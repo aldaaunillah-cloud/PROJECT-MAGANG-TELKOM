@@ -1,7 +1,7 @@
 <div class="topbar">
     <div class="topbar-left">
-        <h4>PROSES PEMBAYARAN BILLING 1 - 6</h4>
-        <small>Per Telkom Daerah - Bulan Juli 2026</small>
+        <h4 style="text-transform:uppercase;">@yield('page-title', 'PROSES PEMBAYARAN BILLING 1 - 6')</h4>
+        <small>@yield('page-subtitle', 'Per Telkom Daerah - Bulan Juli 2026')</small>
     </div>
 
     <div class="topbar-right">
