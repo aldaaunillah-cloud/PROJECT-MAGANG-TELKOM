@@ -25,12 +25,12 @@
 
         <li class="{{ request()->routeIs('rekap.billing') ? 'active' : '' }}" onclick="window.location.href='{{ route('rekap.billing') }}'">
             <i class="bi bi-calendar3"></i>
-            Rekap Billing 1-2
+            Rekap Billing 1-6
         </li>
 
         <li class="{{ request()->routeIs('saldo') ? 'active' : '' }}" onclick="window.location.href='{{ route('saldo') }}'">
-            <i class="bi bi-wallet2"></i>
-            Saldo
+            <i class="bi bi-person"></i>
+            SA
         </li>
 
         <li class="{{ request()->routeIs('riwayat.reminder') ? 'active' : '' }}" onclick="window.location.href='{{ route('riwayat.reminder') }}'">
