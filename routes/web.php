@@ -1,27 +1,49 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SyncController;
+use App\Http\Controllers\BillingController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('dashboard');
-})->name('dashboard');
+Auth::routes();
 
-Route::get('/data-all', function () {
-    return view('data-all');
-})->name('data.all');
+Route::middleware(['auth'])->group(function () {
+    
+    Route::get('/', [CustomerController::class, 'dashboard'])->name('home');
+    Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/download-ssl', [CustomerController::class, 'downloadSsl'])->name('dashboard.download-ssl');
 
-Route::get('/agency-mentah', function () {
-    return view('agency-mentah');
-})->name('agency.mentah');
+    Route::prefix('customers')->name('customers.')->group(function () {
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/export/excel', [CustomerController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf', [CustomerController::class, 'exportPdf'])->name('export.pdf');
+        Route::get('/{id}/download-ssl', [CustomerController::class, 'downloadSsl'])->name('download-ssl');
+    });
 
-Route::get('/rekap-billing', function () {
-    return view('rekap-billing');
-})->name('rekap.billing');
+    Route::get('/rekap/agency', [CustomerController::class, 'rekapAgency'])->name('rekap.agency');
 
-Route::get('/saldo', function () {
-    return view('saldo');
-})->name('saldo');
+    // ============================================
+    // REMINDERS - UDAH BENER DI SINI!
+    // ============================================
+    Route::get('/reminders', [CustomerController::class, 'riwayatReminder'])->name('reminders.index');
 
-Route::get('/riwayat-reminder', function () {
-    return view('riwayat-reminder');
-})->name('riwayat.reminder');
+    // ============================================
+    // BILLING DETAIL
+    // ============================================
+    Route::get('/billing/{billing_ke}', [BillingController::class, 'detail'])->name('billing.detail');
+
+    // ============================================
+    // HOTD DETAIL
+    // ============================================
+    Route::get('/hotd-detail/{billingKe}/{datel}', [CustomerController::class, 'hotdDetail'])
+        ->name('hotd.detail');
+
+    // ============================================
+    // SYNC
+    // ============================================
+    Route::prefix('sync')->group(function () {
+        Route::get('/', [SyncController::class, 'index'])->name('sync.index');
+        Route::get('/google-sheets', [SyncController::class, 'sync'])->name('sync.google-sheets');
+        Route::get('/status', [SyncController::class, 'status'])->name('sync.status');
+    });
+});

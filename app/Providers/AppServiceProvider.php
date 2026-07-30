@@ -3,22 +3,24 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Customer;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        // Share total customer ke semua view
+        View::composer('layouts.app', function ($view) {
+            $view->with('totalCustomer', Cache::remember('total_customer_count', 3600, function() {
+                return Customer::count();
+            }));
+        });
     }
 }
