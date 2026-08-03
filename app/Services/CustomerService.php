@@ -132,14 +132,14 @@ class CustomerService
                 DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as belum_lunas'),
                 DB::raw('SUM(tag_total) as total_tagihan'),
                 DB::raw('AVG(tag_total) as rata_rata_tagihan'),
-                DB::raw('SUM(saldo) as total_saldo'),
+                DB::raw('SUM(tag_total) as total_saldo'),
                 DB::raw('COUNT(CASE WHEN billing_ke <= 2 THEN 1 END) as billing_1_2'),
                 DB::raw('COUNT(CASE WHEN billing_ke >= 3 THEN 1 END) as billing_3_6'),
                 DB::raw('COUNT(*) as total_customer_summary'),
                 DB::raw('SUM(tag_total) as total_tagihan_summary'),
                 DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as total_belum_bayar'),
                 DB::raw('SUM(CASE WHEN status_bayar = "Sdh Bayar" THEN 1 ELSE 0 END) as total_sudah_bayar'),
-                DB::raw('SUM(saldo) as total_saldo_summary')
+                DB::raw('SUM(tag_total) as total_saldo_summary')
             )
             ->whereNotNull('agency')
             ->where('agency', '!=', '')

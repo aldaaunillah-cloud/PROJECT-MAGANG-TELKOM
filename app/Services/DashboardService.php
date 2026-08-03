@@ -16,7 +16,7 @@ class DashboardService
                 $stats = Customer::select([
                     DB::raw('COUNT(*) as total_customer'),
                     DB::raw('SUM(tag_total) as total_tagihan'),
-                    DB::raw('SUM(saldo) as total_saldo'),
+                    DB::raw('SUM(tag_total) as total_saldo'),
                     DB::raw('SUM(CASE WHEN status_bayar = "Sdh Bayar" THEN 1 ELSE 0 END) as total_lunas'),
                     DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as total_belum_lunas'),
                     DB::raw('COUNT(DISTINCT agency) as total_agency'),

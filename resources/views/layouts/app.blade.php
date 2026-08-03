@@ -20,7 +20,7 @@
     {{-- Custom CSS --}}
     <style>
         :root {
-            --primary-color: #E2001A;
+            --primary-color: #000361;
             --secondary-color: #2F3A4A;
             --bg-color: #F8F9FC;
         }
@@ -36,137 +36,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* ============================================
-           SIDEBAR - TELKOM THEME
-           ============================================ */
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(180deg, var(--primary-color) 0%, #b30014 100%);
-            padding-top: 20px;
-            position: sticky;
-            top: 0;
-            overflow-y: auto;
-            width: 260px;
-                        flex-shrink: 0;
-            z-index: 100;
-        }
-
-        .sidebar .sidebar-brand {
-            padding: 10px 20px 30px;
-            text-align: center;
-            color: #fff;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-            margin-bottom: 20px;
-        }
-
-        .sidebar .sidebar-brand .brand-icon {
-            font-size: 2.5rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .sidebar .sidebar-brand h4 {
-            font-weight: 700;
-            font-size: 1.4rem;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar .sidebar-brand small {
-            opacity: 0.8;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-        }
-
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            margin: 3px 12px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
-        .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            transform: translateX(5px);
-        }
-
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .sidebar .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 60%;
-            background: #fff;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .sidebar .nav-link i {
-            margin-right: 12px;
-            width: 22px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        .sidebar .nav-link .badge {
-            float: right;
-            margin-top: 2px;
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-        }
-
-        .sidebar hr {
-            border-color: rgba(255,255,255,0.1);
-            margin: 15px 20px;
-        }
-
-        .sidebar .sidebar-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin-top: auto;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.75rem;
-        }
-
-        .sidebar .sidebar-footer .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .sidebar .sidebar-footer .user-info .avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .sidebar .sidebar-footer .user-info .user-name {
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
+        /* SIDEBAR CSS HAS BEEN MOVED TO BOOTSTRAP UTILITIES */
 
         /* ============================================
            MAIN CONTENT
@@ -564,86 +434,75 @@
             {{-- ============================================ --}}
             {{-- SIDEBAR --}}
             {{-- ============================================ --}}
-            <div class="sidebar d-flex flex-column">
-                <div class="sidebar-brand">
-                    <span class="brand-icon">
-                        <i class="bi bi-building"></i>
-                    </span>
-                    <h4>Telkom</h4>
-                    <small>Customer Management</small>
+            <div class="d-flex flex-column flex-shrink-0 text-white sticky-top shadow" style="width: 260px; min-height: 100vh; background-color: rgb(4, 4, 63); z-index: 100;">
+                <div class="p-3 text-center border-bottom border-light border-opacity-25 mb-3">
+
+            {{-- Logo --}}
+                    <img src="{{ asset('image/logo.png') }}"
+                        alt="Logo Telkom"
+                        style="width:250px; height:auto;"
+                        class="mb-2">
                 </div>
 
-                <nav class="nav flex-column">
+                <nav class="nav flex-column px-2 overflow-y-auto" style="flex: 1;">
                     {{-- DASHBOARD --}}
-                    <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('home') ? 'active' : '' }}">
-                        <i class="bi bi-grid-1x2-fill"></i>
+                    <a href="{{ route('dashboard') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('dashboard') || request()->routeIs('home') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                        <i class="bi bi-grid-1x2-fill me-2 fs-5"></i>
                         Dashboard
                     </a>
 
                     {{-- REKAP AGENCY BILLING 1-2 --}}
-                    <a href="{{ route('rekap.agency') }}" class="nav-link {{ request()->routeIs('rekap.agency') ? 'active' : '' }}">
-                        <i class="bi bi-building-fill"></i>
+                    <a href="{{ route('rekap.agency') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('rekap.agency') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                        <i class="bi bi-building-fill me-2 fs-5"></i>
                         Rekap Agency Billing 1-2
                     </a>
 
                     {{-- RIWAYAT REMINDER --}}
-                    <a href="{{ route('reminders.index') }}" class="nav-link {{ request()->routeIs('reminders.*') ? 'active' : '' }}">
-                        <i class="bi bi-clock-history"></i>
+                    <a href="{{ route('reminders.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('reminders.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                        <i class="bi bi-clock-history me-2 fs-5"></i>
                         Riwayat Reminder
                     </a>
 
-                    <hr>
-
-                    <hr>
-
-                    {{-- HAK AKSES (HANYA ADMIN) - SEMENTARA DINONAKTIFKAN --}}
-                    {{-- 
-                    @if(auth()->user() && auth()->user()->role === 'admin')
-                    <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                        <i class="bi bi-shield-lock-fill"></i>
-                        Hak Akses
-                    </a>
-                    @endif
-                    --}}
+                    <hr class="border-light border-opacity-25 my-3 mx-2">
 
                     {{-- SINKRONISASI --}}
-                    <a href="{{ route('sync.index') }}" class="nav-link {{ request()->routeIs('sync.*') ? 'active' : '' }}">
-                        <i class="bi bi-arrow-repeat"></i>
+                    <a href="{{ route('sync.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('sync.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                        <i class="bi bi-arrow-repeat me-2 fs-5"></i>
                         Sinkronisasi
                     </a>
                 </nav>
 
                 {{-- FOOTER SIDEBAR --}}
-                <div class="sidebar-footer mt-auto">
-                    <div class="user-info">
-                        <div class="avatar">
+                <div class="p-3 border-top border-light border-opacity-25 mt-auto">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-size: 1.2rem;">
                             <i class="bi bi-person-circle"></i>
                         </div>
                         <div>
-                            <div class="user-name">{{ Auth::user()->name ?? 'Admin' }}</div>
-                            <small style="opacity: 0.7; font-size: 0.7rem;">
+                            <div class="fw-bold text-white" style="font-size: 0.85rem;">{{ Auth::user()->name ?? 'Admin' }}</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">
                                 <i class="bi bi-shield-check me-1"></i>
                                 {{ Auth::user()->role ?? 'Supervisor' }}
                             </small>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center text-white-50 mb-2" style="font-size: 0.75rem;">
                         <small>
                             <i class="bi bi-database me-1"></i>
-                            {{ number_format($totalCustomer ?? 0) }} Customer
+                            {{ number_format($totalCustomer ?? 0) }} Cust
                         </small>
                         <small>
                             <i class="bi bi-clock me-1"></i>
-                            {{ now()->format('d/m/Y H:i') }}
+                            {{ now()->format('d/m H:i') }}
                         </small>
                     </div>
-                    <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
-                    <a href="#" class="text-white text-decoration-none" style="opacity: 0.8; font-size: 0.8rem;" 
+                    <hr class="border-light border-opacity-25 my-2">
+                    <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center" style="font-size: 0.8rem;" 
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="bi bi-box-arrow-right me-2"></i>
                         Logout
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
                     </form>
                 </div>
@@ -656,19 +515,9 @@
                 {{-- Top Bar --}}
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                     <div>
-                        <h4 class="mb-0 fw-bold text-primary-custom">
+                        <h1 class="mb-0 fw-bold text-primary-custom">
                             @yield('title', 'Dashboard')
-                        </h4>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0" style="font-size: 0.8rem;">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('dashboard') }}" class="text-decoration-none">Home</a>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    @yield('title', 'Dashboard')
-                                </li>
-                            </ol>
-                        </nav>
+                        </h1>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-light text-dark border">

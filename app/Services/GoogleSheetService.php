@@ -61,7 +61,8 @@ class GoogleSheetService
 
             $response = $this->service->spreadsheets_values->get(
                 $this->spreadsheetId,
-                $this->range
+                $this->range,
+                ['valueRenderOption' => 'UNFORMATTED_VALUE']
             );
             
             $rows = $response->getValues();

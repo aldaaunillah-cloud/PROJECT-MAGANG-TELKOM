@@ -72,11 +72,11 @@ class SyncService
                     'agency' => trim($customer['agency'] ?? ''),
                     'sales' => trim($customer['sales'] ?? ''),
                     'billing_ke' => $this->parseBillingKe($customer['billing_ke'] ?? null),
-                    'saldo' => (float) ($customer['saldo'] ?? 0),
+                    'saldo' => $this->parseCurrency($customer['saldo'] ?? 0),
                     'status_bayar' => trim($customer['status_bayar'] ?? ''),
-                    'tag_total' => (float) ($customer['tag_total'] ?? 0),
-                    'tag_inet' => (float) ($customer['tag_inet'] ?? 0),
-                    'tag_tlp' => (float) ($customer['tag_tlp'] ?? 0),
+                    'tag_total' => $this->parseCurrency($customer['tag_total'] ?? 0),
+                    'tag_inet' => $this->parseCurrency($customer['tag_inet'] ?? 0),
+                    'tag_tlp' => $this->parseCurrency($customer['tag_tlp'] ?? 0),
                     'produk' => trim($customer['produk'] ?? ''),
                     'eksepsi_desc' => trim($customer['eksepsi_desc'] ?? ''),
                     'desc_newbill' => trim($customer['desc_newbill'] ?? ''),
@@ -84,10 +84,10 @@ class SyncService
                     'umur_customer' => (int) ($customer['umur_customer'] ?? 0),
                     'paid_l11' => trim($customer['paid_l11'] ?? ''),
                     'tgl_paid' => $this->parseDate($customer['tgl_paid'] ?? null),
-                    'paid_rp' => (float) ($customer['paid_rp'] ?? 0),
+                    'paid_rp' => $this->parseCurrency($customer['paid_rp'] ?? 0),
                     'coll_agent' => trim($customer['coll_agent'] ?? ''),
                     'tgl_klaim' => $this->parseDate($customer['tgl_klaim'] ?? null),
-                    'amount_klaim' => (float) ($customer['amount_klaim'] ?? 0),
+                    'amount_klaim' => $this->parseCurrency($customer['amount_klaim'] ?? 0),
                     'user_klaim' => trim($customer['user_klaim'] ?? ''),
                     'tgl_paid_n1' => $this->parseDate($customer['tgl_paid_n1'] ?? null),
                     'agency_psb' => trim($customer['agency_psb'] ?? ''),
@@ -226,6 +226,25 @@ class SyncService
         return 0;
     }
 
+    protected function parseCurrency($value): float
+    {
+        if (empty($value)) return 0.0;
+        
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        // Hapus karakter 'Rp', spasi, dll
+        $value = preg_replace('/[^0-9.,-]/', '', $value);
+        
+        // Hapus titik sebagai ribuan (format Indonesia)
+        $value = str_replace('.', '', $value);
+        // Ganti koma dengan titik (sebagai desimal)
+        $value = str_replace(',', '.', $value);
+        
+        return (float) $value;
+    }
+
     protected function parseDate($value): ?string
     {
         if (empty($value)) return null;
@@ -233,6 +252,12 @@ class SyncService
         $value = trim($value);
         
         try {
+            if (is_numeric($value)) {
+                // Excel/Google Sheets serial date (e.g. 44500)
+                $unixDate = ($value - 25569) * 86400;
+                return gmdate("Y-m-d", $unixDate);
+            }
+
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
                 return $value;
             }
