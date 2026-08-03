@@ -431,7 +431,6 @@
 
     <div class="container-fluid p-0">
         <div class="row g-0">
-            {{-- ============================================ --}}
             {{-- SIDEBAR --}}
             {{-- ============================================ --}}
             <div class="d-flex flex-column flex-shrink-0 text-white sticky-top shadow" style="width: 260px; min-height: 100vh; background-color: rgb(4, 4, 63); z-index: 100;">
