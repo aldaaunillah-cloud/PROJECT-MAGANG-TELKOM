@@ -201,67 +201,40 @@ class CustomerController extends Controller
  */
 public function riwayatReminder(Request $request)
 {
-    // Ambil data customer yang BELUM BAYAR
-    $query = Customer::where('status_bayar', '!=', 'Sdh Bayar')
-        ->whereNotNull('status_bayar')
-        ->where('tag_total', '>', 0);
-    
-    // Filter Agency
-    if ($request->filled('agency')) {
-        $query->where('agency', $request->agency);
-    }
-    
-    // Filter Sales
-    if ($request->filled('sales')) {
-        $query->where('sales', $request->sales);
-    }
-    
-    // Filter Billing
-    if ($request->filled('billing_ke')) {
-        $query->where('billing_ke', $request->billing_ke);
-    }
-    
-    // Filter Datel
-    if ($request->filled('datel')) {
-        $query->where('datel', $request->datel);
-    }
-    
-    // Search
+    $query = Reminder::with('customer');
+
+    // Filter Search
     if ($request->filled('search')) {
         $search = $request->search;
         $query->where(function($q) use ($search) {
-            $q->where('nama', 'like', "%{$search}%")
-              ->orWhere('snd', 'like', "%{$search}%")
-              ->orWhere('agency', 'like', "%{$search}%")
-              ->orWhere('sales', 'like', "%{$search}%")
-              ->orWhere('alamat', 'like', "%{$search}%");
+            $q->where('keterangan', 'like', "%{$search}%")
+              ->orWhere('status', 'like', "%{$search}%")
+              ->orWhereHas('customer', function($cQ) use ($search) {
+                  $cQ->where('nama', 'like', "%{$search}%")
+                     ->orWhere('snd', 'like', "%{$search}%")
+                     ->orWhere('sales_agency', 'like', "%{$search}%")
+                     ->orWhere('sales', 'like', "%{$search}%");
+              });
         });
     }
-    
-    $reminders = $query->orderBy('tag_total', 'DESC')->paginate(20);
-    
-    // Data untuk filter
-    $agencies = Customer::where('status_bayar', '!=', 'Sdh Bayar')
-        ->where('tag_total', '>', 0)
-        ->distinct('agency')
-        ->whereNotNull('agency')
-        ->pluck('agency');
-        
-    $sales = Customer::where('status_bayar', '!=', 'Sdh Bayar')
-        ->where('tag_total', '>', 0)
-        ->distinct('sales')
-        ->whereNotNull('sales')
-        ->pluck('sales');
-    
-    $datels = Customer::where('status_bayar', '!=', 'Sdh Bayar')
-        ->where('tag_total', '>', 0)
-        ->distinct('datel')
-        ->whereNotNull('datel')
-        ->pluck('datel');
-    
-    $billingList = [1, 2, 3, 4, 5, 6];
-    
-    return view('reminders.index', compact('reminders', 'agencies', 'sales', 'datels', 'billingList'));
+
+    // Filter Rentang Tanggal (format: DD/MM/YYYY - DD/MM/YYYY)
+    if ($request->filled('daterange')) {
+        $dates = explode(' - ', $request->daterange);
+        if (count($dates) == 2) {
+            try {
+                $dateFrom = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                $dateTo = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
+                $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+    }
+
+    $reminders = $query->orderBy('created_at', 'desc')->paginate(30);
+
+    return view('reminders.index', compact('reminders'));
 }
 
     /**
