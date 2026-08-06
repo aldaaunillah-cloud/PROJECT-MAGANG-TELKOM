@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Reminder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class ReminderApiController extends Controller
+{
+    public function store(Request $request)
+    {
+        // 1. Validasi Token Keamanan
+        $token = env('API_REMINDER_TOKEN');
+        $bearerToken = $request->bearerToken();
+
+        if (empty($token) || $bearerToken !== $token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Invalid API Token.'
+            ], 401);
+        }
+
+        // 2. Validasi Input Payload
+        $validator = Validator::make($request->all(), [
+            'snd' => 'required|string',
+            'status' => 'nullable|string',
+            'keterangan' => 'nullable|string',
+            'jenis_reminder' => 'nullable|string',
+            'tanggal_reminder' => 'nullable|date_format:Y-m-d'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error.',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        // 3. Cari Customer berdasarkan SND
+        $customer = Customer::where('snd', trim($request->snd))->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => "Customer dengan SND '{$request->snd}' tidak ditemukan."
+            ], 404);
+        }
+
+        try {
+            // 4. Simpan Riwayat Reminder ke Database
+            $reminder = Reminder::create([
+                'customer_id' => $customer->id,
+                'user_id' => null, // null karena dikirim sistem Apps Script otomatis
+                'jenis_reminder' => $request->input('jenis_reminder', 'Telegram'),
+                'status' => $request->input('status', 'Selesai'),
+                'keterangan' => $request->input('keterangan'),
+                'tanggal_reminder' => $request->input('tanggal_reminder', now()->toDateString())
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Riwayat reminder berhasil disimpan.',
+                'data' => $reminder
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan riwayat reminder.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+}
