@@ -25,7 +25,8 @@ class ReminderApiController extends Controller
 
         // 2. Validasi Input Payload
         $validator = Validator::make($request->all(), [
-            'snd' => 'required|string',
+            'sales_agency' => 'required|string',
+            'total_ssl' => 'nullable|integer',
             'status' => 'nullable|string',
             'keterangan' => 'nullable|string',
             'jenis_reminder' => 'nullable|string',
@@ -40,21 +41,13 @@ class ReminderApiController extends Controller
             ], 400);
         }
 
-        // 3. Cari Customer berdasarkan SND
-        $customer = Customer::where('snd', trim($request->snd))->first();
-
-        if (!$customer) {
-            return response()->json([
-                'success' => false,
-                'message' => "Customer dengan SND '{$request->snd}' tidak ditemukan."
-            ], 404);
-        }
-
         try {
-            // 4. Simpan Riwayat Reminder ke Database
+            // 3. Simpan Riwayat Reminder ke Database (untuk Sales Agency group)
             $reminder = Reminder::create([
-                'customer_id' => $customer->id,
-                'user_id' => null, // null karena dikirim sistem Apps Script otomatis
+                'customer_id' => null, // null karena ini adalah pengiriman pesan grup SA
+                'user_id' => null, 
+                'sales_agency' => $request->sales_agency,
+                'total_ssl' => $request->input('total_ssl', 0),
                 'jenis_reminder' => $request->input('jenis_reminder', 'Telegram'),
                 'status' => $request->input('status', 'Selesai'),
                 'keterangan' => $request->input('keterangan'),

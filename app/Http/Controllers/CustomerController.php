@@ -201,20 +201,15 @@ class CustomerController extends Controller
  */
 public function riwayatReminder(Request $request)
 {
-    $query = Reminder::with('customer');
+    $query = Reminder::query();
 
     // Filter Search
     if ($request->filled('search')) {
         $search = $request->search;
         $query->where(function($q) use ($search) {
             $q->where('keterangan', 'like', "%{$search}%")
-              ->orWhere('status', 'like', "%{$search}%")
-              ->orWhereHas('customer', function($cQ) use ($search) {
-                  $cQ->where('nama', 'like', "%{$search}%")
-                     ->orWhere('snd', 'like', "%{$search}%")
-                     ->orWhere('sales_agency', 'like', "%{$search}%")
-                     ->orWhere('sales', 'like', "%{$search}%");
-              });
+              ->orWhere('sales_agency', 'like', "%{$search}%")
+              ->orWhere('status', 'like', "%{$search}%");
         });
     }
 

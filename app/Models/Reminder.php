@@ -12,6 +12,8 @@ class Reminder extends Model
     protected $fillable = [
         'customer_id',
         'user_id',
+        'sales_agency',
+        'total_ssl',
         'jenis_reminder',
         'status',
         'keterangan',
