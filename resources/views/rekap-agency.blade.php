@@ -32,6 +32,15 @@
         .table-responsive table { min-width: 900px !important; }
         .table-responsive table th, .table-responsive table td { font-size: 0.6rem !important; padding: 3px 4px !important; }
     }
+    .pagination {
+        margin-bottom: 0 !important;
+        gap: 2px !important;
+    }
+    .pagination .page-item .page-link {
+        padding: 3px 8px !important;
+        font-size: 0.65rem !important;
+        border-radius: 4px !important;
+    }
 </style>
 
 <div class="container-fluid">
@@ -210,7 +219,7 @@
                     </small>
                 </div>
                 <div>
-                    {{ $rekap->appends(request()->query())->links() }}
+                    {{ $rekap->appends(request()->query())->links('partials.pagination') }}
                 </div>
             </div>
         </div>
