@@ -5,7 +5,11 @@ use App\Http\Controllers\SyncController;
 use App\Http\Controllers\BillingController;
 use Illuminate\Support\Facades\Route;
 
-Auth::routes();
+Auth::routes([
+    'register' => false,
+    'reset' => false,
+    'verify' => false,
+]);
 
 Route::middleware(['auth'])->group(function () {
     
