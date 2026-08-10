@@ -44,7 +44,9 @@
         .main-content {
             padding: 30px;
             min-height: 100vh;
-            flex: 1;
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            flex: none;
         }
 
         /* ============================================
@@ -304,26 +306,73 @@
         }
 
         /* ============================================
+        SIDEBAR FIXED
+        ============================================ */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            max-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: rgb(4, 4, 63);
+            z-index: 1000;
+        }
+
+        .sidebar nav {
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+        }
+
+        .sidebar nav::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+        }
+
+        /* ============================================
            RESPONSIVE
            ============================================ */
         @media (max-width: 768px) {
-            .sidebar {
-                min-height: auto;
-                position: relative;
-                width: 100%;
-                padding-bottom: 10px;
-            }
-            .main-content {
-                padding: 15px;
-            }
-            .card-body {
-                padding: 15px;
-            }
-            .login-card {
-                padding: 25px;
-                margin: 15px;
-            }
+        .sidebar {
+            height: auto;
+            max-height: none;
+            min-height: auto;
+            position: relative;
+            width: 100%;
+            padding-bottom: 10px;
         }
+
+        .sidebar nav {
+            overflow-y: visible;
+        }
+
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+            flex: 1;
+            padding: 15px;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .login-card {
+            padding: 25px;
+            margin: 15px;
+        }
+    }
 
         @media (max-width: 576px) {
             .sidebar .sidebar-brand h4 {
@@ -433,7 +482,7 @@
         <div class="row g-0">
             {{-- SIDEBAR --}}
             {{-- ============================================ --}}
-            <div class="d-flex flex-column flex-shrink-0 text-white sticky-top shadow" style="width: 260px; min-height: 100vh; background-color: rgb(4, 4, 63); z-index: 100;">
+            <div class="sidebar d-flex flex-column flex-shrink-0 text-white shadow">
                 <div class="p-3 text-center border-bottom border-light border-opacity-25 mb-3">
 
             {{-- Logo --}}

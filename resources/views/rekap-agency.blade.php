@@ -57,25 +57,39 @@
             {{-- FILTER --}}
             <form method="GET" action="{{ route('rekap.agency') }}" class="row g-2 mb-3">
                 <div class="col-md-3 col-sm-6">
-                    <label class="form-label fw-bold">Agency PSB</label>
-                    <select name="agency_psb" class="form-select form-select-sm">
+                    <label class="form-label fw-bold">Agency</label>
+
+                    <select name="agency_psb"
+                            class="form-select"
+                            onchange="this.form.submit()">
+
                         <option value="">Semua Agency</option>
-                        @foreach($filters['agency_psb'] ?? [] as $agency)
-                            <option value="{{ $agency }}" {{ request('agency_psb') == $agency ? 'selected' : '' }}>
+
+                        @foreach($filters['agency_psb'] as $agency)
+                            <option value="{{ $agency }}"
+                                {{ request('agency_psb') == $agency ? 'selected' : '' }}>
                                 {{ $agency }}
                             </option>
                         @endforeach
+
                     </select>
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label fw-bold">Sales Agency</label>
-                    <select name="sales_agency" class="form-select form-select-sm">
+
+                    <select name="sales_agency"
+                            class="form-select"
+                            onchange="this.form.submit()">
+
                         <option value="">Semua Sales</option>
-                        @foreach($filters['sales_agency'] ?? [] as $sales)
-                            <option value="{{ $sales }}" {{ request('sales_agency') == $sales ? 'selected' : '' }}>
+
+                        @foreach($filters['sales_agency'] as $sales)
+                            <option value="{{ $sales }}"
+                                {{ request('sales_agency') == $sales ? 'selected' : '' }}>
                                 {{ $sales }}
                             </option>
                         @endforeach
+
                     </select>
                 </div>
                 <div class="col-md-3 col-sm-6">
