@@ -161,7 +161,6 @@
 @endforeach
 
 {{-- Load Flatpickr CSS & JS --}}
-@push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     /* Styling khusus tabel */
@@ -175,19 +174,16 @@
         letter-spacing: 0.5px;
     }
 </style>
-@endpush
 
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 {{-- Library html2pdf.js untuk mengunduh PDF di sisi browser --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inisialisasi Flatpickr Range Mode
+        // Inisialisasi Flatpickr Range Mode (locale "id" dihapus agar tidak crash mencari file bahasa luar)
         const dateInput = flatpickr("#daterange", {
             mode: "range",
             dateFormat: "d/m/Y",
-            locale: "id",
             onClose: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length === 2 || dateStr === "") {
                     document.getElementById('filterForm').submit();
@@ -200,14 +196,14 @@
             dateInput.open();
         });
 
-        // Auto submit form saat user stop mengetik pencarian (debounce)
+        // Auto submit form saat user stop mengetik pencarian (delay dipercepat jadi 300ms agar responsif)
         let searchTimeout;
         const searchInput = document.querySelector('input[name="search"]');
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() {
                 document.getElementById('filterForm').submit();
-            }, 600);
+            }, 300);
         });
         
         // Posisikan cursor di akhir teks pencarian saat focus
@@ -319,5 +315,4 @@
         });
     }
 </script>
-@endpush
 @endsection

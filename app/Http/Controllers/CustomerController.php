@@ -213,16 +213,35 @@ class CustomerController extends Controller
             });
         }
 
-        // Filter Rentang Tanggal (format: DD/MM/YYYY - DD/MM/YYYY)
+        // Filter Rentang Tanggal (format: DD/MM/YYYY - DD/MM/YYYY atau DD/MM/YYYY to DD/MM/YYYY)
         if ($request->filled('daterange')) {
-            $dates = explode(' - ', $request->daterange);
-            if (count($dates) == 2) {
-                try {
+            $separator = str_contains($request->daterange, ' to ') ? ' to ' : ' - ';
+            $dates = explode($separator, $request->daterange);
+            
+            try {
+                if (count($dates) == 2) {
                     $dateFrom = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
                     $dateTo = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
                     $query->whereBetween('created_at', [$dateFrom, $dateTo]);
-                } catch (\Exception $e) {
-                    // Ignore parsing errors
+                } elseif (count($dates) == 1 && !empty(trim($dates[0]))) {
+                    $dateFrom = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    $dateTo = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->endOfDay();
+                    $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                }
+            } catch (\Exception $e) {
+                // Fallback jika format d/m/Y gagal, coba parse otomatis menggunakan Carbon
+                try {
+                    if (count($dates) == 2) {
+                        $dateFrom = \Carbon\Carbon::parse(trim($dates[0]))->startOfDay();
+                        $dateTo = \Carbon\Carbon::parse(trim($dates[1]))->endOfDay();
+                        $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                    } elseif (count($dates) == 1 && !empty(trim($dates[0]))) {
+                        $dateFrom = \Carbon\Carbon::parse(trim($dates[0]))->startOfDay();
+                        $dateTo = \Carbon\Carbon::parse(trim($dates[0]))->endOfDay();
+                        $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                    }
+                } catch (\Exception $ex) {
+                    \Log::error("Gagal parse daterange: " . $ex->getMessage());
                 }
             }
         }
