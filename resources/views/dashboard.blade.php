@@ -20,16 +20,8 @@
             <form action="{{ route('dashboard') }}" method="GET" class="row g-2 align-items-end">
                 <div class="col-md-2">
                     <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600;">Datel (Telda)</label>
-                    <select name="datel" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
+                    <select name="datel" id="filter-datel" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
                         <option value="">Semua Datel</option>
-                        <option value="91407 - Inner - Priangan Timur">91407 - Inner - Priangan Timur</option>
-                        <option value="91401 - Banjar">91401 - Banjar</option>
-                        <option value="91403 - Garut">91403 - Garut</option>
-                        <option value="91404 - Indramayu">91404 - Indramayu</option>
-                        <option value="91405 - Kuningan">91405 - Kuningan</option>
-                        <option value="91406 - Majalengka">91406 - Majalengka</option>
-                        <option value="91408 - Singaparna">91408 - Singaparna</option>
-                        <option value="91409 - Tasikmalaya">91409 - Tasikmalaya</option>
                         @foreach($datelsList ?? [] as $d)
                             <option value="{{ $d }}" {{ request('datel') == $d ? 'selected' : '' }}>{{ $d }}</option>
                         @endforeach
@@ -37,26 +29,24 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600;">Agency</label>
-                    <select name="agency" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
+                    <select name="agency" id="filter-agency" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
                         <option value="">Semua Agency</option>
-                        <option value="PT.Panthera Mega Cipta">PT.Panthera Mega Cipta</option>
-                        <option value="CV. Maju Cepat Perkasa">CV. Maju Cepat Perkasa</option>
-                        <option value="CV. DJATI SOLUTION">CV. DJATI SOLUTION</option>
-                        <option value="PT. Infomedia Nusantara">PT. Infomedia Nusantara</option>
-                        <option value="PT. Kharisma Ide Telekomunikasi">PT. Kharisma Ide Telekomunikasi</option>
-                        <option value="PT.Panthera Mega Cipta">AM</option>
-                        <option value="PT.Panthera Mega Cipta">CV.Yura Mulya Informatika</option>
+                        @foreach($agenciesList ?? [] as $a)
+                            <option value="{{ $a }}" {{ request('agency') == $a ? 'selected' : '' }}>{{ $a }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600;">Sales Agency</label>
-                    <select name="sales" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
+                    <select name="sales" id="filter-sales" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;">
                         <option value="">Semua Sales</option>
+                        @foreach($salesList ?? [] as $s)
+                            <option value="{{ $s }}" {{ request('sales') == $s ? 'selected' : '' }}>{{ $s }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label text-muted mb-1" style="font-size: 0.75rem; font-weight: 600;">Dari Tanggal</label>
-                    <input type="date" name="tanggal" class="form-control form-control-sm border-light-subtle text-muted" style="font-size: 0.8rem;" value="{{ request('tanggal') }}">
+                    
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-sm text-white flex-grow-1 shadow-sm" style="background-color: navy;">
@@ -162,7 +152,7 @@
                 @if(!empty($billingSummary) && is_iterable($billingSummary))
                     @forelse($billingSummary as $billing)
                         <div class="col-xl-2 col-lg-4 col-md-6">
-                            <a href="{{ route('billing.detail', $billing->billing_ke) }}" class="text-decoration-none text-dark d-block border border-light-subtle rounded shadow-sm">
+                            <a href="{{ route('billing.detail', ['billing_ke' => $billing->billing_ke, 'datel' => request('datel'), 'agency' => request('agency'), 'sales' => request('sales')]) }}" class="text-decoration-none text-dark d-block border border-light-subtle rounded shadow-sm">
                                 <div class="card border-0 h-100 w-100 overflow-hidden" style="background:#f8f9fa;">
                                     <div class="card-body text-center p-2">
                                         <div class="d-flex justify-content-between align-items-start">
@@ -278,7 +268,11 @@
                     $blm = $data->blm_bayar ?? 0;
                     $blmRp = $data->blm_bayar_rp ?? 0;
                 @endphp
-                <td class="text-center text-nowrap px-2 py-1" style="font-size: 0.65rem;">{{ $blm }}</td>
+                <td class="text-center text-primary text-decoration-underline text-nowrap px-2 py-1" 
+                    style="font-size: 0.65rem;cursor:pointer;"
+                    onclick="showDetail('{{ $datel }}', {{ $billingKe }})">
+                    {{ $blm }}
+                </td>
                 <td class="text-center text-primary text-decoration-underline text-nowrap px-2 py-1" 
                     style="font-size:0.6rem;cursor:pointer;"
                     onclick="showDetail('{{ $datel }}', {{ $billingKe }})">
@@ -363,7 +357,7 @@
                                 <td class="px-2 py-1 text-nowrap" style="font-size:0.8rem;">{{ $index + 1 }}</td>
                                 <td class="px-2 py-1 text-nowrap"><code style="font-size:0.7rem;">{{ $customer->snd }}</code></td>
                                 <td class="px-2 py-1 text-nowrap" style="font-size:0.8rem;">{{ Str::limit($customer->nama, 25) }}</td>
-                                <td class="px-2 py-1 text-nowrap" style="font-size:0.8rem;">{{ $customer->agency ?? '-' }}</td>
+                                <td class="px-2 py-1 text-nowrap" style="font-size:0.8rem;">{{ $customer->agency_psb ?: ($customer->agency ?: '-') }}</td>
                                 <td class="px-2 py-1 text-nowrap">
                                     <span class="badge bg-{{ ($customer->billing_ke ?? 0) <= 2 ? 'primary' : 'secondary' }} px-2 py-1" style="font-size:0.6rem;">
                                         B{{ $customer->billing_ke }}
@@ -423,9 +417,9 @@
                 <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-1"></i> Tutup
                 </button>
-                <button type="button" class="btn btn-info rounded text-white" onclick="exportDetailToExcel()">
+                <a id="btnExportExcel" href="#" class="btn btn-info rounded text-white">
                     <i class="bi bi-file-excel me-1"></i> Export Excel
-                </button>
+                </a>
                 <button type="button" class="btn btn-success rounded" onclick="window.print()">
                     <i class="bi bi-printer me-1"></i> Cetak
                 </button>
@@ -448,6 +442,9 @@ function showDetail(datel, billingKe) {
     // Update judul modal
     document.getElementById('detailBillingKe').textContent = billingKe;
     document.getElementById('detailDatel').textContent = datel;
+
+    const agency = document.getElementById('filter-agency') ? document.getElementById('filter-agency').value : '';
+    const sales = document.getElementById('filter-sales') ? document.getElementById('filter-sales').value : '';
     
     // Tampilkan modal dengan loading
     const modal = new bootstrap.Modal(document.getElementById('hotdDetailModal'), {
@@ -465,8 +462,26 @@ function showDetail(datel, billingKe) {
         </div>
     `;
     
+    let url = `/hotd-detail/${billingKe}/${encodeURIComponent(datel)}`;
+    const params = new URLSearchParams();
+    if (agency) params.append('agency', agency);
+    if (sales) params.append('sales', sales);
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+
+    // Set URL untuk tombol Export Excel
+    let exportUrl = `/hotd-detail/${billingKe}/${encodeURIComponent(datel)}/export`;
+    if (params.toString()) {
+        exportUrl += '?' + params.toString();
+    }
+    const btnExport = document.getElementById('btnExportExcel');
+    if (btnExport) {
+        btnExport.href = exportUrl;
+    }
+
     // AJAX request dengan fetch
-    fetch(`/hotd-detail/${billingKe}/${encodeURIComponent(datel)}`)
+    fetch(url)
         .then(response => response.json())
         .then(response => {
             console.log('Response:', response);
@@ -630,28 +645,95 @@ function renderDetailTable(response) {
 }
 
 // ============================================
-// FUNGSI EXPORT EXCEL
+// FUNGSI EXPORT EXCEL (Sudah Diganti ke Backend)
 // ============================================
-function exportDetailToExcel() {
-    const table = document.getElementById('detailTable');
-    if (!table) {
-        alert('Tidak ada data untuk di-export');
-        return;
+// Fungsi exportDetailToExcel dihapus karena sekarang menggunakan tag <a> yang mengarah ke route backend Laravel
+// ============================================
+// AJAX Cascading Filters
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const datelSelect = document.getElementById('filter-datel');
+    const agencySelect = document.getElementById('filter-agency');
+    const salesSelect = document.getElementById('filter-sales');
+
+    if (datelSelect && agencySelect && salesSelect) {
+        // Event listener saat Datel berubah
+        datelSelect.addEventListener('change', function() {
+            const datel = this.value;
+            
+            // 1. Reset dropdown Agency dan Sales Agency
+            agencySelect.innerHTML = '<option value="">Semua Agency</option>';
+            salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+            
+            // 2. Fetch Agency berdasarkan Datel baru
+            if (datel) {
+                agencySelect.disabled = true;
+                agencySelect.innerHTML = '<option value="">Memuat Agency...</option>';
+            }
+            fetch(`{{ route('filter.agencies') }}?datel=${encodeURIComponent(datel)}`)
+                .then(res => res.json())
+                .then(data => {
+                    agencySelect.disabled = false;
+                    agencySelect.innerHTML = '<option value="">Semua Agency</option>';
+                    data.forEach(agency => {
+                        agencySelect.innerHTML += `<option value="${agency}">${agency}</option>`;
+                    });
+                })
+                .catch(err => {
+                    agencySelect.disabled = false;
+                    agencySelect.innerHTML = '<option value="">Semua Agency</option>';
+                    console.error('Error fetching agencies:', err);
+                });
+                
+            // 3. Fetch Sales Agency berdasarkan Datel baru
+            if (datel) {
+                salesSelect.disabled = true;
+                salesSelect.innerHTML = '<option value="">Memuat Sales...</option>';
+            }
+            fetch(`{{ route('filter.sales') }}?datel=${encodeURIComponent(datel)}`)
+                .then(res => res.json())
+                .then(data => {
+                    salesSelect.disabled = false;
+                    salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+                    data.forEach(sales => {
+                        salesSelect.innerHTML += `<option value="${sales}">${sales}</option>`;
+                    });
+                })
+                .catch(err => {
+                    salesSelect.disabled = false;
+                    salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+                    console.error('Error fetching sales:', err);
+                });
+        });
+
+        // Event listener saat Agency berubah
+        agencySelect.addEventListener('change', function() {
+            const datel = datelSelect.value;
+            const agency = this.value;
+            
+            // Reset Sales Agency
+            salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+            if (agency || datel) {
+                salesSelect.disabled = true;
+                salesSelect.innerHTML = '<option value="">Memuat Sales...</option>';
+            }
+            
+            fetch(`{{ route('filter.sales') }}?datel=${encodeURIComponent(datel)}&agency=${encodeURIComponent(agency)}`)
+                .then(res => res.json())
+                .then(data => {
+                    salesSelect.disabled = false;
+                    salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+                    data.forEach(sales => {
+                        salesSelect.innerHTML += `<option value="${sales}">${sales}</option>`;
+                    });
+                })
+                .catch(err => {
+                    salesSelect.disabled = false;
+                    salesSelect.innerHTML = '<option value="">Semua Sales</option>';
+                    console.error('Error fetching sales:', err);
+                });
+        });
     }
-    
-    if (typeof XLSX !== 'undefined') {
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Detail Customer" });
-        const billingKe = document.getElementById('detailBillingKe').textContent;
-        const datel = document.getElementById('detailDatel').textContent;
-        XLSX.writeFile(wb, `hotd_billing_${billingKe}_${datel}.xlsx`);
-    } else {
-        const range = document.createRange();
-        range.selectNode(table);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
-        document.execCommand('copy');
-        alert('Data sudah di-copy ke clipboard. Silakan paste di Excel.');
-    }
-}
+});
 </script>
 @endpush

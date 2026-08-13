@@ -4,8 +4,10 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\BillingController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-Auth::routes([
+Route::middleware(['web'])->group(function () {
+    Auth::routes([
     'register' => false,
     'reset' => false,
     'verify' => false,
@@ -24,6 +26,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/download-ssl', [CustomerController::class, 'downloadSsl'])->name('download-ssl');
     });
 
+    // AJAX Filter for Dashboard
+    Route::get('/filter/agencies', [CustomerController::class, 'getAgencies'])->name('filter.agencies');
+    Route::get('/filter/sales', [CustomerController::class, 'getSales'])->name('filter.sales');
+
     Route::get('/rekap/agency', [CustomerController::class, 'rekapAgency'])->name('rekap.agency');
 
     // ============================================
@@ -41,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
     // ============================================
     Route::get('/hotd-detail/{billingKe}/{datel}', [CustomerController::class, 'hotdDetail'])
         ->name('hotd.detail');
+    Route::get('/hotd-detail/{billingKe}/{datel}/export', [CustomerController::class, 'exportHotdExcel'])
+        ->name('hotd.export');
 
     // ============================================
     // SYNC
@@ -50,4 +58,5 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/google-sheets', [SyncController::class, 'sync'])->name('sync.google-sheets');
         Route::get('/status', [SyncController::class, 'status'])->name('sync.status');
     });
+});
 });

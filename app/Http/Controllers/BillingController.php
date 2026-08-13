@@ -11,8 +11,24 @@ class BillingController extends Controller
     {
         $query = Customer::where('billing_ke', $billing_ke);
 
+        if ($request->filled('datel')) {
+            $query->where('datel', $request->datel);
+        }
+
         if ($request->filled('agency')) {
-            $query->where('agency', $request->agency);
+            $agency = $request->agency;
+            $query->where(function ($q) use ($agency) {
+                $q->where('agency_psb', $agency)
+                  ->orWhere('agency', $agency);
+            });
+        }
+
+        if ($request->filled('sales')) {
+            $sales = $request->sales;
+            $query->where(function ($q) use ($sales) {
+                $q->where('sales_agency', $sales)
+                  ->orWhere('sales', $sales);
+            });
         }
 
         if ($request->filled('status')) {
@@ -22,9 +38,17 @@ class BillingController extends Controller
         $customers = $query->paginate(30)->withQueryString();
 
         $agencies = Customer::where('billing_ke', $billing_ke)
-            ->whereNotNull('agency')
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('agency')->where('agency', '!=', '');
+                });
+            })
+            ->select(\DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
             ->distinct()
-            ->pluck('agency');
+            ->orderBy('agency_val')
+            ->pluck('agency_val');
 
         $statuses = ['Sdh Bayar', 'Blm Bayar'];
 

@@ -105,8 +105,8 @@
                                     <small class="text-muted">{{ Str::limit($customer->alamat ?? '-', 30) }}</small>
                                 </td>
                                 <td>{{ $customer->datel ?? '-' }}</td>
-                                <td>{{ $customer->agency ?? '-' }}</td>
-                                <td>{{ $customer->sales ?? '-' }}</td>
+                                <td>{{ $customer->agency_psb ?: ($customer->agency ?: '-') }}</td>
+                                <td>{{ $customer->sales_agency ?: ($customer->sales ?: '-') }}</td>
                                 <td>
                                     <span class="badge bg-info">B{{ $customer->billing_ke }}</span>
                                 </td>

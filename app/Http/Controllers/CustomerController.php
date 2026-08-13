@@ -20,16 +20,33 @@ class CustomerController extends Controller
         $agency = $request->input('agency');
         $sales = $request->input('sales');
 
-        $applyFilters = function ($query) use ($datel, $agency, $sales) {
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
+        $applyFilters = function ($query) use ($datel, $agency, $sales, $invalidPlaceholders) {
             if ($datel) {
                 $query->where('datel', $datel);
             }
             if ($agency) {
-                $query->where('agency', $agency);
+                $query->where(function ($q) use ($agency) {
+                    $q->where('agency_psb', $agency)
+                      ->orWhere('agency', $agency);
+                });
             }
             if ($sales) {
-                $query->where('sales', $sales);
+                $query->where(function ($q) use ($sales) {
+                    $q->where('sales_agency', $sales)
+                      ->orWhere('sales', $sales);
+                });
             }
+            
+            // Filter invalid placeholders agar tidak dihitung dalam rekap
+            $query->whereNotIn('datel', $invalidPlaceholders)
+                  ->whereNotIn(\Illuminate\Support\Facades\DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders)
+                  ->whereNotIn(\Illuminate\Support\Facades\DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+
+            // Filter billing_ke 1-6 agar sesuai dengan rekap spreadsheet
+            $query->whereBetween('billing_ke', [1, 6]);
+
             // HANYA menampilkan yang belum bayar di dashboard
             $query->where('status_bayar', '!=', 'Sdh Bayar');
             return $query;
@@ -39,8 +56,28 @@ class CustomerController extends Controller
         $totalBelumLunas = $applyFilters(Customer::query())->count();
         $totalTagihan = $applyFilters(Customer::query())->sum('tag_total');
         $totalSaldo = $applyFilters(Customer::query())->sum('tag_total');
-        $totalAgency = $applyFilters(Customer::query())->distinct('agency')->count('agency');
-        $totalSales = $applyFilters(Customer::query())->distinct('sales')->count('sales');
+
+        $totalAgency = $applyFilters(Customer::query())
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('agency')->where('agency', '!=', '');
+                });
+            })
+            ->distinct(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"))
+            ->count(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"));
+
+        $totalSales = $applyFilters(Customer::query())
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('sales')->where('sales', '!=', '');
+                });
+            })
+            ->distinct(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"))
+            ->count(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"));
 
         // Billing Summary 1-6
         $billingSummary = clone $applyFilters(Customer::query());
@@ -77,7 +114,52 @@ class CustomerController extends Controller
             ->get();
 
         // List datels untuk dropdown filter
-        $datelsList = Customer::distinct('datel')->whereNotNull('datel')->pluck('datel');
+        $datelsList = Customer::distinct('datel')
+            ->whereNotNull('datel')
+            ->where('datel', '!=', '')
+            ->whereNotIn('datel', $invalidPlaceholders)
+            ->orderBy('datel')
+            ->pluck('datel');
+
+        $agenciesQuery = Customer::query()->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
+            })->orWhere(function ($sub) {
+                $sub->whereNotNull('agency')->where('agency', '!=', '');
+            });
+        })->whereNotIn(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders);
+
+        if ($datel) {
+            $agenciesQuery->where('datel', $datel);
+        }
+        $agenciesList = $agenciesQuery
+            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+            ->distinct()
+            ->orderBy('agency_val')
+            ->pluck('agency_val');
+
+        $salesQuery = Customer::query()->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
+            })->orWhere(function ($sub) {
+                $sub->whereNotNull('sales')->where('sales', '!=', '');
+            });
+        })->whereNotIn(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+
+        if ($datel) {
+            $salesQuery->where('datel', $datel);
+        }
+        if ($agency) {
+            $salesQuery->where(function ($q) use ($agency) {
+                $q->where('agency_psb', $agency)
+                  ->orWhere('agency', $agency);
+            });
+        }
+        $salesList = $salesQuery
+            ->select(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales) as sales_val"))
+            ->distinct()
+            ->orderBy('sales_val')
+            ->pluck('sales_val');
 
         return view('dashboard', compact(
             'totalBelumLunas',
@@ -88,8 +170,73 @@ class CustomerController extends Controller
             'billingSummary',
             'hotdData',
             'latestCustomers',
-            'datelsList'
+            'datelsList',
+            'agenciesList',
+            'salesList'
         ));
+    }
+
+    /**
+     * ============================================
+     * AJAX FILTER
+     * ============================================
+     */
+    public function getAgencies(Request $request)
+    {
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
+        $query = Customer::query()->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
+            })->orWhere(function ($sub) {
+                $sub->whereNotNull('agency')->where('agency', '!=', '');
+            });
+        })->whereNotIn(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders);
+
+        if ($request->filled('datel')) {
+            $query->where('datel', $request->datel);
+        }
+
+        $agencies = $query
+            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+            ->distinct()
+            ->orderBy('agency_val')
+            ->pluck('agency_val');
+
+        return response()->json($agencies);
+    }
+
+    public function getSales(Request $request)
+    {
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
+        $query = Customer::query()->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
+            })->orWhere(function ($sub) {
+                $sub->whereNotNull('sales')->where('sales', '!=', '');
+            });
+        })->whereNotIn(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+
+        if ($request->filled('datel')) {
+            $query->where('datel', $request->datel);
+        }
+
+        if ($request->filled('agency')) {
+            $agency = $request->agency;
+            $query->where(function ($q) use ($agency) {
+                $q->where('agency_psb', $agency)
+                  ->orWhere('agency', $agency);
+            });
+        }
+
+        $sales = $query
+            ->select(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales) as sales_val"))
+            ->distinct()
+            ->orderBy('sales_val')
+            ->pluck('sales_val');
+
+        return response()->json($sales);
     }
 
     /**
@@ -97,11 +244,29 @@ class CustomerController extends Controller
      * HOTD DETAIL (AJAX)
      * ============================================
      */
-    public function hotdDetail($billingKe, $datel)
+    public function hotdDetail($billingKe, $datel, ?Request $request = null)
     {
-        $customers = Customer::where('billing_ke', $billingKe)
-            ->where('datel', $datel)
-            ->select(
+        $request = $request ?? request();
+        $query = Customer::where('billing_ke', $billingKe)
+            ->where('datel', $datel);
+
+        if ($request->filled('agency')) {
+            $agency = $request->agency;
+            $query->where(function ($q) use ($agency) {
+                $q->where('agency_psb', $agency)
+                  ->orWhere('agency', $agency);
+            });
+        }
+
+        if ($request->filled('sales')) {
+            $sales = $request->sales;
+            $query->where(function ($q) use ($sales) {
+                $q->where('sales_agency', $sales)
+                  ->orWhere('sales', $sales);
+            });
+        }
+
+        $customers = $query->select(
                 'status_bayar',
                 'tag_total',
                 'tag_inet',
@@ -179,15 +344,29 @@ class CustomerController extends Controller
 
         // Filter Agency
         if ($request->filled('agency')) {
-            $query->where('agency', $request->agency);
+            $agency = $request->agency;
+            $query->where(function ($q) use ($agency) {
+                $q->where('agency_psb', $agency)
+                  ->orWhere('agency', $agency);
+            });
         }
 
         $customers = $query->orderBy('created_at', 'desc')->paginate(50);
 
         // Data untuk filter
         $filters = [
-            'datel' => Customer::distinct('datel')->whereNotNull('datel')->pluck('datel'),
-            'agency' => Customer::distinct('agency')->whereNotNull('agency')->pluck('agency'),
+            'datel' => Customer::distinct('datel')->whereNotNull('datel')->where('datel', '!=', '')->orderBy('datel')->pluck('datel'),
+            'agency' => Customer::where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('agency')->where('agency', '!=', '');
+                });
+            })
+            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+            ->distinct()
+            ->orderBy('agency_val')
+            ->pluck('agency_val'),
         ];
 
         return view('customers.index', compact('customers', 'filters'));
@@ -445,5 +624,18 @@ class CustomerController extends Controller
         }
 
         return response()->download($filePath, $customer->ssl_file);
+    }
+
+    /**
+     * ============================================
+     * EXPORT EXCEL HOTD DETAIL (DASHBOARD)
+     * ============================================
+     */
+    public function exportHotdExcel($billingKe, $datel, Request $request)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\HotdDetailExport($billingKe, $datel, $request->agency, $request->sales), 
+            'hotd_billing_' . $billingKe . '_' . str_replace([' ', '-', '/'], '_', $datel) . '.xlsx'
+        );
     }
 }
