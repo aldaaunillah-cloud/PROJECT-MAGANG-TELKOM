@@ -46,7 +46,7 @@ class CustomerController extends Controller
             return $query;
         };
 
-        // 1. Build base query with all active filters (paid and unpaid)
+        // 1. Build base query with all active filters
         $baseQuery = Customer::query()
             ->whereBetween('billing_ke', [1, 6])
             ->whereNotIn('datel', $invalidPlaceholders)
@@ -63,21 +63,25 @@ class CustomerController extends Controller
             $baseQuery->where('sales_agency', $sales);
         }
 
-        // 2. Compute unified statistics
-        $totalCustomer = (clone $baseQuery)->count();
-        $totalBelumBayarSales = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->count();
-        $totalTagihan = (clone $baseQuery)->sum('tag_total');
-        $totalSaldo = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->sum('tag_total');
+        // 2. Compute statistics for Default/Datel/Agency views (Unpaid data only)
+        $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
+        $totalBelumLunas = (clone $unpaidQuery)->count();
+        $totalTagihan = (clone $unpaidQuery)->sum('tag_total');
+        $totalSales = (clone $unpaidQuery)->distinct()->pluck('sales_agency')->filter()->count();
+        $totalAgency = (clone $unpaidQuery)->distinct()->pluck('agency_psb')->filter()->count();
 
-        // Compatibility variables
-        $totalBelumLunas = $totalBelumBayarSales;
+        // 3. Compute statistics for Sales view (All base vs Unpaid)
+        $totalCustomer = (clone $baseQuery)->count();
+        $totalBelumBayarSales = (clone $unpaidQuery)->count();
+        $totalTagihanSales = (clone $baseQuery)->sum('tag_total');
+        $totalSaldoSales = (clone $unpaidQuery)->sum('tag_total');
 
         // Default Case Variables
         $rekapBilling = null;
         $agencyCustomers = null;
         $salesCustomers = null;
 
-        // 3. Load case-specific data
+        // 4. Load case-specific data
         if ($sales) {
             // Case 3: Sales Agency Terpilih (Menampilkan semua customer baik lunas maupun belum bayar)
             $salesCustomers = (clone $baseQuery)
@@ -88,8 +92,7 @@ class CustomerController extends Controller
 
         } elseif ($agency) {
             // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
-            $agencyCustomers = (clone $baseQuery)
-                ->where('status_bayar', '!=', 'Sdh Bayar')
+            $agencyCustomers = (clone $unpaidQuery)
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
@@ -278,6 +281,10 @@ class CustomerController extends Controller
             'totalSaldo',
             'totalCustomer',
             'totalBelumBayarSales',
+            'totalTagihanSales',
+            'totalSaldoSales',
+            'totalAgency',
+            'totalSales',
             'billingSummary',
             'hotdData',
             'latestCustomers',

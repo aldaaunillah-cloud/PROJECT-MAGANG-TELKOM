@@ -77,93 +77,176 @@
 
     {{-- DYNAMIC STATISTICS CARDS --}}
     <div class="row g-3 mb-4">
-        {{-- Card 1: TOTAL CUSTOMER (SSL) --}}
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-people-fill fs-2"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL CUSTOMER (SSL)</h6>
-                            <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalCustomer ?? 0) }}</h3>
-                            <small style="font-size:0.7rem; opacity: 0.85;">
-                                @if(request('datel')) {{ request('datel') }} @else Semua Datel @endif
-                                @if(request('agency')) | {{ Str::limit(request('agency'), 15) }} @endif
-                                @if(request('sales')) | {{ Str::limit(request('sales'), 15) }} @endif
-                            </small>
+        @if(request('sales'))
+            {{-- Card 1: TOTAL CUSTOMER --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-people-fill fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL CUSTOMER</h6>
+                                <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalCustomer ?? 0) }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ Str::limit(request('sales'), 20) }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        {{-- Card 2: BELUM BAYAR (SSL) --}}
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-exclamation-triangle-fill fs-2"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">BELUM BAYAR (SSL)</h6>
-                            <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalBelumBayarSales ?? 0) }}</h3>
-                            <small style="font-size:0.7rem; opacity: 0.85;">
-                                @if(request('datel')) {{ request('datel') }} @else Semua Datel @endif
-                                @if(request('agency')) | {{ Str::limit(request('agency'), 15) }} @endif
-                                @if(request('sales')) | {{ Str::limit(request('sales'), 15) }} @endif
-                            </small>
+            
+            {{-- Card 2: BELUM BAYAR (SSL) --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">BELUM BAYAR (SSL)</h6>
+                                <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalBelumBayarSales ?? 0) }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ Str::limit(request('sales'), 20) }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Card 3: TOTAL TAGIHAN --}}
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-cash-stack fs-2"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL TAGIHAN</h6>
-                            <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</h3>
-                            <small style="font-size:0.7rem; opacity: 0.85;">
-                                @if(request('datel')) {{ request('datel') }} @else Semua Datel @endif
-                                @if(request('agency')) | {{ Str::limit(request('agency'), 15) }} @endif
-                                @if(request('sales')) | {{ Str::limit(request('sales'), 15) }} @endif
-                            </small>
+            {{-- Card 3: TOTAL TAGIHAN --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-cash-stack fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL TAGIHAN</h6>
+                                <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalTagihanSales ?? 0, 0, ',', '.') }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ Str::limit(request('sales'), 20) }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Card 4: BELUM BAYAR (RUPIAH) --}}
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-wallet2 fs-2"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">BELUM BAYAR (RUPIAH)</h6>
-                            <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</h3>
-                            <small style="font-size:0.7rem; opacity: 0.85;">
-                                @if(request('datel')) {{ request('datel') }} @else Semua Datel @endif
-                                @if(request('agency')) | {{ Str::limit(request('agency'), 15) }} @endif
-                                @if(request('sales')) | {{ Str::limit(request('sales'), 15) }} @endif
-                            </small>
+            {{-- Card 4: TOTAL SALDO --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-wallet2 fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL SALDO</h6>
+                                <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalSaldoSales ?? 0, 0, ',', '.') }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ Str::limit(request('sales'), 20) }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @else
+            {{-- Default/Datel/Agency View --}}
+            {{-- Card 1: TOTAL CUSTOMER (SSL) --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-people-fill fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL CUSTOMER (SSL)</h6>
+                                <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalBelumLunas ?? 0) }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">
+                                    @if(request('datel') || request('agency'))
+                                        {{ request('datel') ?: 'Semua Datel' }}@if(request('agency')) | {{ Str::limit(request('agency'), 12) }}@endif
+                                    @else
+                                        Semua Billing
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {{-- Card 2: TOTAL TAGIHAN --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-cash-stack fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL TAGIHAN</h6>
+                                <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">
+                                    @if(request('datel') || request('agency'))
+                                        {{ request('datel') ?: 'Semua Datel' }}@if(request('agency')) | {{ Str::limit(request('agency'), 12) }}@endif
+                                    @else
+                                        Semua Billing
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card 3: TOTAL SALES AGENCY --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-badge fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL SALES AGENCY</h6>
+                                <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalSales ?? 0) }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">
+                                    @if(request('datel') || request('agency'))
+                                        {{ request('datel') ?: 'Semua Datel' }}@if(request('agency')) | {{ Str::limit(request('agency'), 12) }}@endif
+                                    @else
+                                        Sales
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card 4: TOTAL AGENCY --}}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-building fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL AGENCY</h6>
+                                <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalAgency ?? 0) }}</h3>
+                                <small style="font-size:0.7rem; opacity: 0.85;">
+                                    @if(request('datel') || request('agency'))
+                                        {{ request('datel') ?: 'Semua Datel' }}@if(request('agency')) | {{ Str::limit(request('agency'), 12) }}@endif
+                                    @else
+                                        Customer
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- DYNAMIC CONTENT TABLES --}}
