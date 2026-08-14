@@ -46,41 +46,41 @@ class CustomerController extends Controller
             return $query;
         };
 
-        // Default values to prevent undefined errors in view
-        $totalBelumLunas = 0;
-        $totalTagihan = 0;
-        $totalSaldo = 0;
-        $totalAgency = 0;
-        $totalSales = 0;
-        $totalCustomer = 0; // For sales
-        $totalBelumBayarSales = 0; // For sales
+        // 1. Build base query with all active filters (paid and unpaid)
+        $baseQuery = Customer::query()
+            ->whereBetween('billing_ke', [1, 6])
+            ->whereNotIn('datel', $invalidPlaceholders)
+            ->whereNotIn('agency_psb', $invalidPlaceholders)
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
+        if ($datel) {
+            $baseQuery->where('datel', $datel);
+        }
+        if ($agency) {
+            $baseQuery->where('agency_psb', $agency);
+        }
+        if ($sales) {
+            $baseQuery->where('sales_agency', $sales);
+        }
+
+        // 2. Compute unified statistics
+        $totalCustomer = (clone $baseQuery)->count();
+        $totalBelumBayarSales = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->count();
+        $totalTagihan = (clone $baseQuery)->sum('tag_total');
+        $totalSaldo = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->sum('tag_total');
+
+        // Compatibility variables
+        $totalBelumLunas = $totalBelumBayarSales;
+
+        // Default Case Variables
         $rekapBilling = null;
         $agencyCustomers = null;
         $salesCustomers = null;
 
+        // 3. Load case-specific data
         if ($sales) {
             // Case 3: Sales Agency Terpilih (Menampilkan semua customer baik lunas maupun belum bayar)
-            $baseQuery = Customer::query()
-                ->where('sales_agency', $sales)
-                ->whereBetween('billing_ke', [1, 6])
-                ->whereNotIn('datel', $invalidPlaceholders)
-                ->whereNotIn('agency_psb', $invalidPlaceholders)
-                ->whereNotIn('sales_agency', $invalidPlaceholders);
-
-            if ($datel) {
-                $baseQuery->where('datel', $datel);
-            }
-            if ($agency) {
-                $baseQuery->where('agency_psb', $agency);
-            }
-
-            $totalCustomer = (clone $baseQuery)->count();
-            $totalBelumBayarSales = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->count();
-            $totalTagihan = (clone $baseQuery)->sum('tag_total');
-            $totalSaldo = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->sum('tag_total');
-
-            $salesCustomers = $baseQuery
+            $salesCustomers = (clone $baseQuery)
                 ->orderBy('status_bayar', 'desc') // Belum bayar first
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
@@ -88,56 +88,15 @@ class CustomerController extends Controller
 
         } elseif ($agency) {
             // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
-            $baseQuery = Customer::query()
-                ->where('agency_psb', $agency)
+            $agencyCustomers = (clone $baseQuery)
                 ->where('status_bayar', '!=', 'Sdh Bayar')
-                ->whereBetween('billing_ke', [1, 6])
-                ->whereNotIn('datel', $invalidPlaceholders)
-                ->whereNotIn('agency_psb', $invalidPlaceholders)
-                ->whereNotIn('sales_agency', $invalidPlaceholders);
-
-            if ($datel) {
-                $baseQuery->where('datel', $datel);
-            }
-
-            $totalBelumLunas = (clone $baseQuery)->count();
-            $totalTagihan = (clone $baseQuery)->sum('tag_total');
-            $totalSales = (clone $baseQuery)->distinct('sales_agency')->count('sales_agency');
-            $totalAgency = (clone $baseQuery)->distinct('agency_psb')->count('agency_psb');
-
-            $agencyCustomers = $baseQuery
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
 
         } else {
             // Case 1: Hanya Datel Terpilih / Default View
-            $baseQuery = Customer::query()
-                ->where('status_bayar', '!=', 'Sdh Bayar')
-                ->whereBetween('billing_ke', [1, 6])
-                ->whereNotIn('datel', $invalidPlaceholders)
-                ->whereNotIn('agency_psb', $invalidPlaceholders)
-                ->whereNotIn('sales_agency', $invalidPlaceholders);
-
-            if ($datel) {
-                $baseQuery->where('datel', $datel);
-            }
-
-            $totalBelumLunas = (clone $baseQuery)->count();
-            $totalTagihan = (clone $baseQuery)->sum('tag_total');
-            $totalAgency = (clone $baseQuery)->distinct('agency_psb')->count('agency_psb');
-            $totalSales = (clone $baseQuery)->distinct('sales_agency')->count('sales_agency');
-
-            // Generate Rekap Billing 1-6
-            $rekapQuery = Customer::query()
-                ->whereBetween('billing_ke', [1, 6])
-                ->whereNotIn('datel', $invalidPlaceholders)
-                ->whereNotIn('agency_psb', $invalidPlaceholders)
-                ->whereNotIn('sales_agency', $invalidPlaceholders);
-
-            if ($datel) {
-                $rekapQuery->where('datel', $datel);
-            }
+            $rekapQuery = (clone $baseQuery);
 
             $rekapBilling = $rekapQuery
                 ->select(
