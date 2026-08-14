@@ -27,6 +27,11 @@
         </div>
     </div>
 
+    {{-- BANNER IMAGE --}}
+    <div class="banner p-0 mb-4 overflow-hidden border-0" style="border-radius: 16px; height: 160px; box-shadow: none;">
+        <img src="{{ asset('image/halaman pertama.png') }}" class="w-100 h-100" style="object-fit: cover;">
+    </div>
+
     {{-- FILTER FORM --}}
     <div class="card border-0 mb-4 w-100" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
         <div class="card-body p-3">
@@ -218,7 +223,7 @@
                             <div class="flex-grow-1 ms-3">
                                 <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL CUSTOMER (SSL)</h6>
                                 <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalBelumLunas ?? 0) }}</h3>
-                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Nasional' }}</small>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Semua Billing' }}</small>
                             </div>
                         </div>
                     </div>
@@ -234,7 +239,7 @@
                             <div class="flex-grow-1 ms-3">
                                 <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL TAGIHAN</h6>
                                 <h3 class="mb-0 fw-bold fs-4">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</h3>
-                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Nasional' }}</small>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Semua Billing' }}</small>
                             </div>
                         </div>
                     </div>
@@ -250,7 +255,7 @@
                             <div class="flex-grow-1 ms-3">
                                 <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL SALES AGENCY</h6>
                                 <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalSales ?? 0) }}</h3>
-                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Nasional' }}</small>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Sales' }}</small>
                             </div>
                         </div>
                     </div>
@@ -266,7 +271,7 @@
                             <div class="flex-grow-1 ms-3">
                                 <h6 class="mb-0 text-uppercase fw-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">TOTAL AGENCY</h6>
                                 <h3 class="mb-0 fw-bold fs-4">{{ number_format($totalAgency ?? 0) }}</h3>
-                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Nasional' }}</small>
+                                <small style="font-size:0.7rem; opacity: 0.85;">{{ request('datel') ?: 'Customer' }}</small>
                             </div>
                         </div>
                     </div>
@@ -403,76 +408,191 @@
         </div>
 
     @else
-        {{-- CASE 1: Default/Datel View - Tabel Summary Vertikal Billing 1-6 --}}
-        <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
-            <div class="card-header bg-white border-0 py-3 px-3">
-                <h6 class="mb-0 fw-bold text-primary">
-                    REKAP BILLING 1 - 6 - {{ request('datel') ? strtoupper(request('datel')) : 'NASIONAL' }}
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive w-100">
-                    <table class="table table-hover table-bordered align-middle mb-0 w-100">
-                        <thead class="table-light">
-                            <tr style="background-color: #f8f9fa;">
-                                <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 30%;">BILLING</th>
-                                <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 20%;">SSL</th>
-                                <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 30%;">RUPIAH</th>
-                                <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 20%;">%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $totalSsl = 0;
-                                $totalRp = 0;
-                                $totalAllCust = 0;
-                                $totalUnpaidCust = 0;
-                            @endphp
-                            @forelse($rekapBilling ?? [] as $rekap)
-                                @php
-                                    $totalSsl += $rekap->unpaid_cust;
-                                    $totalRp += $rekap->unpaid_rp;
-                                    $totalAllCust += $rekap->total_cust;
-                                    $totalUnpaidCust += $rekap->unpaid_cust;
-                                    
-                                    $rate = $rekap->total_cust > 0 
-                                        ? (($rekap->total_cust - $rekap->unpaid_cust) / $rekap->total_cust) * 100 
-                                        : 100;
-                                @endphp
-                                <tr onclick="showDetail('{{ request('datel') ?: 'Nasional' }}', {{ $rekap->billing_ke }})" style="cursor: pointer;" title="Klik untuk lihat detail customer">
-                                    <td class="px-3 py-2 fw-semibold text-primary" style="font-size:0.85rem;">BILLING KE {{ $rekap->billing_ke }}</td>
-                                    <td class="px-3 py-2 text-center fw-bold" style="font-size:0.85rem; color: #000361;">{{ number_format($rekap->unpaid_cust) }}</td>
-                                    <td class="px-3 py-2 text-end fw-semibold text-danger" style="font-size:0.85rem;">Rp {{ number_format($rekap->unpaid_rp, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2 text-center fw-bold text-success" style="font-size:0.85rem;">{{ number_format($rate, 2, ',', '.') }}%</td>
-                                </tr>
-                            @empty
+        {{-- CASE 1: Default/Datel View --}}
+        @if(!request('datel') && !request('agency') && !request('sales'))
+            {{-- Tampilan Awal: 2D Grid Rekap Billing 1-6 Per Datel --}}
+            <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
+                <div class="card-header bg-white border-0 py-3 px-3">
+                    <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
+                        REKAP BILLING 1 - 6 PER DATEL
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive w-100">
+                        <table class="table table-bordered table-hover align-middle mb-0 text-center w-100" style="font-size: 0.72rem; border-color: #cbd5e1; min-width: 1200px;">
+                            <thead class="table-light fw-bold" style="border-bottom: 2px solid #94a3b8;">
                                 <tr>
-                                    <td colspan="4" class="text-center py-4">
-                                        <i class="bi bi-inbox fs-2 text-muted d-block mb-1"></i>
-                                        <span class="text-muted" style="font-size:0.85rem;">Tidak ada data rekap billing</span>
-                                    </td>
+                                    <th rowspan="2" class="align-middle px-3 py-2 text-start text-dark" style="background-color: #e2f0fe; min-width: 180px; font-weight: bold;">DATEL</th>
+                                    <th colspan="3" style="background-color: #bae6fd; font-weight: bold; color: #0369a1;">BILLING KE 1</th>
+                                    <th colspan="3" style="background-color: #fed7aa; font-weight: bold; color: #c2410c;">BILLING KE 2</th>
+                                    <th colspan="3" style="background-color: #99f6e4; font-weight: bold; color: #0f766e;">BILLING KE 3</th>
+                                    <th colspan="3" style="background-color: #fef08a; font-weight: bold; color: #a16207;">BILLING KE 4</th>
+                                    <th colspan="3" style="background-color: #e9d5ff; font-weight: bold; color: #7e22ce;">BILLING KE 5</th>
+                                    <th colspan="3" style="background-color: #fbcfe8; font-weight: bold; color: #be185d;">BILLING KE 6</th>
+                                    <th colspan="2" style="background-color: #cffafe; font-weight: bold; color: #0891b2;">TOTAL ALL BILLING</th>
+                                    <th rowspan="2" class="align-middle px-3 py-2 text-dark" style="background-color: #f1f5f9; font-weight: bold;">REWARD</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                        @if(!empty($rekapBilling) && count($rekapBilling) > 0)
-                            @php
-                                $totalRate = $totalAllCust > 0 
-                                    ? (($totalAllCust - $totalUnpaidCust) / $totalAllCust) * 100 
-                                    : 100;
-                            @endphp
-                            <tfoot>
-                                <tr class="table-light fw-bold" style="background-color: #eaeaea;">
-                                    <td class="px-3 py-2" style="font-size:0.85rem; font-weight: bold;">TOTAL</td>
-                                    <td class="px-3 py-2 text-center" style="font-size:0.85rem; font-weight: bold;">{{ number_format($totalSsl) }}</td>
-                                    <td class="px-3 py-2 text-end text-danger" style="font-size:0.85rem; font-weight: bold;">Rp {{ number_format($totalRp, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2 text-center text-success" style="font-size:0.85rem; font-weight: bold;">{{ number_format($totalRate, 2, ',', '.') }}%</td>
+                                <tr>
+                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">SSL</th>
+                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">RUPIAH</th>
+                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">%</th>
+                                    
+                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">SSL</th>
+                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">RUPIAH</th>
+                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">%</th>
+                                    
+                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">SSL</th>
+                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">RUPIAH</th>
+                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">%</th>
+                                    
+                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">SSL</th>
+                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">RUPIAH</th>
+                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">%</th>
+                                    
+                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">SSL</th>
+                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">RUPIAH</th>
+                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">%</th>
+                                    
+                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">SSL</th>
+                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">RUPIAH</th>
+                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">%</th>
+                                    
+                                    <th style="background-color: #cffafe; font-size: 0.65rem; color: #0891b2;">SSL</th>
+                                    <th style="background-color: #cffafe; font-size: 0.65rem; color: #0891b2;">RUPIAH</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $grandSsl = array_fill(1, 6, 0);
+                                    $grandRp = array_fill(1, 6, 0);
+                                    $allSslTotal = 0;
+                                    $allRpTotal = 0;
+                                @endphp
+                                @foreach($dashboardGrid ?? [] as $row)
+                                    <tr>
+                                        <td class="text-start fw-bold px-3 py-2 text-dark" style="font-size: 0.75rem;">{{ $row['datel'] }}</td>
+                                        @foreach(range(1, 6) as $b)
+                                            @php
+                                                $ssl = $row['billings'][$b]['ssl'] ?? 0;
+                                                $rp = $row['billings'][$b]['rp'] ?? 0;
+                                                $rate = $row['billings'][$b]['rate'] ?? 100;
+                                                
+                                                $grandSsl[$b] += $ssl;
+                                                $grandRp[$b] += $rp;
+                                            @endphp
+                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer;" class="fw-semibold text-dark">
+                                                {{ $ssl > 0 ? $ssl : '' }}
+                                            </td>
+                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer;" class="text-dark">
+                                                {{ $rp > 0 ? number_format($rp, 0, ',', '.') : '' }}
+                                            </td>
+                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer; color: {{ $rate == 100 ? '#22c55e' : '#000' }};" class="fw-bold">
+                                                {{ number_format($rate, 2, ',', '.') }}%
+                                            </td>
+                                        @endforeach
+                                        @php
+                                            $allSslTotal += $row['total_ssl'];
+                                            $allRpTotal += $row['total_rp'];
+                                        @endphp
+                                        <td class="fw-bold bg-light text-dark">{{ number_format($row['total_ssl']) }}</td>
+                                        <td class="fw-bold bg-light text-dark">{{ number_format($row['total_rp'], 0, ',', '.') }}</td>
+                                        <td class="fw-bold text-dark">{{ $row['reward'] ?: '' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="fw-bold" style="background-color: #e2e8f0; border-top: 2px solid #94a3b8;">
+                                <tr class="text-dark">
+                                    <td class="text-start px-3 py-2">Grand Total</td>
+                                    @foreach(range(1, 6) as $b)
+                                        @php
+                                            $totalBAll = \App\Models\Customer::whereBetween('billing_ke', [1, 6])->where('billing_ke', $b)->count();
+                                            $grandRate = $totalBAll > 0 ? (($totalBAll - $grandSsl[$b]) / $totalBAll) * 100 : 100;
+                                        @endphp
+                                        <td>{{ number_format($grandSsl[$b]) }}</td>
+                                        <td>{{ number_format($grandRp[$b], 0, ',', '.') }}</td>
+                                        <td>{{ number_format($grandRate, 2, ',', '.') }}%</td>
+                                    @endforeach
+                                    <td>{{ number_format($allSslTotal) }}</td>
+                                    <td>{{ number_format($allRpTotal, 0, ',', '.') }}</td>
+                                    <td>150.000</td>
                                 </tr>
                             </tfoot>
-                        @endif
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        @else
+            {{-- Tampilan 1D Datel Terpilih --}}
+            <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
+                <div class="card-header bg-white border-0 py-3 px-3">
+                    <h6 class="mb-0 fw-bold text-primary">
+                        REKAP BILLING 1 - 6 - {{ request('datel') ? strtoupper(request('datel')) : 'NASIONAL' }}
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive w-100">
+                        <table class="table table-hover table-bordered align-middle mb-0 w-100">
+                            <thead class="table-light">
+                                <tr style="background-color: #f8f9fa;">
+                                    <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 30%;">BILLING</th>
+                                    <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 20%;">SSL</th>
+                                    <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 30%;">RUPIAH</th>
+                                    <th class="px-3 py-2 text-center text-nowrap" style="font-size:0.75rem; font-weight: bold; width: 20%;">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $totalSsl = 0;
+                                    $totalRp = 0;
+                                    $totalAllCust = 0;
+                                    $totalUnpaidCust = 0;
+                                @endphp
+                                @forelse($rekapBilling ?? [] as $rekap)
+                                    @php
+                                        $totalSsl += $rekap->unpaid_cust;
+                                        $totalRp += $rekap->unpaid_rp;
+                                        $totalAllCust += $rekap->total_cust;
+                                        $totalUnpaidCust += $rekap->unpaid_cust;
+                                        
+                                        $rate = $rekap->total_cust > 0 
+                                            ? (($rekap->total_cust - $rekap->unpaid_cust) / $rekap->total_cust) * 100 
+                                            : 100;
+                                    @endphp
+                                    <tr onclick="showDetail('{{ request('datel') ?: 'Nasional' }}', {{ $rekap->billing_ke }})" style="cursor: pointer;" title="Klik untuk lihat detail customer">
+                                        <td class="px-3 py-2 fw-semibold text-primary" style="font-size:0.85rem;">BILLING KE {{ $rekap->billing_ke }}</td>
+                                        <td class="px-3 py-2 text-center fw-bold" style="font-size:0.85rem; color: #000361;">{{ number_format($rekap->unpaid_cust) }}</td>
+                                        <td class="px-3 py-2 text-end fw-semibold text-danger" style="font-size:0.85rem;">Rp {{ number_format($rekap->unpaid_rp, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-2 text-center fw-bold text-success" style="font-size:0.85rem;">{{ number_format($rate, 2, ',', '.') }}%</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <i class="bi bi-inbox fs-2 text-muted d-block mb-1"></i>
+                                            <span class="text-muted" style="font-size:0.85rem;">Tidak ada data rekap billing</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if(!empty($rekapBilling) && count($rekapBilling) > 0)
+                                @php
+                                    $totalRate = $totalAllCust > 0 
+                                        ? (($totalAllCust - $totalUnpaidCust) / $totalAllCust) * 100 
+                                        : 100;
+                                @endphp
+                                <tfoot>
+                                    <tr class="table-light fw-bold" style="background-color: #eaeaea;">
+                                        <td class="px-3 py-2" style="font-size:0.85rem; font-weight: bold;">TOTAL</td>
+                                        <td class="px-3 py-2 text-center" style="font-size:0.85rem; font-weight: bold;">{{ number_format($totalSsl) }}</td>
+                                        <td class="px-3 py-2 text-end text-danger" style="font-size:0.85rem; font-weight: bold;">Rp {{ number_format($totalRp, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-2 text-center text-success" style="font-size:0.85rem; font-weight: bold;">{{ number_format($totalRate, 2, ',', '.') }}%</td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
     @endif
 
     {{-- PRINT FLOATING DOWNLOAD BUTTON (Klik Unduh) AT BOTTOM RIGHT --}}

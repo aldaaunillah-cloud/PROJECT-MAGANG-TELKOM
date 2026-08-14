@@ -151,6 +151,84 @@ class CustomerController extends Controller
                 ->get();
         }
 
+        // Tampilan Awal: 2D Grid Matrix Datel by Billing 1-6
+        $dashboardGrid = [];
+        if (!$datel && !$agency && !$sales) {
+            $rawGrid = Customer::query()
+                ->select(
+                    'datel',
+                    'billing_ke',
+                    DB::raw('COUNT(*) as total_cust'),
+                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as unpaid_cust'),
+                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
+                )
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders)
+                ->groupBy('datel', 'billing_ke')
+                ->get();
+
+            $gridByDatel = $rawGrid->groupBy('datel');
+
+            $standardDatels = [
+                '91405 - Kuningan',
+                '91407 - Inner - Priangan Timur',
+                '91403 - Garut',
+                '91406 - Majalengka',
+                '91404 - Indramayu',
+                '91408 - Singaparna',
+                '91409 - Tasikmalaya',
+                '91401 - Banjar'
+            ];
+
+            // Get any other datels that might exist in database
+            $allDbDatels = $rawGrid->pluck('datel')->unique()->toArray();
+            foreach ($allDbDatels as $dbd) {
+                if (!in_array($dbd, $standardDatels)) {
+                    $standardDatels[] = $dbd;
+                }
+            }
+
+            foreach ($standardDatels as $datelName) {
+                $row = [
+                    'datel' => $datelName,
+                    'billings' => [],
+                    'total_ssl' => 0,
+                    'total_rp' => 0,
+                    'reward' => (str_contains(strtolower($datelName), 'majalengka') || str_contains($datelName, '91406')) ? '150.000' : ''
+                ];
+
+                $datelGroup = $gridByDatel->get($datelName, collect());
+
+                foreach (range(1, 6) as $b) {
+                    $item = $datelGroup->firstWhere('billing_ke', $b);
+                    if ($item) {
+                        $ssl = $item->unpaid_cust;
+                        $rp = $item->unpaid_rp;
+                        $tot = $item->total_cust;
+                        $rate = $tot > 0 ? (($tot - $ssl) / $tot) * 100 : 100;
+
+                        $row['billings'][$b] = [
+                            'ssl' => $ssl,
+                            'rp' => $rp,
+                            'rate' => $rate
+                        ];
+                        $row['total_ssl'] += $ssl;
+                        $row['total_rp'] += $rp;
+                    } else {
+                        $row['billings'][$b] = [
+                            'ssl' => 0,
+                            'rp' => 0,
+                            'rate' => 100
+                        ];
+                    }
+                }
+
+                $dashboardGrid[] = $row;
+            }
+        }
+
         // Keep fallback data to prevent dashboard error if views need it
         $latestCustomers = [];
         $hotdData = [];
@@ -211,7 +289,8 @@ class CustomerController extends Controller
             'salesList',
             'rekapBilling',
             'agencyCustomers',
-            'salesCustomers'
+            'salesCustomers',
+            'dashboardGrid'
         ));
     }
 
