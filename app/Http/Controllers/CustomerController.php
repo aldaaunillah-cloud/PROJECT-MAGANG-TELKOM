@@ -276,8 +276,6 @@ class CustomerController extends Controller
             'totalBelumLunas',
             'totalTagihan',
             'totalSaldo',
-            'totalAgency',
-            'totalSales',
             'totalCustomer',
             'totalBelumBayarSales',
             'billingSummary',
