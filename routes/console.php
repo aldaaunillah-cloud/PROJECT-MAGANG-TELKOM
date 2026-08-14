@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 Schedule::call(function () {
     try {
         $syncService = app(SyncService::class);
-        $result = $syncService->sync();
+        $result = $syncService->syncFromGoogleSheets();
         
         Log::info('Sync otomatis berhasil: ' . json_encode($result));
         echo "✅ Sync otomatis berhasil: " . json_encode($result) . PHP_EOL;
