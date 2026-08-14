@@ -32,6 +32,18 @@ class SyncService
                 ];
             }
 
+            // Hapus duplikat data customer yang ada di database agar datanya bersih
+            DB::statement("
+                DELETE FROM customers 
+                WHERE id NOT IN (
+                    SELECT max_id FROM (
+                        SELECT MAX(id) as max_id 
+                        FROM customers 
+                        GROUP BY snd
+                    ) as tmp
+                )
+            ");
+
             Log::info('Google Sheet berhasil dibaca', ['rows' => count($googleCustomers)]);
 
             if (!empty($googleCustomers)) {
@@ -122,23 +134,12 @@ class SyncService
                 }
 
                 if (!empty($updateData)) {
-                    foreach (array_chunk($updateData, $this->chunkSize) as $chunk) {
-                        Customer::upsert(
-                            $chunk,
-                            ['snd'],
-                            [
-                                'snd_group', 'ncli', 'nama', 'alamat', 'sto',
-                                'datel', 'agency', 'sales', 'billing_ke',
-                                'saldo', 'status_bayar', 'tag_total',
-                                'tag_inet', 'tag_tlp', 'produk',
-                                'eksepsi_desc', 'desc_newbill', 'usage_desc',
-                                'umur_customer', 'paid_l11', 'tgl_paid',
-                                'paid_rp', 'coll_agent', 'tgl_klaim',
-                                'amount_klaim', 'user_klaim', 'tgl_paid_n1',
-                                'agency_psb', 'sales_agency', 'ppp',
-                                'caring_mybrains', 'ssl_file', 'updated_at'
-                            ]
-                        );
+                    foreach ($updateData as $row) {
+                        // Jangan overwrite ssl_file milik customer jika di spreadsheet kosong
+                        if (empty($row['ssl_file'])) {
+                            unset($row['ssl_file']);
+                        }
+                        Customer::where('snd', $row['snd'])->update($row);
                     }
                 }
             });
@@ -187,13 +188,31 @@ class SyncService
             $data = $data->toArray();
         }
         
-        unset($data['created_at']);
-        unset($data['updated_at']);
-        unset($data['id']);
+        $compareFields = [
+            'snd', 'snd_group', 'ncli', 'nama', 'alamat', 'sto',
+            'datel', 'agency', 'sales', 'billing_ke', 'saldo', 'status_bayar',
+            'tag_total', 'tag_inet', 'tag_tlp', 'produk', 'eksepsi_desc',
+            'desc_newbill', 'usage_desc', 'umur_customer', 'paid_l11', 'tgl_paid',
+            'paid_rp', 'coll_agent', 'tgl_klaim', 'amount_klaim', 'user_klaim',
+            'tgl_paid_n1', 'agency_psb', 'sales_agency', 'ppp', 'caring_mybrains', 'ssl_file'
+        ];
         
-        ksort($data);
+        $normalized = [];
+        foreach ($compareFields as $field) {
+            $val = $data[$field] ?? null;
+            if (is_numeric($val)) {
+                $val = (string) round((float) $val, 2);
+            } elseif ($val === null) {
+                $val = '';
+            } else {
+                $val = trim((string) $val);
+            }
+            $normalized[$field] = $val;
+        }
         
-        return md5(json_encode($data));
+        ksort($normalized);
+        
+        return md5(json_encode($normalized));
     }
 
     protected function parseBillingKe($value): ?int
