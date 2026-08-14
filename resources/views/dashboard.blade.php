@@ -33,7 +33,7 @@
     </div>
 
     {{-- FILTER FORM --}}
-    <div class="card border-0 mb-4 w-100" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+    <div class="card mb-4 w-100">
         <div class="card-body p-3">
             <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end" id="dashboardFilterForm">
                 <div class="col-md-3">
@@ -80,7 +80,7 @@
         @if(request('sales'))
             {{-- Case 3: Sales View --}}
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e2f0fe; color: #0d6efd; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -96,7 +96,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fef0db; color: #fd7e14; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -112,7 +112,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e6f9e9; color: #198754; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -128,7 +128,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fae6fa; color: #d63384; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -147,7 +147,7 @@
         @elseif(request('agency'))
             {{-- Case 2: Agency View --}}
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e2f0fe; color: #0d6efd; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -163,7 +163,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e6f9e9; color: #198754; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -179,7 +179,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fae6fa; color: #d63384; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -195,7 +195,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fef0db; color: #fd7e14; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -214,7 +214,7 @@
         @else
             {{-- Case 1: Default/Datel View --}}
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e2f0fe; color: #0d6efd; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f0f7ff; color: #000361; border: 1px solid #cce3fd !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -230,7 +230,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #e6f9e9; color: #198754; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #f2fcf5; color: #15803d; border: 1px solid #d1fae5 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -246,7 +246,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fae6fa; color: #d63384; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fbf2ff; color: #7e22ce; border: 1px solid #f3e8ff !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -262,7 +262,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fef0db; color: #fd7e14; border-radius: 12px; box-shadow: none;">
+                <div class="card border-0 h-100 w-100 overflow-hidden" style="background-color: #fffdf5; color: #b45309; border: 1px solid #fef3c7 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -411,7 +411,7 @@
         {{-- CASE 1: Default/Datel View --}}
         @if(!request('datel') && !request('agency') && !request('sales'))
             {{-- BILLING SUMMARY 1-6 CARDS (ORIGINAL) --}}
-            <div class="card border-0 shadow-sm mb-4 w-100 overflow-hidden" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+            <div class="card mb-4 w-100 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
                         <i class="bi bi-file-invoice-dollar me-2"></i> Rekap Billing Customer 1-6 (HOTD)
@@ -459,7 +459,7 @@
             </div>
 
             {{-- 2D GRID MATRIX TABLE Detail Billing 1-6 per Datel (HOTD) (ORIGINAL) --}}
-            <div class="card border-0 shadow-sm mb-4 w-100 overflow-hidden" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+            <div class="card mb-4 w-100 overflow-hidden">
                 <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
                         <i class="bi bi-table me-2"></i> Detail Billing 1-6 per Datel (HOTD)
@@ -590,7 +590,7 @@
             </div>
 
             {{-- 10 RECENT CUSTOMERS (ORIGINAL) --}}
-            <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+            <div class="card w-100 overflow-hidden mb-5">
                 <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
                         <i class="bi bi-people me-2"></i> 10 Customer Terbaru

@@ -23,6 +23,7 @@
             --primary-color: #000361;
             --secondary-color: #2F3A4A;
             --bg-color: #F8F9FC;
+            --telkom-red: #E2001A;
         }
 
         * {
@@ -34,9 +35,8 @@
         body {
             background-color: var(--bg-color);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #1e293b;
         }
-
-        /* SIDEBAR CSS HAS BEEN MOVED TO BOOTSTRAP UTILITIES */
 
         /* ============================================
            MAIN CONTENT
@@ -47,28 +47,29 @@
             margin-left: 260px;
             width: calc(100% - 260px);
             flex: none;
+            background-color: var(--bg-color);
         }
 
         /* ============================================
-           CARDS - Modern
+           CARDS - Premium & Modern
            ============================================ */
         .card {
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: none;
+            border: 1px solid #e2e8f0;
             background: #ffffff;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.01);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
         }
 
         .card-header {
             background: #fff;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-bottom: 1px solid #e2e8f0;
             padding: 16px 20px;
         }
 
@@ -80,102 +81,114 @@
            TABLES
            ============================================ */
         .table thead th {
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: 2px solid #e2e8f0;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             letter-spacing: 0.5px;
-            color: #6c757d;
-            padding: 12px 12px;
-            background-color: #f8f9fa;
+            color: #475569;
+            padding: 10px 12px;
+            background-color: #f8fafc;
         }
 
         .table tbody td {
-            padding: 12px 12px;
+            padding: 10px 12px;
             vertical-align: middle;
+            color: #334155;
+            border-color: #f1f5f9;
         }
 
         .table-hover tbody tr:hover {
-            background-color: rgba(226, 0, 26, 0.04);
+            background-color: rgba(226, 0, 26, 0.03);
+            transition: background-color 0.2s ease;
         }
 
         .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(0,0,0,0.02);
+            background-color: #fafafb;
         }
 
         /* ============================================
            BADGES
            ============================================ */
         .badge {
-            font-weight: 500;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.72rem;
             letter-spacing: 0.3px;
         }
 
         .badge-success {
-            background-color: #28a745;
-            color: #fff;
+            background-color: #dcfce7;
+            color: #15803d;
         }
 
         .badge-danger {
-            background-color: #dc3545;
-            color: #fff;
+            background-color: #fee2e2;
+            color: #b91c1c;
         }
 
         .badge-warning {
-            background-color: #ffc107;
-            color: #212529;
+            background-color: #fef9c3;
+            color: #a16207;
         }
 
         .badge-info {
-            background-color: #17a2b8;
-            color: #fff;
+            background-color: #e0f2fe;
+            color: #0369a1;
         }
 
         .badge-primary {
-            background-color: var(--primary-color);
-            color: #fff;
+            background-color: #e0e7ff;
+            color: #4338ca;
         }
 
         .badge-secondary {
-            background-color: var(--secondary-color);
-            color: #fff;
+            background-color: #f1f5f9;
+            color: #475569;
         }
 
         /* ============================================
            BUTTONS
            ============================================ */
         .btn {
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 500;
-            padding: 8px 22px;
-            transition: all 0.3s ease;
+            padding: 8px 18px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
         }
 
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            color: #fff;
         }
 
         .btn-primary:hover {
-            background-color: #b30014;
-            border-color: #b30014;
+            background-color: #00024a;
+            border-color: #00024a;
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(226, 0, 26, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 3, 97, 0.2);
         }
 
         .btn-sm {
-            border-radius: 8px;
-            padding: 5px 14px;
-            font-size: 0.8rem;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 0.78rem;
         }
 
-        .btn-outline-secondary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            color: #fff;
+        /* ============================================
+           SIDEBAR LINKS & HOVER
+           ============================================ */
+        .hover-bg-light {
+            transition: all 0.2s ease;
+        }
+        
+        .hover-bg-light:hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            color: #fff !important;
+            transform: translateX(3px);
         }
 
         /* ============================================
