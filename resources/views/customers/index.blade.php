@@ -129,7 +129,7 @@
                                         </a>
                                         @if($customer->ssl_file)
                                             <a href="{{ route('customers.download-ssl', $customer->id) }}" 
-                                               class="btn btn-outline-success" title="Download SSL">
+                                               class="btn btn-outline-success" title="Download SSL" target="_blank">
                                                 <i class="bi bi-download"></i>
                                             </a>
                                         @endif
