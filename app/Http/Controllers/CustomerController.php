@@ -27,22 +27,16 @@ class CustomerController extends Controller
                 $query->where('datel', $datel);
             }
             if ($agency) {
-                $query->where(function ($q) use ($agency) {
-                    $q->where('agency_psb', $agency)
-                      ->orWhere('agency', $agency);
-                });
+                $query->where('agency_psb', $agency);
             }
             if ($sales) {
-                $query->where(function ($q) use ($sales) {
-                    $q->where('sales_agency', $sales)
-                      ->orWhere('sales', $sales);
-                });
+                $query->where('sales_agency', $sales);
             }
             
             // Filter invalid placeholders agar tidak dihitung dalam rekap
             $query->whereNotIn('datel', $invalidPlaceholders)
-                  ->whereNotIn(\Illuminate\Support\Facades\DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders)
-                  ->whereNotIn(\Illuminate\Support\Facades\DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+                  ->whereNotIn('agency_psb', $invalidPlaceholders)
+                  ->whereNotIn('sales_agency', $invalidPlaceholders);
 
             // Filter billing_ke 1-6 agar sesuai dengan rekap spreadsheet
             $query->whereBetween('billing_ke', [1, 6]);
@@ -58,26 +52,16 @@ class CustomerController extends Controller
         $totalSaldo = $applyFilters(Customer::query())->sum('tag_total');
 
         $totalAgency = $applyFilters(Customer::query())
-            ->where(function ($q) {
-                $q->where(function ($sub) {
-                    $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
-                })->orWhere(function ($sub) {
-                    $sub->whereNotNull('agency')->where('agency', '!=', '');
-                });
-            })
-            ->distinct(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"))
-            ->count(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"));
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->distinct('agency_psb')
+            ->count('agency_psb');
 
         $totalSales = $applyFilters(Customer::query())
-            ->where(function ($q) {
-                $q->where(function ($sub) {
-                    $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
-                })->orWhere(function ($sub) {
-                    $sub->whereNotNull('sales')->where('sales', '!=', '');
-                });
-            })
-            ->distinct(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"))
-            ->count(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"));
+            ->whereNotNull('sales_agency')
+            ->where('sales_agency', '!=', '')
+            ->distinct('sales_agency')
+            ->count('sales_agency');
 
         // Billing Summary 1-6
         $billingSummary = clone $applyFilters(Customer::query());
@@ -121,42 +105,33 @@ class CustomerController extends Controller
             ->orderBy('datel')
             ->pluck('datel');
 
-        $agenciesQuery = Customer::query()->where(function ($q) {
-            $q->where(function ($sub) {
-                $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
-            })->orWhere(function ($sub) {
-                $sub->whereNotNull('agency')->where('agency', '!=', '');
-            });
-        })->whereNotIn(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders);
+        $agenciesQuery = Customer::query()
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->whereNotIn('agency_psb', $invalidPlaceholders);
 
         if ($datel) {
             $agenciesQuery->where('datel', $datel);
         }
         $agenciesList = $agenciesQuery
-            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+            ->select('agency_psb as agency_val')
             ->distinct()
             ->orderBy('agency_val')
             ->pluck('agency_val');
 
-        $salesQuery = Customer::query()->where(function ($q) {
-            $q->where(function ($sub) {
-                $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
-            })->orWhere(function ($sub) {
-                $sub->whereNotNull('sales')->where('sales', '!=', '');
-            });
-        })->whereNotIn(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+        $salesQuery = Customer::query()
+            ->whereNotNull('sales_agency')
+            ->where('sales_agency', '!=', '')
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
         if ($datel) {
             $salesQuery->where('datel', $datel);
         }
         if ($agency) {
-            $salesQuery->where(function ($q) use ($agency) {
-                $q->where('agency_psb', $agency)
-                  ->orWhere('agency', $agency);
-            });
+            $salesQuery->where('agency_psb', $agency);
         }
         $salesList = $salesQuery
-            ->select(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales) as sales_val"))
+            ->select('sales_agency as sales_val')
             ->distinct()
             ->orderBy('sales_val')
             ->pluck('sales_val');
@@ -185,20 +160,17 @@ class CustomerController extends Controller
     {
         $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
 
-        $query = Customer::query()->where(function ($q) {
-            $q->where(function ($sub) {
-                $sub->whereNotNull('agency_psb')->where('agency_psb', '!=', '');
-            })->orWhere(function ($sub) {
-                $sub->whereNotNull('agency')->where('agency', '!=', '');
-            });
-        })->whereNotIn(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency)"), $invalidPlaceholders);
+        $query = Customer::query()
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->whereNotIn('agency_psb', $invalidPlaceholders);
 
         if ($request->filled('datel')) {
             $query->where('datel', $request->datel);
         }
 
         $agencies = $query
-            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+            ->select('agency_psb as agency_val')
             ->distinct()
             ->orderBy('agency_val')
             ->pluck('agency_val');
@@ -210,28 +182,21 @@ class CustomerController extends Controller
     {
         $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
 
-        $query = Customer::query()->where(function ($q) {
-            $q->where(function ($sub) {
-                $sub->whereNotNull('sales_agency')->where('sales_agency', '!=', '');
-            })->orWhere(function ($sub) {
-                $sub->whereNotNull('sales')->where('sales', '!=', '');
-            });
-        })->whereNotIn(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales)"), $invalidPlaceholders);
+        $query = Customer::query()
+            ->whereNotNull('sales_agency')
+            ->where('sales_agency', '!=', '')
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
         if ($request->filled('datel')) {
             $query->where('datel', $request->datel);
         }
 
         if ($request->filled('agency')) {
-            $agency = $request->agency;
-            $query->where(function ($q) use ($agency) {
-                $q->where('agency_psb', $agency)
-                  ->orWhere('agency', $agency);
-            });
+            $query->where('agency_psb', $request->agency);
         }
 
         $sales = $query
-            ->select(DB::raw("COALESCE(NULLIF(sales_agency, ''), sales) as sales_val"))
+            ->select('sales_agency as sales_val')
             ->distinct()
             ->orderBy('sales_val')
             ->pluck('sales_val');
