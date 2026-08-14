@@ -46,56 +46,115 @@ class CustomerController extends Controller
             return $query;
         };
 
-        // Data statistik
-        $totalBelumLunas = $applyFilters(Customer::query())->count();
-        $totalTagihan = $applyFilters(Customer::query())->sum('tag_total');
-        $totalSaldo = $applyFilters(Customer::query())->sum('tag_total');
+        // Default values to prevent undefined errors in view
+        $totalBelumLunas = 0;
+        $totalTagihan = 0;
+        $totalSaldo = 0;
+        $totalAgency = 0;
+        $totalSales = 0;
+        $totalCustomer = 0; // For sales
+        $totalBelumBayarSales = 0; // For sales
 
-        $totalAgency = $applyFilters(Customer::query())
-            ->whereNotNull('agency_psb')
-            ->where('agency_psb', '!=', '')
-            ->distinct('agency_psb')
-            ->count('agency_psb');
+        $rekapBilling = null;
+        $agencyCustomers = null;
+        $salesCustomers = null;
 
-        $totalSales = $applyFilters(Customer::query())
-            ->whereNotNull('sales_agency')
-            ->where('sales_agency', '!=', '')
-            ->distinct('sales_agency')
-            ->count('sales_agency');
+        if ($sales) {
+            // Case 3: Sales Agency Terpilih (Menampilkan semua customer baik lunas maupun belum bayar)
+            $baseQuery = Customer::query()
+                ->where('sales_agency', $sales)
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
 
-        // Billing Summary 1-6
-        $billingSummary = clone $applyFilters(Customer::query());
-        $billingSummary = $billingSummary->select(
-            'billing_ke',
-            DB::raw('COUNT(*) as belum_lunas'),
-            DB::raw('SUM(tag_total) as total_tagihan')
-        )
-            ->whereNotNull('billing_ke')
-            ->whereBetween('billing_ke', [1, 6])
-            ->groupBy('billing_ke')
-            ->orderBy('billing_ke')
-            ->get();
+            if ($datel) {
+                $baseQuery->where('datel', $datel);
+            }
+            if ($agency) {
+                $baseQuery->where('agency_psb', $agency);
+            }
 
-        // HOTD Data - Rekapan per billing per datel
-        $hotdData = clone $applyFilters(Customer::query());
-        $hotdData = $hotdData->select(
-            'datel',
-            'billing_ke',
-            DB::raw('COUNT(*) as blm_bayar'),
-            DB::raw('SUM(tag_total) as blm_bayar_rp')
-        )
-            ->whereNotNull('datel')
-            ->whereBetween('billing_ke', [1, 6])
-            ->groupBy('datel', 'billing_ke')
-            ->orderBy('billing_ke')
-            ->orderBy('datel')
-            ->get();
+            $totalCustomer = (clone $baseQuery)->count();
+            $totalBelumBayarSales = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->count();
+            $totalTagihan = (clone $baseQuery)->sum('tag_total');
+            $totalSaldo = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar')->sum('tag_total');
 
-        // Latest 10 Customers (Belum bayar)
-        $latestCustomers = clone $applyFilters(Customer::query());
-        $latestCustomers = $latestCustomers->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
+            $salesCustomers = $baseQuery
+                ->orderBy('status_bayar', 'desc') // Belum bayar first
+                ->orderBy('tag_total', 'desc')
+                ->paginate(30)
+                ->withQueryString();
+
+        } elseif ($agency) {
+            // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
+            $baseQuery = Customer::query()
+                ->where('agency_psb', $agency)
+                ->where('status_bayar', '!=', 'Sdh Bayar')
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
+
+            if ($datel) {
+                $baseQuery->where('datel', $datel);
+            }
+
+            $totalBelumLunas = (clone $baseQuery)->count();
+            $totalTagihan = (clone $baseQuery)->sum('tag_total');
+            $totalSales = (clone $baseQuery)->distinct('sales_agency')->count('sales_agency');
+            $totalAgency = (clone $baseQuery)->distinct('agency_psb')->count('agency_psb');
+
+            $agencyCustomers = $baseQuery
+                ->orderBy('tag_total', 'desc')
+                ->paginate(30)
+                ->withQueryString();
+
+        } else {
+            // Case 1: Hanya Datel Terpilih / Default View
+            $baseQuery = Customer::query()
+                ->where('status_bayar', '!=', 'Sdh Bayar')
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
+
+            if ($datel) {
+                $baseQuery->where('datel', $datel);
+            }
+
+            $totalBelumLunas = (clone $baseQuery)->count();
+            $totalTagihan = (clone $baseQuery)->sum('tag_total');
+            $totalAgency = (clone $baseQuery)->distinct('agency_psb')->count('agency_psb');
+            $totalSales = (clone $baseQuery)->distinct('sales_agency')->count('sales_agency');
+
+            // Generate Rekap Billing 1-6
+            $rekapQuery = Customer::query()
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
+
+            if ($datel) {
+                $rekapQuery->where('datel', $datel);
+            }
+
+            $rekapBilling = $rekapQuery
+                ->select(
+                    'billing_ke',
+                    DB::raw('COUNT(*) as total_cust'),
+                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as unpaid_cust'),
+                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
+                )
+                ->groupBy('billing_ke')
+                ->orderBy('billing_ke')
+                ->get();
+        }
+
+        // Keep fallback data to prevent dashboard error if views need it
+        $latestCustomers = [];
+        $hotdData = [];
+        $billingSummary = [];
 
         // List datels untuk dropdown filter
         $datelsList = Customer::distinct('datel')
@@ -142,12 +201,17 @@ class CustomerController extends Controller
             'totalSaldo',
             'totalAgency',
             'totalSales',
+            'totalCustomer',
+            'totalBelumBayarSales',
             'billingSummary',
             'hotdData',
             'latestCustomers',
             'datelsList',
             'agenciesList',
-            'salesList'
+            'salesList',
+            'rekapBilling',
+            'agencyCustomers',
+            'salesCustomers'
         ));
     }
 
@@ -212,8 +276,11 @@ class CustomerController extends Controller
     public function hotdDetail($billingKe, $datel, ?Request $request = null)
     {
         $request = $request ?? request();
-        $query = Customer::where('billing_ke', $billingKe)
-            ->where('datel', $datel);
+        $query = Customer::where('billing_ke', $billingKe);
+
+        if ($datel && $datel !== 'Nasional' && $datel !== 'Semua Datel') {
+            $query->where('datel', $datel);
+        }
 
         if ($request->filled('agency')) {
             $agency = $request->agency;
