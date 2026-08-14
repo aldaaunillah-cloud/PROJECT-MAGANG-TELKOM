@@ -63,12 +63,33 @@ class CustomerController extends Controller
             $baseQuery->where('sales_agency', $sales);
         }
 
-        // 2. Compute statistics for Default/Datel/Agency views (Unpaid data only)
+        // 2. Compute statistics for Default/Datel/Agency views
         $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
         $totalBelumLunas = (clone $unpaidQuery)->count();
         $totalTagihan = (clone $unpaidQuery)->sum('tag_total');
-        $totalSales = (clone $unpaidQuery)->distinct()->pluck('sales_agency')->filter()->count();
-        $totalAgency = (clone $unpaidQuery)->distinct()->pluck('agency_psb')->filter()->count();
+
+        // Calculate total sales and agency counts from the entire customer base (including billing 0)
+        $salesCountQuery = Customer::query()
+            ->whereNotIn('sales_agency', $invalidPlaceholders)
+            ->whereNotNull('sales_agency')
+            ->where('sales_agency', '!=', '');
+
+        $agencyCountQuery = Customer::query()
+            ->whereNotIn('agency_psb', $invalidPlaceholders)
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '');
+
+        if ($datel) {
+            $salesCountQuery->where('datel', $datel);
+            $agencyCountQuery->where('datel', $datel);
+        }
+        if ($agency) {
+            $salesCountQuery->where('agency_psb', $agency);
+            $agencyCountQuery->where('agency_psb', $agency);
+        }
+
+        $totalSales = $salesCountQuery->distinct()->pluck('sales_agency')->filter()->count();
+        $totalAgency = $agencyCountQuery->distinct()->pluck('agency_psb')->filter()->count();
 
         // 3. Compute statistics for Sales view (All base vs Unpaid)
         $totalCustomer = (clone $baseQuery)->count();
