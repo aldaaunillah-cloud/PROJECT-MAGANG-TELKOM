@@ -410,113 +410,235 @@
     @else
         {{-- CASE 1: Default/Datel View --}}
         @if(!request('datel') && !request('agency') && !request('sales'))
-            {{-- Tampilan Awal: 2D Grid Rekap Billing 1-6 Per Datel --}}
-            <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
-                <div class="card-header bg-white border-0 py-3 px-3">
+            {{-- BILLING SUMMARY 1-6 CARDS (ORIGINAL) --}}
+            <div class="card border-0 shadow-sm mb-4 w-100 overflow-hidden" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+                <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
-                        REKAP BILLING 1 - 6 PER DATEL
+                        <i class="bi bi-file-invoice-dollar me-2"></i> Rekap Billing Customer 1-6 (HOTD)
                     </h6>
+                    <span class="badge text-white px-2 py-1" style="font-size:0.7rem; background-color: #0b2240;">
+                        <i class="bi bi-info-circle me-1"></i> Billing 1-6
+                    </span>
+                </div>
+                <div class="card-body p-3 pt-0">
+                    <div class="row g-2">
+                        @if(!empty($billingSummary) && is_iterable($billingSummary))
+                            @forelse($billingSummary as $billing)
+                                <div class="col-xl-2 col-lg-4 col-md-6">
+                                    <a href="{{ route('billing.detail', ['billing_ke' => $billing->billing_ke, 'datel' => request('datel'), 'agency' => request('agency'), 'sales' => request('sales')]) }}" class="text-decoration-none text-dark d-block border border-light-subtle rounded shadow-sm">
+                                        <div class="card border-0 h-100 w-100 overflow-hidden" style="background:#f8f9fa;">
+                                            <div class="card-body text-center p-2">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h6 class="text-muted mb-0" style="font-size:0.75rem;">Billing {{ $billing->billing_ke ?? 0 }}</h6>
+                                                    <span class="badge bg-{{ ($billing->billing_ke ?? 0) <= 2 ? 'primary' : 'secondary' }} px-2 py-1" style="font-size:0.6rem;">
+                                                        {{ ($billing->billing_ke ?? 0) <= 2 ? 'Awal' : 'Berikutnya' }}
+                                                    </span>
+                                                </div>
+                                                <h4 class="mb-0 mt-1" style="font-size:1.3rem; color: #000361;">{{ number_format($billing->belum_lunas ?? 0) }}</h4>
+                                                <small class="text-muted" style="font-size:0.65rem;">Customer Belum Bayar</small>
+                                                <hr class="my-1">
+                                                <div class="text-danger fw-bold" style="font-size:0.75rem;">
+                                                    Rp {{ number_format($billing->total_tagihan ?? 0, 0, ',', '.') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-warning mb-0" style="font-size:0.8rem;">Tidak ada data billing</div>
+                                </div>
+                            @endforelse
+                        @else
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0" style="font-size:0.8rem;">Data billing sedang dimuat...</div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- 2D GRID MATRIX TABLE Detail Billing 1-6 per Datel (HOTD) (ORIGINAL) --}}
+            <div class="card border-0 shadow-sm mb-4 w-100 overflow-hidden" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+                <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
+                        <i class="bi bi-table me-2"></i> Detail Billing 1-6 per Datel (HOTD)
+                        <small class="text-muted ms-2" style="font-size:0.7rem;">Klik baris untuk lihat detail</small>
+                    </h6>
+                    <span class="badge text-white px-2 py-1" style="font-size:0.7rem; background-color: #0b2240;">
+                        <i class="bi bi-database me-1"></i> {{ count($hotdData ?? []) }} Data
+                    </span>
+                </div>
+                <div class="card-body p-2">
+                    @if(!empty($hotdData) && count($hotdData) > 0)
+                        @php
+                            $grouped = $hotdData->groupBy('billing_ke');
+                            $datels = $hotdData->pluck('datel')->unique()->sort()->values();
+                            $colors = ['#E2001A', '#2F3A4A', '#28a745', '#ffc107', '#17a2b8', '#dc3545'];
+                            
+                            $billingTotals = [];
+                            foreach ($grouped as $billingKe => $items) {
+                                $billingTotals[$billingKe] = [
+                                    'total_customer' => $items->sum('total_customer'),
+                                    'total_tagihan' => $items->sum('total_tagihan'),
+                                    'blm_bayar' => $items->sum('blm_bayar'),
+                                    'sdh_bayar' => $items->sum('sdh_bayar'),
+                                    'blm_bayar_rp' => $items->sum('blm_bayar_rp'),
+                                    'sdh_bayar_rp' => $items->sum('sdh_bayar_rp'),
+                                ];
+                            }
+
+                            $datelBillingMap = [];
+                            foreach ($datels as $d) {
+                                $billingsForDatel = $grouped->filter(function($items, $key) use ($d) {
+                                    return $items->contains('datel', $d);
+                                })->keys()->toArray();
+                                
+                                if (!empty($billingsForDatel)) {
+                                    $datelBillingMap[$d] = $billingsForDatel[0];
+                                }
+                            }
+                        @endphp
+
+                        <div class="table-responsive w-100" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                            <table class="table table-bordered table-hover table-sm mb-0 w-100" style="min-width: 600px; font-size: 0.72rem; border-color: #cbd5e1;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="3" class="text-center align-middle text-nowrap px-2 py-1 text-dark" style="min-width:100px; font-size: 0.65rem; background-color: #f8f9fa;">DATEL</th>
+                                        @foreach(range(1, 6) as $billingKe)
+                                            <th colspan="2" class="text-center text-white text-nowrap px-2 py-1" style="background-color:{{ $colors[$billingKe-1] }}; min-width:100px; font-size: 0.65rem;">
+                                                Billing {{ $billingKe }}
+                                            </th>
+                                        @endforeach
+                                        <th colspan="2" rowspan="3" class="text-center align-middle text-white text-nowrap px-2 py-1" style="background-color:#6c757d; min-width:100px; font-size: 0.65rem;">
+                                            TOTAL ALL
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        @foreach(range(1, 6) as $billingKe)
+                                            <th colspan="2" class="text-center text-white text-nowrap px-2 py-1" style="background-color:#dc3545; font-size: 0.65rem;">Belum Bayar</th>
+                                        @endforeach
+                                    </tr>
+                                    <tr>
+                                        @foreach(range(1, 6) as $billingKe)
+                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:35px; font-size: 0.65rem; background-color: #f8f9fa;">SL</th>
+                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:70px; font-size: 0.65rem; background-color: #f8f9fa;">RUPIAH</th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($datels as $datelItem)
+                                        <tr style="cursor:pointer;">
+                                            <td class="fw-bold text-nowrap px-2 py-1 text-dark" style="font-size: 0.7rem; color: #000361;">{{ $datelItem }}</td>
+                                            @foreach(range(1, 6) as $billingKe)
+                                                @php
+                                                    $item = $grouped->get($billingKe)?->firstWhere('datel', $datelItem);
+                                                    $blmVal = $item ? $item->blm_bayar : 0;
+                                                    $rpVal = $item ? $item->blm_bayar_rp : 0;
+                                                @endphp
+                                                <td class="text-center text-nowrap px-2 py-1 text-dark" style="font-size: 0.75rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
+                                                    {{ $blmVal > 0 ? $blmVal : '' }}
+                                                </td>
+                                                <td class="text-end text-nowrap px-2 py-1 text-danger" style="font-size:0.65rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
+                                                    {{ $rpVal > 0 ? 'Rp ' . number_format($rpVal, 0, ',', '.') : '' }}
+                                                </td>
+                                            @endforeach
+                                            @php
+                                                $rowBlm = 0; $rowBlmRp = 0;
+                                                foreach(range(1, 6) as $billingKe) {
+                                                    $item = $grouped->get($billingKe)?->firstWhere('datel', $datelItem);
+                                                    $rowBlm += $item ? $item->blm_bayar : 0;
+                                                    $rowBlmRp += $item ? $item->blm_bayar_rp : 0;
+                                                }
+                                            @endphp
+                                            <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#868e96; font-size: 0.75rem;">{{ $rowBlm }}</td>
+                                            <td class="text-end text-white text-nowrap px-2 py-1" style="background-color:#868e96; font-size:0.65rem;">Rp {{ number_format($rowBlmRp, 0, ',', '.') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-light fw-bold text-dark">
+                                        <td class="px-2 py-1 text-nowrap" style="font-size: 0.7rem; background-color: #eaeaea;">TOTAL</td>
+                                        @foreach(range(1, 6) as $billingKe)
+                                            @php
+                                                $total = $billingTotals[$billingKe] ?? ['blm_bayar' => 0, 'blm_bayar_rp' => 0];
+                                            @endphp
+                                            <td class="text-center text-nowrap px-2 py-1" style="font-size: 0.65rem; background-color: #eaeaea;">{{ $total['blm_bayar'] }}</td>
+                                            <td class="text-center text-nowrap px-2 py-1 text-danger" style="font-size:0.6rem; background-color: #eaeaea;">Rp {{ number_format($total['blm_bayar_rp'] ?? 0, 0, ',', '.') }}</td>
+                                        @endforeach
+                                        @php
+                                            $allBlm = 0; $allBlmRp = 0;
+                                            foreach(range(1, 6) as $billingKe) {
+                                                $total = $billingTotals[$billingKe] ?? ['blm_bayar' => 0, 'blm_bayar_rp' => 0];
+                                                $allBlm += $total['blm_bayar'];
+                                                $allBlmRp += $total['blm_bayar_rp'];
+                                            }
+                                        @endphp
+                                        <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#6c757d; font-size: 0.65rem;">{{ $allBlm }}</td>
+                                        <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#6c757d; font-size:0.6rem;">Rp {{ number_format($allBlmRp, 0, ',', '.') }}</td>
+                                     </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-warning mb-0" style="font-size:0.8rem;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Tidak ada data HOTD. Pastikan data customer sudah di-sync.
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- 10 RECENT CUSTOMERS (ORIGINAL) --}}
+            <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5" style="border: 1px solid #ced4da !important; border-radius: 12px; box-shadow: none;">
+                <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
+                        <i class="bi bi-people me-2"></i> 10 Customer Terbaru
+                    </h6>
+                    <span class="badge text-white px-2 py-1" style="font-size:0.7rem; background-color: #0b2240;">{{ count($latestCustomers ?? []) }} Data</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive w-100">
-                        <table class="table table-bordered table-hover align-middle mb-0 text-center w-100" style="font-size: 0.72rem; border-color: #cbd5e1; min-width: 1200px;">
-                            <thead class="table-light fw-bold" style="border-bottom: 2px solid #94a3b8;">
+                        <table class="table table-hover table-striped mb-0 w-100">
+                            <thead class="table-light">
                                 <tr>
-                                    <th rowspan="2" class="align-middle px-3 py-2 text-start text-dark" style="background-color: #e2f0fe; min-width: 180px; font-weight: bold;">DATEL</th>
-                                    <th colspan="3" style="background-color: #bae6fd; font-weight: bold; color: #0369a1;">BILLING KE 1</th>
-                                    <th colspan="3" style="background-color: #fed7aa; font-weight: bold; color: #c2410c;">BILLING KE 2</th>
-                                    <th colspan="3" style="background-color: #99f6e4; font-weight: bold; color: #0f766e;">BILLING KE 3</th>
-                                    <th colspan="3" style="background-color: #fef08a; font-weight: bold; color: #a16207;">BILLING KE 4</th>
-                                    <th colspan="3" style="background-color: #e9d5ff; font-weight: bold; color: #7e22ce;">BILLING KE 5</th>
-                                    <th colspan="3" style="background-color: #fbcfe8; font-weight: bold; color: #be185d;">BILLING KE 6</th>
-                                    <th colspan="2" style="background-color: #cffafe; font-weight: bold; color: #0891b2;">TOTAL ALL BILLING</th>
-                                    <th rowspan="2" class="align-middle px-3 py-2 text-dark" style="background-color: #f1f5f9; font-weight: bold;">REWARD</th>
-                                </tr>
-                                <tr>
-                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">SSL</th>
-                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">RUPIAH</th>
-                                    <th style="background-color: #bae6fd; font-size: 0.65rem; color: #0369a1;">%</th>
-                                    
-                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">SSL</th>
-                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">RUPIAH</th>
-                                    <th style="background-color: #fed7aa; font-size: 0.65rem; color: #c2410c;">%</th>
-                                    
-                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">SSL</th>
-                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">RUPIAH</th>
-                                    <th style="background-color: #99f6e4; font-size: 0.65rem; color: #0f766e;">%</th>
-                                    
-                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">SSL</th>
-                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">RUPIAH</th>
-                                    <th style="background-color: #fef08a; font-size: 0.65rem; color: #a16207;">%</th>
-                                    
-                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">SSL</th>
-                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">RUPIAH</th>
-                                    <th style="background-color: #e9d5ff; font-size: 0.65rem; color: #7e22ce;">%</th>
-                                    
-                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">SSL</th>
-                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">RUPIAH</th>
-                                    <th style="background-color: #fbcfe8; font-size: 0.65rem; color: #be185d;">%</th>
-                                    
-                                    <th style="background-color: #cffafe; font-size: 0.65rem; color: #0891b2;">SSL</th>
-                                    <th style="background-color: #cffafe; font-size: 0.65rem; color: #0891b2;">RUPIAH</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">#</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">SND</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NAMA CUSTOMER</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">AGENCY</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">BILLING</th>
+                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">STATUS</th>
+                                    <th class="text-end px-3 py-2 text-nowrap" style="font-size:0.7rem;">TAGIHAN</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    $grandSsl = array_fill(1, 6, 0);
-                                    $grandRp = array_fill(1, 6, 0);
-                                    $allSslTotal = 0;
-                                    $allRpTotal = 0;
-                                @endphp
-                                @foreach($dashboardGrid ?? [] as $row)
+                                @forelse(($latestCustomers ?? []) as $index => $customer)
                                     <tr>
-                                        <td class="text-start fw-bold px-3 py-2 text-dark" style="font-size: 0.75rem;">{{ $row['datel'] }}</td>
-                                        @foreach(range(1, 6) as $b)
-                                            @php
-                                                $ssl = $row['billings'][$b]['ssl'] ?? 0;
-                                                $rp = $row['billings'][$b]['rp'] ?? 0;
-                                                $rate = $row['billings'][$b]['rate'] ?? 100;
-                                                
-                                                $grandSsl[$b] += $ssl;
-                                                $grandRp[$b] += $rp;
-                                            @endphp
-                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer;" class="fw-semibold text-dark">
-                                                {{ $ssl > 0 ? $ssl : '' }}
-                                            </td>
-                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer;" class="text-dark">
-                                                {{ $rp > 0 ? number_format($rp, 0, ',', '.') : '' }}
-                                            </td>
-                                            <td onclick="showDetail('{{ $row['datel'] }}', {{ $b }})" style="cursor: pointer; color: {{ $rate == 100 ? '#22c55e' : '#000' }};" class="fw-bold">
-                                                {{ number_format($rate, 2, ',', '.') }}%
-                                            </td>
-                                        @endforeach
-                                        @php
-                                            $allSslTotal += $row['total_ssl'];
-                                            $allRpTotal += $row['total_rp'];
-                                        @endphp
-                                        <td class="fw-bold bg-light text-dark">{{ number_format($row['total_ssl']) }}</td>
-                                        <td class="fw-bold bg-light text-dark">{{ number_format($row['total_rp'], 0, ',', '.') }}</td>
-                                        <td class="fw-bold text-dark">{{ $row['reward'] ?: '' }}</td>
+                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem;">{{ $index + 1 }}</td>
+                                        <td class="px-3 py-2 text-nowrap"><code style="font-size:0.7rem;">{{ $customer->snd }}</code></td>
+                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ Str::limit($customer->nama, 25) }}</td>
+                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem;">{{ $customer->agency_psb ?: ($customer->agency ?: '-') }}</td>
+                                        <td class="px-3 py-2 text-nowrap">
+                                            <span class="badge bg-{{ ($customer->billing_ke ?? 0) <= 2 ? 'primary' : 'secondary' }} px-2 py-1" style="font-size:0.6rem;">
+                                                B{{ $customer->billing_ke }}
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-2 text-nowrap">
+                                            <span class="badge bg-{{ $customer->status_bayar == 'Sdh Bayar' ? 'success' : 'danger' }} px-2 py-1" style="font-size:0.65rem;">
+                                                {{ $customer->status_bayar == 'Sdh Bayar' ? 'Sudah Bayar' : 'Belum Bayar' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end px-3 py-2 text-nowrap text-danger fw-bold" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-3 px-2 text-nowrap">
+                                            <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
+                                            <span class="text-muted" style="font-size:0.8rem;">Tidak ada data customer</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
-                            <tfoot class="fw-bold" style="background-color: #e2e8f0; border-top: 2px solid #94a3b8;">
-                                <tr class="text-dark">
-                                    <td class="text-start px-3 py-2">Grand Total</td>
-                                    @foreach(range(1, 6) as $b)
-                                        @php
-                                            $totalBAll = \App\Models\Customer::whereBetween('billing_ke', [1, 6])->where('billing_ke', $b)->count();
-                                            $grandRate = $totalBAll > 0 ? (($totalBAll - $grandSsl[$b]) / $totalBAll) * 100 : 100;
-                                        @endphp
-                                        <td>{{ number_format($grandSsl[$b]) }}</td>
-                                        <td>{{ number_format($grandRp[$b], 0, ',', '.') }}</td>
-                                        <td>{{ number_format($grandRate, 2, ',', '.') }}%</td>
-                                    @endforeach
-                                    <td>{{ number_format($allSslTotal) }}</td>
-                                    <td>{{ number_format($allRpTotal, 0, ',', '.') }}</td>
-                                    <td>150.000</td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
                 </div>

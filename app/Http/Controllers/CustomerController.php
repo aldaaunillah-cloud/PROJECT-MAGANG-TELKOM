@@ -229,10 +229,50 @@ class CustomerController extends Controller
             }
         }
 
-        // Keep fallback data to prevent dashboard error if views need it
+        // Populate dashboard data when no filters are selected
         $latestCustomers = [];
         $hotdData = [];
         $billingSummary = [];
+
+        if (!$datel && !$agency && !$sales) {
+            $latestCustomers = Customer::query()
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders)
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get();
+
+            $hotdData = Customer::query()
+                ->where('status_bayar', '!=', 'Sdh Bayar')
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders)
+                ->select(
+                    'datel',
+                    'billing_ke',
+                    DB::raw('COUNT(*) as blm_bayar'),
+                    DB::raw('SUM(tag_total) as blm_bayar_rp')
+                )
+                ->groupBy('datel', 'billing_ke')
+                ->get();
+
+            $billingSummary = Customer::query()
+                ->where('status_bayar', '!=', 'Sdh Bayar')
+                ->whereBetween('billing_ke', [1, 6])
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders)
+                ->select(
+                    'billing_ke',
+                    DB::raw('COUNT(*) as belum_lunas'),
+                    DB::raw('SUM(tag_total) as total_tagihan')
+                )
+                ->groupBy('billing_ke')
+                ->orderBy('billing_ke')
+                ->get();
+        }
 
         // List datels untuk dropdown filter
         $datelsList = Customer::distinct('datel')
