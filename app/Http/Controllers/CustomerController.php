@@ -278,7 +278,6 @@ class CustomerController extends Controller
         return view('dashboard', compact(
             'totalBelumLunas',
             'totalTagihan',
-            'totalSaldo',
             'totalCustomer',
             'totalBelumBayarSales',
             'totalTagihanSales',
