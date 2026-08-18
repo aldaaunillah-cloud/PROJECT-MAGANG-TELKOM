@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class CustomerController extends Controller
 {
@@ -257,44 +258,54 @@ class CustomerController extends Controller
                 ->get();
         }
 
-        // List datels untuk dropdown filter
-        $datelsList = Customer::distinct('datel')
-            ->whereNotNull('datel')
-            ->where('datel', '!=', '')
-            ->whereNotIn('datel', $invalidPlaceholders)
-            ->orderBy('datel')
-            ->pluck('datel');
+        // List datels untuk dropdown filter (Cached)
+        $datelsList = Cache::rememberForever('filter_datels_list', function() use ($invalidPlaceholders) {
+            return Customer::distinct('datel')
+                ->whereNotNull('datel')
+                ->where('datel', '!=', '')
+                ->whereNotIn('datel', $invalidPlaceholders)
+                ->orderBy('datel')
+                ->pluck('datel');
+        });
 
-        $agenciesQuery = Customer::query()
-            ->whereNotNull('agency_psb')
-            ->where('agency_psb', '!=', '')
-            ->whereNotIn('agency_psb', $invalidPlaceholders);
+        // List agencies untuk dropdown filter (Cached by Datel)
+        $cacheKeyAgencies = 'filter_agencies_list_' . md5($datel ?? 'all');
+        $agenciesList = Cache::rememberForever($cacheKeyAgencies, function() use ($datel, $invalidPlaceholders) {
+            $agenciesQuery = Customer::query()
+                ->whereNotNull('agency_psb')
+                ->where('agency_psb', '!=', '')
+                ->whereNotIn('agency_psb', $invalidPlaceholders);
 
-        if ($datel) {
-            $agenciesQuery->where('datel', $datel);
-        }
-        $agenciesList = $agenciesQuery
-            ->select('agency_psb as agency_val')
-            ->distinct()
-            ->orderBy('agency_val')
-            ->pluck('agency_val');
+            if ($datel) {
+                $agenciesQuery->where('datel', $datel);
+            }
+            return $agenciesQuery
+                ->select('agency_psb as agency_val')
+                ->distinct()
+                ->orderBy('agency_val')
+                ->pluck('agency_val');
+        });
 
-        $salesQuery = Customer::query()
-            ->whereNotNull('sales_agency')
-            ->where('sales_agency', '!=', '')
-            ->whereNotIn('sales_agency', $invalidPlaceholders);
+        // List sales untuk dropdown filter (Cached by Datel & Agency)
+        $cacheKeySales = 'filter_sales_list_' . md5(($datel ?? 'all') . '_' . ($agency ?? 'all'));
+        $salesList = Cache::rememberForever($cacheKeySales, function() use ($datel, $agency, $invalidPlaceholders) {
+            $salesQuery = Customer::query()
+                ->whereNotNull('sales_agency')
+                ->where('sales_agency', '!=', '')
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
 
-        if ($datel) {
-            $salesQuery->where('datel', $datel);
-        }
-        if ($agency) {
-            $salesQuery->where('agency_psb', $agency);
-        }
-        $salesList = $salesQuery
-            ->select('sales_agency as sales_val')
-            ->distinct()
-            ->orderBy('sales_val')
-            ->pluck('sales_val');
+            if ($datel) {
+                $salesQuery->where('datel', $datel);
+            }
+            if ($agency) {
+                $salesQuery->where('agency_psb', $agency);
+            }
+            return $salesQuery
+                ->select('sales_agency as sales_val')
+                ->distinct()
+                ->orderBy('sales_val')
+                ->pluck('sales_val');
+        });
 
         return view('dashboard', compact(
             'totalBelumLunas',

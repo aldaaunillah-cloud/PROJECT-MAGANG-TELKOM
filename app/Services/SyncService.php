@@ -307,8 +307,7 @@ class SyncService
 
     protected function clearCache(): void
     {
-        Cache::forget('customer_filter_options');
-        Cache::forget('dashboard_data');
+        Cache::flush();
         
         try {
             if (class_exists(\App\Services\DashboardService::class)) {
