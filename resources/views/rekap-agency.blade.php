@@ -264,5 +264,107 @@
             </div>
         </div>
     </div>
+
+    {{-- TABEL BILLING KE - 1 AGENCY WITEL PRIANGAN TIMUR --}}
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 text-center pt-3 pb-0">
+            <h6 class="mb-1 fw-bold text-dark text-uppercase" style="font-size: 13px; letter-spacing: 0.5px;">
+                BILLING KE - 1
+            </h6>
+            <h6 class="mb-0 fw-bold text-dark text-uppercase" style="font-size: 13px; letter-spacing: 0.5px;">
+                AGENCY WITEL PRIANGAN TIMUR
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center table-hover table-striped mb-0" style="font-size: 11px; border-color: #dee2e6;">
+                    <thead style="background-color: #176B87; color: white;">
+                        <tr>
+                            <th class="py-2 text-start align-middle" style="background-color: #176B87; color: white; min-width: 180px;">AGENCY</th>
+                            @foreach($witelDatels as $datel)
+                                <th class="py-2 align-middle" style="background-color: #176B87; color: white;">{{ $datel }}</th>
+                            @endforeach
+                            <th class="py-2 align-middle" style="background-color: #176B87; color: white; min-width: 90px;">Grand Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $colTotals = [];
+                            foreach ($witelDatels as $datel) {
+                                $colTotals[$datel] = 0;
+                            }
+                            $grandTotalAll = 0;
+                        @endphp
+                        
+                        @forelse($witelAgencies as $agency)
+                            @php
+                                $rowTotal = 0;
+                            @endphp
+                            <tr>
+                                <td class="text-start fw-bold">{{ $agency }}</td>
+                                @foreach($witelDatels as $datel)
+                                    @php
+                                        $val = $witelData[$agency][$datel] ?? 0;
+                                        $rowTotal += $val;
+                                        $colTotals[$datel] += $val;
+                                        $grandTotalAll += $val;
+                                    @endphp
+                                    <td>
+                                        @if($val > 0)
+                                            <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $agency, 'datel' => $datel, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                                {{ number_format($val) }}
+                                            </a>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td class="fw-bold">
+                                    @if($rowTotal > 0)
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-dark fw-bold">
+                                            {{ number_format($rowTotal) }}
+                                        </a>
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ count($witelDatels) + 2 }}" class="text-center py-4 text-muted">
+                                    Tidak ada data belum bayar untuk Billing Ke-1 Agency Witel Priangan Timur
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    @if(count($witelAgencies) > 0)
+                        <tfoot class="fw-bold" style="background-color: #176B87; color: white;">
+                            <tr>
+                                <td class="text-start" style="background-color: #176B87; color: white;">Grand Total</td>
+                                @foreach($witelDatels as $datel)
+                                    <td style="background-color: #176B87; color: white;">
+                                        @if(($colTotals[$datel] ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', ['billing_ke' => 1, 'datel' => $datel, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-white fw-bold">
+                                                {{ number_format($colTotals[$datel]) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td style="background-color: #176B87; color: white;">
+                                    @if($grandTotalAll > 0)
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-white fw-bold">
+                                            {{ number_format($grandTotalAll) }}
+                                        </a>
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
