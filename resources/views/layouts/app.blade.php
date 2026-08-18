@@ -540,7 +540,7 @@
                     {{-- REKAP AGENCY BILLING 1-2 --}}
                     <a href="{{ route('rekap.agency') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('rekap.agency') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
                         <i class="bi bi-building-fill me-2 fs-5"></i>
-                        Rekap Agency Billing 1-6
+                        Rekap Agency Billing 1-2
                     </a>
 
                     {{-- RIWAYAT REMINDER --}}
