@@ -6,7 +6,7 @@ use App\Models\Customer;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
@@ -33,11 +33,11 @@ class CustomerController extends Controller
             if ($sales) {
                 $query->where('sales_agency', $sales);
             }
-            
+
             // Filter invalid placeholders agar tidak dihitung dalam rekap
             $query->whereNotIn('datel', $invalidPlaceholders)
-                  ->whereNotIn('agency_psb', $invalidPlaceholders)
-                  ->whereNotIn('sales_agency', $invalidPlaceholders);
+                ->whereNotIn('agency_psb', $invalidPlaceholders)
+                ->whereNotIn('sales_agency', $invalidPlaceholders);
 
             // Filter billing_ke 1-6 agar sesuai dengan rekap spreadsheet
             $query->whereBetween('billing_ke', [1, 6]);
@@ -111,14 +111,12 @@ class CustomerController extends Controller
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
-
         } elseif ($agency) {
             // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
             $agencyCustomers = (clone $unpaidQuery)
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
-
         } else {
             // Case 1: Hanya Datel Terpilih / Default View
             $rekapQuery = (clone $baseQuery);
@@ -258,57 +256,44 @@ class CustomerController extends Controller
                 ->get();
         }
 
-        // List datels untuk dropdown filter (Cached)
-        $datelsList = Cache::rememberForever('filter_datels_list', function() use ($invalidPlaceholders) {
-            return Customer::distinct('datel')
-                ->whereNotNull('datel')
-                ->where('datel', '!=', '')
-                ->whereNotIn('datel', $invalidPlaceholders)
-                ->orderBy('datel')
-                ->pluck('datel')
-                ->toArray();
-        });
+        // List datels untuk dropdown filter
+        $datelsList = Customer::distinct('datel')
+            ->whereNotNull('datel')
+            ->where('datel', '!=', '')
+            ->whereNotIn('datel', $invalidPlaceholders)
+            ->orderBy('datel')
+            ->pluck('datel');
 
-        // List agencies untuk dropdown filter (Cached by Datel)
-        $cacheKeyAgencies = 'filter_agencies_list_' . md5($datel ?? 'all');
-        $agenciesList = Cache::rememberForever($cacheKeyAgencies, function() use ($datel, $invalidPlaceholders) {
-            $agenciesQuery = Customer::query()
-                ->whereNotNull('agency_psb')
-                ->where('agency_psb', '!=', '')
-                ->whereNotIn('agency_psb', $invalidPlaceholders);
+        $agenciesQuery = Customer::query()
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->whereNotIn('agency_psb', $invalidPlaceholders);
 
-            if ($datel) {
-                $agenciesQuery->where('datel', $datel);
-            }
-            return $agenciesQuery
-                ->select('agency_psb as agency_val')
-                ->distinct()
-                ->orderBy('agency_val')
-                ->pluck('agency_val')
-                ->toArray();
-        });
+        if ($datel) {
+            $agenciesQuery->where('datel', $datel);
+        }
+        $agenciesList = $agenciesQuery
+            ->select('agency_psb as agency_val')
+            ->distinct()
+            ->orderBy('agency_val')
+            ->pluck('agency_val');
 
-        // List sales untuk dropdown filter (Cached by Datel & Agency)
-        $cacheKeySales = 'filter_sales_list_' . md5(($datel ?? 'all') . '_' . ($agency ?? 'all'));
-        $salesList = Cache::rememberForever($cacheKeySales, function() use ($datel, $agency, $invalidPlaceholders) {
-            $salesQuery = Customer::query()
-                ->whereNotNull('sales_agency')
-                ->where('sales_agency', '!=', '')
-                ->whereNotIn('sales_agency', $invalidPlaceholders);
+        $salesQuery = Customer::query()
+            ->whereNotNull('sales_agency')
+            ->where('sales_agency', '!=', '')
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
-            if ($datel) {
-                $salesQuery->where('datel', $datel);
-            }
-            if ($agency) {
-                $salesQuery->where('agency_psb', $agency);
-            }
-            return $salesQuery
-                ->select('sales_agency as sales_val')
-                ->distinct()
-                ->orderBy('sales_val')
-                ->pluck('sales_val')
-                ->toArray();
-        });
+        if ($datel) {
+            $salesQuery->where('datel', $datel);
+        }
+        if ($agency) {
+            $salesQuery->where('agency_psb', $agency);
+        }
+        $salesList = $salesQuery
+            ->select('sales_agency as sales_val')
+            ->distinct()
+            ->orderBy('sales_val')
+            ->pluck('sales_val');
 
         return view('dashboard', compact(
             'totalBelumLunas',
@@ -403,7 +388,7 @@ class CustomerController extends Controller
             $agency = $request->agency;
             $query->where(function ($q) use ($agency) {
                 $q->where('agency_psb', $agency)
-                  ->orWhere('agency', $agency);
+                    ->orWhere('agency', $agency);
             });
         }
 
@@ -411,42 +396,42 @@ class CustomerController extends Controller
             $sales = $request->sales;
             $query->where(function ($q) use ($sales) {
                 $q->where('sales_agency', $sales)
-                  ->orWhere('sales', $sales);
+                    ->orWhere('sales', $sales);
             });
         }
 
         $customers = $query->select(
-                'status_bayar',
-                'tag_total',
-                'tag_inet',
-                'tag_tlp',
-                'snd',
-                'snd_group',
-                'ncli',
-                'nama',
-                'alamat',
-                'sto',
-                'datel',
-                'produk',
-                'eksepsi_desc',
-                'desc_newbill',
-                'usage_desc',
-                'saldo',
-                'umur_customer',
-                'billing_ke',
-                'paid_l11',
-                'tgl_paid',
-                'paid_rp',
-                'coll_agent',
-                'tgl_klaim',
-                'amount_klaim',
-                'user_klaim',
-                'tgl_paid_n1',
-                'agency_psb',
-                'sales_agency',
-                'ppp',
-                'caring_mybrains'
-            )
+            'status_bayar',
+            'tag_total',
+            'tag_inet',
+            'tag_tlp',
+            'snd',
+            'snd_group',
+            'ncli',
+            'nama',
+            'alamat',
+            'sto',
+            'datel',
+            'produk',
+            'eksepsi_desc',
+            'desc_newbill',
+            'usage_desc',
+            'saldo',
+            'umur_customer',
+            'billing_ke',
+            'paid_l11',
+            'tgl_paid',
+            'paid_rp',
+            'coll_agent',
+            'tgl_klaim',
+            'amount_klaim',
+            'user_klaim',
+            'tgl_paid_n1',
+            'agency_psb',
+            'sales_agency',
+            'ppp',
+            'caring_mybrains'
+        )
             ->orderBy('tag_total', 'DESC')
             ->get();
 
@@ -496,7 +481,7 @@ class CustomerController extends Controller
             $agency = $request->agency;
             $query->where(function ($q) use ($agency) {
                 $q->where('agency_psb', $agency)
-                  ->orWhere('agency', $agency);
+                    ->orWhere('agency', $agency);
             });
         }
 
@@ -512,10 +497,10 @@ class CustomerController extends Controller
                     $sub->whereNotNull('agency')->where('agency', '!=', '');
                 });
             })
-            ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
-            ->distinct()
-            ->orderBy('agency_val')
-            ->pluck('agency_val'),
+                ->select(DB::raw("COALESCE(NULLIF(agency_psb, ''), agency) as agency_val"))
+                ->distinct()
+                ->orderBy('agency_val')
+                ->pluck('agency_val'),
         ];
 
         return view('customers.index', compact('customers', 'filters'));
@@ -541,23 +526,36 @@ class CustomerController extends Controller
             });
         }
 
-        // Filter Rentang Tanggal Mulai & Akhir (format YYYY-MM-DD dari browser date input)
-        if ($request->filled('start_date')) {
+        // Filter Rentang Tanggal (format: DD/MM/YYYY - DD/MM/YYYY atau DD/MM/YYYY to DD/MM/YYYY)
+        if ($request->filled('daterange')) {
+            $separator = str_contains($request->daterange, ' to ') ? ' to ' : ' - ';
+            $dates = explode($separator, $request->daterange);
+
             try {
-                $dateFrom = \Carbon\Carbon::parse($request->start_date)->startOfDay();
-                $dateTo = $request->filled('end_date') 
-                    ? \Carbon\Carbon::parse($request->end_date)->endOfDay() 
-                    : \Carbon\Carbon::parse($request->start_date)->endOfDay();
-                $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                if (count($dates) == 2) {
+                    $dateFrom = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    $dateTo = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
+                    $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                } elseif (count($dates) == 1 && !empty(trim($dates[0]))) {
+                    $dateFrom = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    $dateTo = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->endOfDay();
+                    $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                }
             } catch (\Exception $e) {
-                \Log::error("Gagal parse start_date/end_date: " . $e->getMessage());
-            }
-        } elseif ($request->filled('end_date')) {
-            try {
-                $dateTo = \Carbon\Carbon::parse($request->end_date)->endOfDay();
-                $query->where('created_at', '<=', $dateTo);
-            } catch (\Exception $e) {
-                \Log::error("Gagal parse end_date: " . $e->getMessage());
+                // Fallback jika format d/m/Y gagal, coba parse otomatis menggunakan Carbon
+                try {
+                    if (count($dates) == 2) {
+                        $dateFrom = \Carbon\Carbon::parse(trim($dates[0]))->startOfDay();
+                        $dateTo = \Carbon\Carbon::parse(trim($dates[1]))->endOfDay();
+                        $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                    } elseif (count($dates) == 1 && !empty(trim($dates[0]))) {
+                        $dateFrom = \Carbon\Carbon::parse(trim($dates[0]))->startOfDay();
+                        $dateTo = \Carbon\Carbon::parse(trim($dates[0]))->endOfDay();
+                        $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+                    }
+                } catch (\Exception $ex) {
+                    \Log::error("Gagal parse daterange: " . $ex->getMessage());
+                }
             }
         }
 
@@ -591,23 +589,7 @@ class CustomerController extends Controller
             DB::raw("SUM(CASE WHEN billing_ke = 2 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_2_ssl"),
             DB::raw('SUM(CASE WHEN billing_ke = 2 THEN saldo ELSE 0 END) as billing_2_saldo'),
 
-            // Billing 3
-            DB::raw("SUM(CASE WHEN billing_ke = 3 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_3_ssl"),
-            DB::raw('SUM(CASE WHEN billing_ke = 3 THEN saldo ELSE 0 END) as billing_3_saldo'),
-
-            // Billing 4
-            DB::raw("SUM(CASE WHEN billing_ke = 4 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_4_ssl"),
-            DB::raw('SUM(CASE WHEN billing_ke = 4 THEN saldo ELSE 0 END) as billing_4_saldo'),
-
-            // Billing 5
-            DB::raw("SUM(CASE WHEN billing_ke = 5 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_5_ssl"),
-            DB::raw('SUM(CASE WHEN billing_ke = 5 THEN saldo ELSE 0 END) as billing_5_saldo'),
-
-            // Billing 6
-            DB::raw("SUM(CASE WHEN billing_ke = 6 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_6_ssl"),
-            DB::raw('SUM(CASE WHEN billing_ke = 6 THEN saldo ELSE 0 END) as billing_6_saldo'),
-
-            // Total Billing 1 - 6
+            // Total Billing 1 + 2
             DB::raw("COUNT(NULLIF(snd, '')) as total_ssl"),
             DB::raw('SUM(saldo) as total_saldo')
         )
@@ -616,8 +598,8 @@ class CustomerController extends Controller
             // Sesuai filter Pivot: hanya Belum Bayar
             ->where('status_bayar', 'Blm Bayar')
 
-            // Sesuai filter Pivot: Billing 1 dan 6
-            ->whereBetween('billing_ke', [1, 6])
+            // Sesuai filter Pivot: Billing 1 dan 2
+            ->whereBetween('billing_ke', [1, 2])
 
             // Filter Agency
             ->when($request->filled('agency_psb'), function ($q) use ($request) {
@@ -641,7 +623,7 @@ class CustomerController extends Controller
 
         $summaryQuery = Customer::whereNotNull('agency_psb')
             ->where('status_bayar', 'Blm Bayar')
-            ->whereBetween('billing_ke', [1, 6]);
+            ->whereBetween('billing_ke', [1, 2]);
 
         $summary = [
             'total_customer' => (clone $summaryQuery)->count(),
@@ -786,7 +768,7 @@ class CustomerController extends Controller
     public function exportHotdExcel($billingKe, $datel, Request $request)
     {
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\HotdDetailExport($billingKe, $datel, $request->agency, $request->sales), 
+            new \App\Exports\HotdDetailExport($billingKe, $datel, $request->agency, $request->sales),
             'hotd_billing_' . $billingKe . '_' . str_replace([' ', '-', '/'], '_', $datel) . '.xlsx'
         );
     }
