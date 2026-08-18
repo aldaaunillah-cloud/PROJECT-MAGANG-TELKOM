@@ -16,10 +16,14 @@
                 <!-- Left Column (Avatar) -->
                 <div class="col-md-4 text-center border-end-md" style="border-color: #f1f5f9;">
                     <div class="d-flex flex-column align-items-center">
-                        <!-- Silhouette Avatar Circle -->
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" 
+                        <!-- Silhouette Avatar Circle or User Uploaded Photo -->
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm overflow-hidden" 
                              style="width: 150px; height: 150px; background-color: #dbeafe;">
-                            <i class="bi bi-person-fill" style="font-size: 90px; color: #3b82f6;"></i>
+                            @if($user->profile_photo_path && file_exists(public_path($user->profile_photo_path)))
+                                <img src="{{ asset($user->profile_photo_path) }}?v={{ time() }}" class="w-100 h-100" style="object-fit: cover;" alt="Foto Profil">
+                            @else
+                                <i class="bi bi-person-fill" style="font-size: 90px; color: #3b82f6;"></i>
+                            @endif
                         </div>
                         <h4 class="fw-bold" style="color: #000361;">Administrator</h4>
                     </div>
@@ -68,8 +72,14 @@
                         </div>
 
                         <!-- EDIT MODE (FORM) -->
-                        <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" class="d-none ps-2">
+                        <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" class="d-none ps-2" enctype="multipart/form-data">
                             @csrf
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Foto Profil</label>
+                                <input type="file" name="profile_photo" class="form-control" accept="image/*">
+                                <small class="text-muted d-block mt-1">Format: JPG, JPEG, PNG, GIF (Maks. 2MB)</small>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Nama Lengkap</label>
                                 <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>

@@ -16,6 +16,7 @@ class User extends Authenticatable
         'password',
         'divisi',
         'witel',
+        'profile_photo_path',
     ];
 
     protected $hidden = [

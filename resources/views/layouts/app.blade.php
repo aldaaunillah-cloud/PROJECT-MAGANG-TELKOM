@@ -561,8 +561,12 @@
                 {{-- FOOTER SIDEBAR --}}
                 <div class="p-3 border-top border-light border-opacity-25 mt-auto">
                     <a href="{{ route('profile') }}" class="d-flex align-items-center gap-2 mb-2 text-decoration-none text-white hover-bg-light p-1.5 rounded" style="transition: all 0.2s;">
-                        <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-size: 1.2rem;">
-                            <i class="bi bi-person-circle"></i>
+                        <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center overflow-hidden" style="width: 35px; height: 35px; font-size: 1.2rem;">
+                            @if(Auth::user() && Auth::user()->profile_photo_path && file_exists(public_path(Auth::user()->profile_photo_path)))
+                                <img src="{{ asset(Auth::user()->profile_photo_path) }}?v={{ time() }}" class="w-100 h-100" style="object-fit: cover;">
+                            @else
+                                <i class="bi bi-person-circle"></i>
+                            @endif
                         </div>
                         <div>
                             <div class="fw-bold text-white" style="font-size: 0.85rem;">{{ Auth::user()->name ?? 'Admin' }}</div>
@@ -607,8 +611,12 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <a href="{{ route('profile') }}" class="text-decoration-none hover-bg-light">
-                            <span class="badge bg-light text-dark border">
-                                <i class="bi bi-person-circle me-1"></i>
+                            <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
+                                @if(Auth::user() && Auth::user()->profile_photo_path && file_exists(public_path(Auth::user()->profile_photo_path)))
+                                    <img src="{{ asset(Auth::user()->profile_photo_path) }}?v={{ time() }}" class="rounded-circle" style="width: 18px; height: 18px; object-fit: cover;">
+                                @else
+                                    <i class="bi bi-person-circle"></i>
+                                @endif
                                 {{ Auth::user()->name ?? 'Admin' }}
                             </span>
                         </a>
