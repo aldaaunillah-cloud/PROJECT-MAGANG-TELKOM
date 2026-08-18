@@ -581,9 +581,9 @@
                             <i class="bi bi-database me-1"></i>
                             {{ number_format($totalCustomer ?? 0) }} Cust
                         </small>
-                        <small title="Update Terakhir Spreadsheet">
+                        <small id="sidebar-live-clock" title="Waktu Sekarang (Live)">
                             <i class="bi bi-clock me-1"></i>
-                            {{ $lastUpdate ?? '-' }}
+                            <span id="live-clock-val">{{ now()->format('d/m H:i') }}</span>
                         </small>
                     </div>
                     <hr class="border-light border-opacity-25 my-2">
@@ -620,9 +620,6 @@
                                 {{ Auth::user()->name ?? 'Admin' }}
                             </span>
                         </a>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()" title="Refresh Halaman">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -805,6 +802,24 @@
                 }, 500);
             }, 4000);
         }
+
+        // Live running digital clock in sidebar footer
+        function initSidebarLiveClock() {
+            function updateClock() {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const clockEl = document.getElementById('live-clock-val');
+                if (clockEl) {
+                    clockEl.textContent = `${day}/${month} ${hours}:${minutes}`;
+                }
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+        }
+        document.addEventListener('DOMContentLoaded', initSidebarLiveClock);
     </script>
 
     @stack('scripts')
