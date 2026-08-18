@@ -6,6 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('image/icon.png') }}">
+    
     <title>@yield('title', 'Dashboard') - Telkom Customer Management</title>
 
     {{-- Bootstrap 5 --}}
@@ -354,6 +357,23 @@
         }
 
         /* ============================================
+           SIDEBAR HOVER EFFECTS
+           ============================================ */
+        .hover-bg-light {
+            transition: background-color 0.2s ease, color 0.2s ease !important;
+        }
+        .hover-bg-light:hover {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+        }
+        .hover-logout {
+            transition: color 0.2s ease !important;
+        }
+        .hover-logout:hover {
+            color: #ff4d5e !important; /* Warna merah terang agar kontras di latar biru gelap */
+        }
+
+        /* ============================================
            RESPONSIVE
            ============================================ */
         @media (max-width: 768px) {
@@ -558,7 +578,7 @@
                         </small>
                     </div>
                     <hr class="border-light border-opacity-25 my-2">
-                    <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center" style="font-size: 0.8rem;" 
+                    <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center hover-logout" style="font-size: 0.8rem;" 
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="bi bi-box-arrow-right me-2"></i>
                         Logout

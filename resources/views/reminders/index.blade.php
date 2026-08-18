@@ -11,23 +11,25 @@
     {{-- ============================================ --}}
     {{-- FILTER BOX (TANGGAL & PENCARIAN) --}}
     {{-- ============================================ --}}
-    <div class="card border border-2 rounded-4 mb-4" style="border-color: #dbe0eb !important; box-shadow: none;">
+    <div class="card border border-2 rounded-4 mb-4 no-hover" style="border-color: #dbe0eb !important; box-shadow: none;">
         <div class="card-body p-4">
             <form method="GET" id="filterForm" class="row align-items-end g-3">
-                {{-- Date Range Picker --}}
-                <div class="col-md-5">
-                    <label class="form-label text-secondary fw-semibold mb-2" style="font-size: 0.85rem;">Tanggal</label>
-                    <div class="input-group border rounded-3 overflow-hidden" style="border-color: #ced4da !important;">
-                        <input type="text" id="daterange" name="daterange" class="form-control border-0 py-2 bg-white" 
-                               placeholder="Pilih tanggal..." value="{{ request('daterange') }}" readonly>
-                        <span class="input-group-text bg-white border-0 pe-3" id="calendarIcon" style="cursor: pointer;">
-                            <i class="bi bi-calendar3 text-primary fs-5"></i>
-                        </span>
-                    </div>
+                {{-- Tanggal Mulai --}}
+                <div class="col-md-3">
+                    <label class="form-label text-secondary fw-semibold mb-2" style="font-size: 0.85rem;">Tanggal Mulai</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control rounded-3 py-2" 
+                           value="{{ request('start_date') }}" style="border-color: #ced4da !important;">
+                </div>
+
+                {{-- Tanggal Akhir --}}
+                <div class="col-md-3">
+                    <label class="form-label text-secondary fw-semibold mb-2" style="font-size: 0.85rem;">Tanggal Akhir</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control rounded-3 py-2" 
+                           value="{{ request('end_date') }}" style="border-color: #ced4da !important;">
                 </div>
 
                 {{-- Search Bar --}}
-                <div class="col-md-5 ms-auto">
+                <div class="col-md-4 ms-auto">
                     <div class="position-relative">
                         <input type="text" name="search" class="form-control rounded-3 py-2 pe-5" 
                                placeholder="Cari Customer / pesan...." value="{{ request('search') }}"
@@ -44,7 +46,7 @@
     {{-- ============================================ --}}
     {{-- TABLE DATA --}}
     {{-- ============================================ --}}
-    <div class="card border-0 rounded-4 overflow-hidden mb-3" style="box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+    <div class="card border-0 rounded-4 overflow-hidden mb-3 no-hover" style="box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="reminderTable">
@@ -173,6 +175,11 @@
     .badge {
         letter-spacing: 0.5px;
     }
+    /* Mencegah card tabel melayang saat dihover */
+    .no-hover:hover {
+        transform: none !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -180,20 +187,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inisialisasi Flatpickr Range Mode (locale "id" dihapus agar tidak crash mencari file bahasa luar)
-        const dateInput = flatpickr("#daterange", {
-            mode: "range",
-            dateFormat: "d/m/Y",
-            onClose: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length === 2 || dateStr === "") {
-                    document.getElementById('filterForm').submit();
-                }
-            }
+        // Auto submit form saat tanggal diubah
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        startDateInput.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
         });
 
-        // Trigger flatpickr open ketika klik icon kalender
-        document.getElementById('calendarIcon').addEventListener('click', function() {
-            dateInput.open();
+        endDateInput.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
         });
 
         // Auto submit form saat user stop mengetik pencarian (delay dipercepat jadi 300ms agar responsif)
@@ -208,9 +211,11 @@
         
         // Posisikan cursor di akhir teks pencarian saat focus
         const val = searchInput.value;
-        searchInput.value = '';
-        searchInput.focus();
-        searchInput.value = val;
+        if (val) {
+            searchInput.value = '';
+            searchInput.focus();
+            searchInput.value = val;
+        }
     });
 
     // Fungsi Client-side Export PDF untuk masing-masing baris
