@@ -12,11 +12,13 @@ class UserSeeder extends Seeder
     {
         // Admin
         User::updateOrCreate(
-            ['email' => 'admin@telkom.com'],
+            ['email' => 'admin@telkom.co.id'],
             [
-                'name' => 'Administrator',
-                'email' => 'admin@telkom.com',
+                'name' => 'Bidadari',
+                'email' => 'admin@telkom.co.id',
                 'password' => Hash::make('password'),
+                'divisi' => 'Business Service',
+                'witel' => 'Telkom Cirebon',
                 'email_verified_at' => now(),
             ]
         );
@@ -33,7 +35,7 @@ class UserSeeder extends Seeder
         );
 
         $this->command->info('Users created successfully!');
-        $this->command->info('Admin: admin@telkom.com / password');
+        $this->command->info('Admin: admin@telkom.co.id / password');
         $this->command->info('Agency: agency@telkom.com / password');
     }
 }

@@ -58,5 +58,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/google-sheets', [SyncController::class, 'sync'])->name('sync.google-sheets');
         Route::get('/status', [SyncController::class, 'status'])->name('sync.status');
     });
+
+    // ============================================
+    // PROFILE / ADMINISTRATOR
+    // ============================================
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
+    Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 });

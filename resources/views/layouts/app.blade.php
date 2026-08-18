@@ -516,12 +516,17 @@
             {{-- SIDEBAR --}}
             {{-- ============================================ --}}
             <div class="sidebar d-flex flex-column flex-shrink-0 text-white shadow">
-                <div class="p-3 text-center border-bottom border-light border-opacity-25 mb-3">
+                <div class="p-3 text-center border-bottom border-light border-opacity-25 mb-3 position-relative">
+                    @if(request()->routeIs('profile'))
+                        <a href="{{ route('dashboard') }}" class="text-white position-absolute start-0 top-50 translate-middle-y ms-3 bg-white bg-opacity-10 hover-bg-light p-1.5 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; transition: all 0.2s;" title="Kembali ke Dashboard">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                    @endif
 
-            {{-- Logo --}}
+                    {{-- Logo --}}
                     <img src="{{ asset('image/logo.png') }}"
                         alt="Logo Telkom"
-                        style="width:250px; height:auto;"
+                        style="width:200px; height:auto;"
                         class="mb-2">
                 </div>
 
@@ -555,7 +560,7 @@
 
                 {{-- FOOTER SIDEBAR --}}
                 <div class="p-3 border-top border-light border-opacity-25 mt-auto">
-                    <div class="d-flex align-items-center gap-2 mb-2">
+                    <a href="{{ route('profile') }}" class="d-flex align-items-center gap-2 mb-2 text-decoration-none text-white hover-bg-light p-1.5 rounded" style="transition: all 0.2s;">
                         <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-size: 1.2rem;">
                             <i class="bi bi-person-circle"></i>
                         </div>
@@ -566,7 +571,7 @@
                                 {{ Auth::user()->role ?? 'Supervisor' }}
                             </small>
                         </div>
-                    </div>
+                    </a>
                     <div class="d-flex justify-content-between align-items-center text-white-50 mb-2" style="font-size: 0.75rem;">
                         <small>
                             <i class="bi bi-database me-1"></i>
@@ -601,10 +606,12 @@
                         </h1>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-light text-dark border">
-                            <i class="bi bi-person-circle me-1"></i>
-                            {{ Auth::user()->name ?? 'Admin' }}
-                        </span>
+                        <a href="{{ route('profile') }}" class="text-decoration-none hover-bg-light">
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-person-circle me-1"></i>
+                                {{ Auth::user()->name ?? 'Admin' }}
+                            </span>
+                        </a>
                         <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()" title="Refresh Halaman">
                             <i class="bi bi-arrow-clockwise"></i>
                         </button>
