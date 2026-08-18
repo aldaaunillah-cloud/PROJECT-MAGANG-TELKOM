@@ -265,7 +265,8 @@ class CustomerController extends Controller
                 ->where('datel', '!=', '')
                 ->whereNotIn('datel', $invalidPlaceholders)
                 ->orderBy('datel')
-                ->pluck('datel');
+                ->pluck('datel')
+                ->toArray();
         });
 
         // List agencies untuk dropdown filter (Cached by Datel)
@@ -283,7 +284,8 @@ class CustomerController extends Controller
                 ->select('agency_psb as agency_val')
                 ->distinct()
                 ->orderBy('agency_val')
-                ->pluck('agency_val');
+                ->pluck('agency_val')
+                ->toArray();
         });
 
         // List sales untuk dropdown filter (Cached by Datel & Agency)
@@ -304,7 +306,8 @@ class CustomerController extends Controller
                 ->select('sales_agency as sales_val')
                 ->distinct()
                 ->orderBy('sales_val')
-                ->pluck('sales_val');
+                ->pluck('sales_val')
+                ->toArray();
         });
 
         return view('dashboard', compact(
