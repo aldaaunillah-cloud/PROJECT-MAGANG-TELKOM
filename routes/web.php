@@ -38,9 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reminders', [CustomerController::class, 'riwayatReminder'])->name('reminders.index');
 
     // ============================================
-    // BILLING DETAIL
-    // ============================================
     Route::get('/billing/{billing_ke}', [BillingController::class, 'detail'])->name('billing.detail');
+    Route::get('/billing/{billing_ke}/export-excel', [BillingController::class, 'exportExcel'])->name('billing.detail.export-excel');
+    Route::get('/billing/{billing_ke}/print-pdf', [BillingController::class, 'printPdf'])->name('billing.detail.print-pdf');
 
     // ============================================
     // HOTD DETAIL
