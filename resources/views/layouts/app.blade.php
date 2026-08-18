@@ -581,9 +581,9 @@
                             <i class="bi bi-database me-1"></i>
                             {{ number_format($totalCustomer ?? 0) }} Cust
                         </small>
-                        <small>
+                        <small title="Update Terakhir Spreadsheet">
                             <i class="bi bi-clock me-1"></i>
-                            {{ now()->format('d/m H:i') }}
+                            {{ $lastUpdate ?? '-' }}
                         </small>
                     </div>
                     <hr class="border-light border-opacity-25 my-2">
