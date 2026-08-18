@@ -216,7 +216,7 @@
                                 <!-- Billing 1 -->
                                 <td class="text-center">
                                     @if(($item->billing_1_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_1_ssl) }}
                                         </a>
                                     @else
@@ -228,7 +228,7 @@
                                 <!-- Billing 2 -->
                                 <td class="text-center">
                                     @if(($item->billing_2_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_2_ssl) }}
                                         </a>
                                     @else
@@ -240,7 +240,7 @@
                                 <!-- Billing 3 -->
                                 <td class="text-center">
                                     @if(($item->billing_3_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 3, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 3, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_3_ssl) }}
                                         </a>
                                     @else
@@ -252,7 +252,7 @@
                                 <!-- Billing 4 -->
                                 <td class="text-center">
                                     @if(($item->billing_4_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 4, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 4, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_4_ssl) }}
                                         </a>
                                     @else
@@ -264,7 +264,7 @@
                                 <!-- Billing 5 -->
                                 <td class="text-center">
                                     @if(($item->billing_5_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 5, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 5, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_5_ssl) }}
                                         </a>
                                     @else
@@ -276,7 +276,7 @@
                                 <!-- Billing 6 -->
                                 <td class="text-center">
                                     @if(($item->billing_6_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 6, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 6, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
                                             {{ number_format($item->billing_6_ssl) }}
                                         </a>
                                     @else
