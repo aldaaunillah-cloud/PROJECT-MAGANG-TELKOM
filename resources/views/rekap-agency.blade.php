@@ -40,6 +40,16 @@
         font-size: 0.7rem !important;
         border-radius: 6px !important;
     }
+    .ssl-link {
+        color: #212529 !important;
+        text-decoration: none !important;
+        font-weight: bold;
+        transition: all 0.15s ease-in-out;
+    }
+    .ssl-link:hover {
+        color: #0b5ed7 !important;
+        text-decoration: underline !important;
+    }
 </style>
 
 <div class="container-fluid">
@@ -184,7 +194,7 @@
                                 <!-- Billing 1 -->
                                 <td class="text-center">
                                     @if(($item->billing_1_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="ssl-link">
                                             {{ number_format($item->billing_1_ssl) }}
                                         </a>
                                     @else
@@ -196,7 +206,7 @@
                                 <!-- Billing 2 -->
                                 <td class="text-center">
                                     @if(($item->billing_2_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="ssl-link">
                                             {{ number_format($item->billing_2_ssl) }}
                                         </a>
                                     @else
