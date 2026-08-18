@@ -591,7 +591,23 @@ class CustomerController extends Controller
             DB::raw("SUM(CASE WHEN billing_ke = 2 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_2_ssl"),
             DB::raw('SUM(CASE WHEN billing_ke = 2 THEN saldo ELSE 0 END) as billing_2_saldo'),
 
-            // Total Billing 1 + 2
+            // Billing 3
+            DB::raw("SUM(CASE WHEN billing_ke = 3 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_3_ssl"),
+            DB::raw('SUM(CASE WHEN billing_ke = 3 THEN saldo ELSE 0 END) as billing_3_saldo'),
+
+            // Billing 4
+            DB::raw("SUM(CASE WHEN billing_ke = 4 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_4_ssl"),
+            DB::raw('SUM(CASE WHEN billing_ke = 4 THEN saldo ELSE 0 END) as billing_4_saldo'),
+
+            // Billing 5
+            DB::raw("SUM(CASE WHEN billing_ke = 5 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_5_ssl"),
+            DB::raw('SUM(CASE WHEN billing_ke = 5 THEN saldo ELSE 0 END) as billing_5_saldo'),
+
+            // Billing 6
+            DB::raw("SUM(CASE WHEN billing_ke = 6 AND snd IS NOT NULL AND snd != '' THEN 1 ELSE 0 END) as billing_6_ssl"),
+            DB::raw('SUM(CASE WHEN billing_ke = 6 THEN saldo ELSE 0 END) as billing_6_saldo'),
+
+            // Total Billing 1 - 6
             DB::raw("COUNT(NULLIF(snd, '')) as total_ssl"),
             DB::raw('SUM(saldo) as total_saldo')
         )
@@ -600,8 +616,8 @@ class CustomerController extends Controller
             // Sesuai filter Pivot: hanya Belum Bayar
             ->where('status_bayar', 'Blm Bayar')
 
-            // Sesuai filter Pivot: Billing 1 dan 2
-            ->whereBetween('billing_ke', [1, 2])
+            // Sesuai filter Pivot: Billing 1 dan 6
+            ->whereBetween('billing_ke', [1, 6])
 
             // Filter Agency
             ->when($request->filled('agency_psb'), function ($q) use ($request) {
@@ -625,7 +641,7 @@ class CustomerController extends Controller
 
         $summaryQuery = Customer::whereNotNull('agency_psb')
             ->where('status_bayar', 'Blm Bayar')
-            ->whereBetween('billing_ke', [1, 2]);
+            ->whereBetween('billing_ke', [1, 6]);
 
         $summary = [
             'total_customer' => (clone $summaryQuery)->count(),
