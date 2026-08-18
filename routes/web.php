@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
     // PROFILE / ADMINISTRATOR
     // ============================================
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
+    Route::post('/profile/update', [\App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 });

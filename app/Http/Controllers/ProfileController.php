@@ -39,4 +39,30 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password berhasil diubah.');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'divisi' => ['nullable', 'string', 'max:255'],
+            'witel' => ['nullable', 'string', 'max:255'],
+        ], [
+            'name.required' => 'Nama Lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah digunakan oleh pengguna lain.',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'divisi' => $request->divisi,
+            'witel' => $request->witel,
+        ]);
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
+    }
 }

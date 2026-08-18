@@ -4,9 +4,8 @@
 
 @section('content')
 <div class="container-fluid p-0">
-    <!-- Header Page -->
-    <div class="mb-4">
-        <h3 class="fw-bold" style="color: #000361; font-size: 1.6rem;">PROFIL ADMIN</h3>
+    <!-- Header Page Description (Title is handled by main layout topbar) -->
+    <div class="mb-4" style="margin-top: -15px;">
         <p class="text-muted mb-0" style="font-size: 0.9rem;">Informasi profil dan pengaturan akun admin</p>
     </div>
 
@@ -30,9 +29,15 @@
                 <div class="col-md-8">
                     <!-- Informasi Akun -->
                     <div class="mb-5">
-                        <h5 class="fw-bold mb-4" style="color: #000361; letter-spacing: 0.5px;">Informasi Akun</h5>
+                        <div class="d-flex align-items-center mb-4">
+                            <h5 class="fw-bold m-0" style="color: #000361; letter-spacing: 0.5px;">Informasi Akun</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary ms-2 border-0 px-2 py-1" id="btnEditProfile" onclick="toggleEditMode(true)" title="Edit Profil">
+                                <i class="bi bi-pencil-square fs-5"></i>
+                            </button>
+                        </div>
                         
-                        <div class="ps-2">
+                        <!-- VIEW MODE -->
+                        <div id="profileView" class="ps-2">
                             <div class="row mb-3 align-items-center">
                                 <div class="col-sm-4 text-muted" style="font-size: 0.95rem;">Nama Lengkap</div>
                                 <div class="col-sm-8 fw-semibold" style="color: #1e293b; font-size: 0.95rem;">
@@ -61,6 +66,39 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- EDIT MODE (FORM) -->
+                        <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" class="d-none ps-2">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Nama Lengkap</label>
+                                <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Divisi</label>
+                                <input type="text" name="divisi" class="form-control" value="{{ $user->divisi ?? 'Business Service' }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Witel</label>
+                                <input type="text" name="witel" class="form-control" value="{{ $user->witel ?? 'Telkom Cirebon' }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn text-white btn-sm px-4 py-2" style="background-color: #000361; border-radius: 8px;">
+                                    <i class="bi bi-check-lg me-1"></i> Simpan Perubahan
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-4 py-2 ms-2" style="border-radius: 8px;" onclick="toggleEditMode(false)">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
                     <!-- Form Ubah Password -->
@@ -120,3 +158,23 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleEditMode(edit) {
+        const viewDiv = document.getElementById('profileView');
+        const editForm = document.getElementById('formEditProfile');
+        const btnEdit = document.getElementById('btnEditProfile');
+
+        if (edit) {
+            viewDiv.classList.add('d-none');
+            editForm.classList.remove('d-none');
+            btnEdit.classList.add('d-none');
+        } else {
+            viewDiv.classList.remove('d-none');
+            editForm.classList.add('d-none');
+            btnEdit.classList.remove('d-none');
+        }
+    }
+</script>
+@endpush
