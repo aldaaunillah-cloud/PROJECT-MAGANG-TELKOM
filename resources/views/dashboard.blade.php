@@ -558,60 +558,7 @@
                 </div>
             </div>
 
-            {{-- 10 RECENT CUSTOMERS (ORIGINAL) --}}
-            <div class="card w-100 overflow-hidden mb-5">
-                <div class="card-header bg-white border-0 py-3 px-3 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold text-primary" style="font-size:0.9rem; color: #000361 !important;">
-                        <i class="bi bi-people me-2"></i> 10 Customer Terbaru
-                    </h6>
-                    <span class="badge text-white px-2 py-1" style="font-size:0.7rem; background-color: #0b2240;">{{ count($latestCustomers ?? []) }} Data</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive w-100">
-                        <table class="table table-hover table-striped mb-0 w-100">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">#</th>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">SND</th>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NAMA CUSTOMER</th>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">AGENCY</th>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">BILLING</th>
-                                    <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">STATUS</th>
-                                    <th class="text-end px-3 py-2 text-nowrap" style="font-size:0.7rem;">TAGIHAN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse(($latestCustomers ?? []) as $index => $customer)
-                                    <tr>
-                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem;">{{ $index + 1 }}</td>
-                                        <td class="px-3 py-2 text-nowrap"><code style="font-size:0.7rem;">{{ $customer->snd }}</code></td>
-                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ Str::limit($customer->nama, 25) }}</td>
-                                        <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem;">{{ $customer->agency_psb ?: ($customer->agency ?: '-') }}</td>
-                                        <td class="px-3 py-2 text-nowrap">
-                                            <span class="badge bg-{{ ($customer->billing_ke ?? 0) <= 2 ? 'primary' : 'secondary' }} px-2 py-1" style="font-size:0.6rem;">
-                                                B{{ $customer->billing_ke }}
-                                            </span>
-                                        </td>
-                                        <td class="px-3 py-2 text-nowrap">
-                                            <span class="badge bg-{{ $customer->status_bayar == 'Sdh Bayar' ? 'success' : 'danger' }} px-2 py-1" style="font-size:0.65rem;">
-                                                {{ $customer->status_bayar == 'Sdh Bayar' ? 'Sudah Bayar' : 'Belum Bayar' }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end px-3 py-2 text-nowrap text-danger fw-bold" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center py-3 px-2 text-nowrap">
-                                            <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
-                                            <span class="text-muted" style="font-size:0.8rem;">Tidak ada data customer</span>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+
         @else
             {{-- Tampilan 1D Datel Terpilih --}}
             <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
