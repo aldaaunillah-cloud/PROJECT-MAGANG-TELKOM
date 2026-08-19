@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rekap Agency Billing 1-2')
+@section('title', 'BILL 1-2 AGENCY')
 
 @section('content')
 <style>
@@ -54,13 +54,15 @@
 
 <div class="container-fluid">
     <div class="card border-0 shadow-sm" style="border: 1px solid #e2e8f0 !important; border-radius: 12px; overflow: hidden;">
-        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center flex-wrap">
+        <div class="card-header bg-white border-0 d-flex justify-content-center align-items-center flex-wrap gap-2">
             <h6 class="mb-0 fw-bold text-primary-custom">
-                <i class="bi bi-building me-2"></i> Rekap Agency Billing 1 & 2
+                PENYELESAIAN BILLING 1 DAN 2
+                <br>
+                AGENCY WITEL PRIANGAN TIMUR
             </h6>
-            <span class="badge bg-primary" style="font-size:0.7rem; border-radius: 6px;">
+            {{-- <span class="badge bg-primary" style="font-size:0.7rem; border-radius: 6px;">
                 <i class="bi bi-info-circle me-1"></i> Billing 1 & 2
-            </span>
+            </span> --}}
         </div>
         <div class="card-body">
             {{-- FILTER --}}
@@ -142,7 +144,7 @@
                 <table class="table table-bordered table-hover table-striped mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th rowspan="2" style="vertical-align:middle;min-width:45px;" class="text-center">#</th>
+                            <th rowspan="2" style="vertical-align:middle;min-width:45px;" class="text-center">No</th>
                             <th rowspan="2" style="vertical-align:middle;min-width:200px;">Agency PSB</th>
                             <th rowspan="2" style="vertical-align:middle;min-width:150px;">Sales Agency</th>
                             <th colspan="2" class="text-center" style="background-color:#E2001A;color:white;">Billing 1</th>
@@ -362,6 +364,177 @@
                             </tr>
                         </tfoot>
                     @endif
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============================================
+     TABEL BILLING KE-2
+    ============================================ --}}
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 text-center pt-3 pb-0">
+            <h6 class="mb-1 fw-bold text-dark text-uppercase"
+                style="font-size: 13px; letter-spacing: 0.5px;">
+                BILLING KE - 2
+            </h6>
+
+            <h6 class="mb-0 fw-bold text-dark text-uppercase"
+                style="font-size: 13px; letter-spacing: 0.5px;">
+                AGENCY WITEL PRIANGAN TIMUR
+            </h6>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center table-hover table-striped mb-0"
+                    style="font-size: 11px; border-color: #dee2e6;">
+
+                    <thead style="background-color: #176B87; color: white;">
+                        <tr>
+                            <th class="py-2 text-start align-middle"
+                                style="background-color: #176B87; color: white; min-width: 180px;">
+                                AGENCY
+                            </th>
+
+                            @foreach($witelDatels2 as $datel)
+                                <th class="py-2 align-middle"
+                                    style="background-color: #176B87; color: white;">
+                                    {{ $datel }}
+                                </th>
+                            @endforeach
+
+                            <th class="py-2 align-middle"
+                                style="background-color: #176B87; color: white; min-width: 90px;">
+                                Grand Total
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @php
+                            $colTotals2 = [];
+
+                            foreach ($witelDatels2 as $datel) {
+                                $colTotals2[$datel] = 0;
+                            }
+
+                            $grandTotalAll2 = 0;
+                        @endphp
+
+                        @forelse($witelAgencies2 as $agency)
+                            @php
+                                $rowTotal2 = 0;
+                            @endphp
+
+                            <tr>
+                                <td class="text-start fw-bold">
+                                    {{ $agency }}
+                                </td>
+
+                                @foreach($witelDatels2 as $datel)
+                                    @php
+                                        $val = $witelData2[$agency][$datel] ?? 0;
+
+                                        $rowTotal2 += $val;
+                                        $colTotals2[$datel] += $val;
+                                        $grandTotalAll2 += $val;
+                                    @endphp
+
+                                    <td>
+                                        @if($val > 0)
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 2,
+                                                'agency' => $agency,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-decoration-underline fw-bold text-primary">
+                                                {{ number_format($val) }}
+                                            </a>
+                                        @endif
+                                    </td>
+                                @endforeach
+
+                                <td class="fw-bold">
+                                    @if($rowTotal2 > 0)
+                                        <a href="{{ route('billing.detail', [
+                                            'billing_ke' => 2,
+                                            'agency' => $agency,
+                                            'status' => 'Blm Bayar'
+                                        ]) }}"
+                                        class="text-decoration-underline text-dark fw-bold">
+                                            {{ number_format($rowTotal2) }}
+                                        </a>
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                            </tr>
+
+                        @empty
+                            <tr>
+                                <td colspan="{{ count($witelDatels2) + 2 }}"
+                                    class="text-center py-4 text-muted">
+                                    Tidak ada data belum bayar untuk Billing Ke-2 Agency Witel Priangan Timur
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+
+                    @if(count($witelAgencies2) > 0)
+                        <tfoot class="fw-bold"
+                            style="background-color: #176B87; color: white;">
+
+                            <tr>
+                                <td class="text-start"
+                                    style="background-color: #176B87; color: white;">
+                                    Grand Total
+                                </td>
+
+                                @foreach($witelDatels2 as $datel)
+                                    <td style="background-color: #176B87; color: white;">
+
+                                        @if(($colTotals2[$datel] ?? 0) > 0)
+
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 2,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-decoration-underline text-white fw-bold">
+                                                {{ number_format($colTotals2[$datel]) }}
+                                            </a>
+
+                                        @else
+                                            0
+                                        @endif
+
+                                    </td>
+                                @endforeach
+
+                                <td style="background-color: #176B87; color: white;">
+
+                                    @if($grandTotalAll2 > 0)
+
+                                        <a href="{{ route('billing.detail', [
+                                            'billing_ke' => 2,
+                                            'status' => 'Blm Bayar'
+                                        ]) }}"
+                                        class="text-decoration-underline text-white fw-bold">
+                                            {{ number_format($grandTotalAll2) }}
+                                        </a>
+
+                                    @else
+                                        0
+                                    @endif
+
+                                </td>
+                            </tr>
+
+                        </tfoot>
+                    @endif
+
                 </table>
             </div>
         </div>

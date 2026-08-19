@@ -25,10 +25,18 @@
 <div class="container-fluid">
     <div class="card border-0 shadow-sm" style="border: 1px solid #e2e8f0 !important; border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h6 class="mb-0 fw-bold text-primary-custom">
-                <i class="bi bi-file-invoice me-2"></i> 
-                Billing {{ $billing_ke }} - Detail Customer (Database Lengkap)
-            </h6>
+            <div>
+                <h6 class="mb-0 fw-bold text-primary-custom">
+                    <i class="bi bi-file-invoice me-2"></i>
+                    Billing ke-{{ $billing_ke }} - Detail Customer
+                </h6>
+
+                <small class="text-muted">
+                    Agency: {{ request('agency') ?: '-' }}
+                    |
+                    Sales Agency: {{ request('sales') ?: '-' }}
+                </small>
+            </div>
             <div class="d-flex align-items-center gap-2">
                 <a href="{{ route('billing.detail.export-excel', array_merge(['billing_ke' => $billing_ke], request()->query())) }}" class="btn btn-sm btn-success text-white px-3" style="border-radius: 8px;">
                     <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Unduh Excel
@@ -40,7 +48,7 @@
             </div>
         </div>
         <div class="card-body p-4">
-            <form method="GET" class="row g-3 mb-4 p-3 bg-light rounded-3" style="border: 1px solid #f1f5f9;">
+            {{-- <form method="GET" class="row g-3 mb-4 p-3 bg-light rounded-3" style="border: 1px solid #f1f5f9;">
                 <div class="col-md-8">
                     <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;">Agency</label>
                     <select name="agency" class="form-select form-select-sm">
@@ -60,7 +68,7 @@
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
                     </a>
                 </div>
-            </form>
+            </form> --}}
 
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle table-bordered" style="border-color: #dee2e6;">

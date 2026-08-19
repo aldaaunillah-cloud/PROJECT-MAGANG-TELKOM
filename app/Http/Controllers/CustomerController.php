@@ -555,7 +555,7 @@ class CustomerController extends Controller
                         $query->whereBetween('created_at', [$dateFrom, $dateTo]);
                     }
                 } catch (\Exception $ex) {
-                    \Log::error("Gagal parse daterange: " . $ex->getMessage());
+                    Log::error("Gagal parse daterange: " . $ex->getMessage());
                 }
             }
         }
@@ -667,7 +667,14 @@ class CustomerController extends Controller
         ];
 
         // Query untuk tabel "BILLING KE - 1 AGENCY WITEL PRIANGAN TIMUR" (hanya yang "Blm Bayar" pada Billing 1)
-        $billing1WitelRaw = Customer::select('agency_psb', 'datel', DB::raw('COUNT(*) as total'))
+        $billing1WitelRaw = Customer::select(
+            DB::raw("CASE 
+                WHEN LOWER(TRIM(agency_psb)) = 'm others' THEN 'M Others'
+                ELSE TRIM(agency_psb)
+            END as agency_psb"),
+            'datel',
+            DB::raw('COUNT(*) as total')
+        )
             ->where('billing_ke', 1)
             ->where('status_bayar', 'Blm Bayar')
             ->whereNotNull('agency_psb')
@@ -691,9 +698,61 @@ class CustomerController extends Controller
             $witelData[$item->agency_psb][$item->datel] = $item->total;
         }
 
+        // Query untuk tabel "BILLING KE - 2 AGENCY WITEL PRIANGAN TIMUR"
+        // hanya yang "Blm Bayar" pada Billing 2
+        $billing2WitelRaw = Customer::select(
+                'agency_psb',
+                'datel',
+                DB::raw('COUNT(*) as total')
+            )
+            ->where('billing_ke', 2)
+            ->where('status_bayar', 'Blm Bayar')
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->whereNotNull('datel')
+            ->where('datel', '!=', '')
+            ->when($request->filled('agency_psb'), function ($q) use ($request) {
+                return $q->where('agency_psb', $request->agency_psb);
+            })
+            ->when($request->filled('sales_agency'), function ($q) use ($request) {
+                return $q->where('sales_agency', $request->sales_agency);
+            })
+            ->groupBy('agency_psb', 'datel')
+            ->get();
+
+        $witelAgencies2 = $billing2WitelRaw
+            ->pluck('agency_psb')
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $witelDatels2 = $billing2WitelRaw
+            ->pluck('datel')
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $witelData2 = [];
+
+        foreach ($billing2WitelRaw as $item) {
+            $witelData2[$item->agency_psb][$item->datel] = $item->total;
+        }
+
         return view(
             'rekap-agency',
-            compact('rekap', 'summary', 'filters', 'witelAgencies', 'witelDatels', 'witelData')
+            compact(
+                'rekap',
+                'summary',
+                'filters',
+                'witelAgencies',
+                'witelDatels',
+                'witelData',
+                'witelAgencies2',
+                'witelDatels2',
+                'witelData2'
+            )
         );
     }
     /**
