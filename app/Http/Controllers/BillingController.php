@@ -10,7 +10,8 @@ class BillingController extends Controller
 {
     public function detail(Request $request, $billing_ke)
     {
-        $query = Customer::where('billing_ke', $billing_ke);
+        $query = Customer::where('billing_ke', $billing_ke)
+            ->where('status_bayar', 'Blm Bayar');
 
         if ($request->filled('datel')) {
             $query->where('datel', $request->datel);
@@ -24,13 +25,10 @@ class BillingController extends Controller
             $query->where('sales_agency', $request->sales);
         }
 
-        if ($request->filled('status')) {
-            $query->where('status_bayar', $request->status);
-        }
-
         $customers = $query->paginate(30)->withQueryString();
 
         $agencies = Customer::where('billing_ke', $billing_ke)
+            ->where('status_bayar', 'Blm Bayar')
             ->whereNotNull('agency_psb')
             ->where('agency_psb', '!=', '')
             ->select('agency_psb as agency_val')
@@ -38,9 +36,7 @@ class BillingController extends Controller
             ->orderBy('agency_val')
             ->pluck('agency_val');
 
-        $statuses = ['Sdh Bayar', 'Blm Bayar'];
-
-        return view('billing-detail', compact('customers', 'billing_ke', 'agencies', 'statuses'));
+        return view('billing-detail', compact('customers', 'billing_ke', 'agencies'));
     }
 
     public function exportExcel(Request $request, $billing_ke)
@@ -48,7 +44,7 @@ class BillingController extends Controller
         $datel = $request->datel;
         $agency = $request->agency;
         $sales = $request->sales;
-        $status = $request->status;
+        $status = 'Blm Bayar';
 
         $fileName = 'Detail_Billing_' . $billing_ke;
         if ($datel) $fileName .= '_' . str_replace(' ', '_', $datel);
@@ -60,7 +56,8 @@ class BillingController extends Controller
 
     public function printPdf(Request $request, $billing_ke)
     {
-        $query = Customer::where('billing_ke', $billing_ke);
+        $query = Customer::where('billing_ke', $billing_ke)
+            ->where('status_bayar', 'Blm Bayar');
 
         if ($request->filled('datel')) {
             $query->where('datel', $request->datel);
@@ -72,10 +69,6 @@ class BillingController extends Controller
 
         if ($request->filled('sales')) {
             $query->where('sales_agency', $request->sales);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status_bayar', $request->status);
         }
 
         $customers = $query->orderBy('tag_total', 'DESC')->get();

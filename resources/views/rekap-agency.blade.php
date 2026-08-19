@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rekap Agency Billing 1-6')
+@section('title', 'Rekap Agency Billing 1-2')
 
 @section('content')
 <style>
@@ -9,7 +9,7 @@
     .row > * { padding-left: 4px !important; padding-right: 4px !important; }
     .card-body { padding: 15px !important; }
     .table-responsive { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-    .table-responsive table { min-width: 1400px !important; width: 100% !important; }
+    .table-responsive table { min-width: 1000px !important; width: 100% !important; }
     .table-responsive table th, .table-responsive table td { 
         white-space: nowrap !important; 
         padding: 5px 8px !important; 
@@ -29,7 +29,7 @@
     .bg-agency { background-color: #f8f9fa; }
     .fw-600 { font-weight: 600; }
     @media (max-width: 768px) {
-        .table-responsive table { min-width: 1200px !important; }
+        .table-responsive table { min-width: 900px !important; }
     }
     .pagination {
         margin-bottom: 0 !important;
@@ -40,16 +40,26 @@
         font-size: 0.7rem !important;
         border-radius: 6px !important;
     }
+    .ssl-link {
+        color: #212529 !important;
+        text-decoration: none !important;
+        font-weight: bold;
+        transition: all 0.15s ease-in-out;
+    }
+    .ssl-link:hover {
+        color: #0b5ed7 !important;
+        text-decoration: underline !important;
+    }
 </style>
 
 <div class="container-fluid">
     <div class="card border-0 shadow-sm" style="border: 1px solid #e2e8f0 !important; border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center flex-wrap">
             <h6 class="mb-0 fw-bold text-primary-custom">
-                <i class="bi bi-building me-2"></i> Rekap Agency Billing 1 Hingga 6
+                <i class="bi bi-building me-2"></i> Rekap Agency Billing 1 & 2
             </h6>
             <span class="badge bg-primary" style="font-size:0.7rem; border-radius: 6px;">
-                <i class="bi bi-info-circle me-1"></i> Billing 1 - 6
+                <i class="bi bi-info-circle me-1"></i> Billing 1 & 2
             </span>
         </div>
         <div class="card-body">
@@ -137,44 +147,24 @@
                             <th rowspan="2" style="vertical-align:middle;min-width:150px;">Sales Agency</th>
                             <th colspan="2" class="text-center" style="background-color:#E2001A;color:white;">Billing 1</th>
                             <th colspan="2" class="text-center" style="background-color:#2F3A4A;color:white;">Billing 2</th>
-                            <th colspan="2" class="text-center" style="background-color:#28a745;color:white;">Billing 3</th>
-                            <th colspan="2" class="text-center" style="background-color:#ffc107;color:black;">Billing 4</th>
-                            <th colspan="2" class="text-center" style="background-color:#17a2b8;color:white;">Billing 5</th>
-                            <th colspan="2" class="text-center" style="background-color:#dc3545;color:white;">Billing 6</th>
-                            <th colspan="2" class="text-center" style="background-color:#6c757d;color:white;">Total</th>
+                            <th colspan="2" class="text-center" style="background-color:#28a745;color:white;">Total</th>
                         </tr>
                         <tr>
                             <!-- Billing 1 -->
-                            <th class="text-center" style="background-color:#E2001A;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#E2001A;color:white;width:100px;">Saldo</th>
+                            <th class="text-center" style="background-color:#E2001A;color:white;width:80px;">SSL</th>
+                            <th class="text-end" style="background-color:#E2001A;color:white;width:120px;">Saldo</th>
                             <!-- Billing 2 -->
-                            <th class="text-center" style="background-color:#2F3A4A;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#2F3A4A;color:white;width:100px;">Saldo</th>
-                            <!-- Billing 3 -->
-                            <th class="text-center" style="background-color:#28a745;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#28a745;color:white;width:100px;">Saldo</th>
-                            <!-- Billing 4 -->
-                            <th class="text-center" style="background-color:#ffc107;color:black;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#ffc107;color:black;width:100px;">Saldo</th>
-                            <!-- Billing 5 -->
-                            <th class="text-center" style="background-color:#17a2b8;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#17a2b8;color:white;width:100px;">Saldo</th>
-                            <!-- Billing 6 -->
-                            <th class="text-center" style="background-color:#dc3545;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#dc3545;color:white;width:100px;">Saldo</th>
+                            <th class="text-center" style="background-color:#2F3A4A;color:white;width:80px;">SSL</th>
+                            <th class="text-end" style="background-color:#2F3A4A;color:white;width:120px;">Saldo</th>
                             <!-- Total -->
-                            <th class="text-center" style="background-color:#6c757d;color:white;width:60px;">SSL</th>
-                            <th class="text-end" style="background-color:#6c757d;color:white;width:100px;">Saldo</th>
+                            <th class="text-center" style="background-color:#28a745;color:white;width:80px;">SSL</th>
+                            <th class="text-end" style="background-color:#28a745;color:white;width:120px;">Saldo</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php
                             $grandTotal1Ssl = 0; $grandTotal1Saldo = 0;
                             $grandTotal2Ssl = 0; $grandTotal2Saldo = 0;
-                            $grandTotal3Ssl = 0; $grandTotal3Saldo = 0;
-                            $grandTotal4Ssl = 0; $grandTotal4Saldo = 0;
-                            $grandTotal5Ssl = 0; $grandTotal5Saldo = 0;
-                            $grandTotal6Ssl = 0; $grandTotal6Saldo = 0;
                             $grandTotalSsl = 0;  $grandTotalSaldo = 0;
                             $lastAgency = null;
                         @endphp
@@ -188,18 +178,6 @@
                                 
                                 $grandTotal2Ssl += $item->billing_2_ssl ?? 0;
                                 $grandTotal2Saldo += $item->billing_2_saldo ?? 0;
-                                
-                                $grandTotal3Ssl += $item->billing_3_ssl ?? 0;
-                                $grandTotal3Saldo += $item->billing_3_saldo ?? 0;
-                                
-                                $grandTotal4Ssl += $item->billing_4_ssl ?? 0;
-                                $grandTotal4Saldo += $item->billing_4_saldo ?? 0;
-                                
-                                $grandTotal5Ssl += $item->billing_5_ssl ?? 0;
-                                $grandTotal5Saldo += $item->billing_5_saldo ?? 0;
-                                
-                                $grandTotal6Ssl += $item->billing_6_ssl ?? 0;
-                                $grandTotal6Saldo += $item->billing_6_saldo ?? 0;
                                 
                                 $grandTotalSsl += $item->total_ssl ?? 0;
                                 $grandTotalSaldo += $item->total_saldo ?? 0;
@@ -216,7 +194,7 @@
                                 <!-- Billing 1 -->
                                 <td class="text-center">
                                     @if(($item->billing_1_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="ssl-link">
                                             {{ number_format($item->billing_1_ssl) }}
                                         </a>
                                     @else
@@ -228,7 +206,7 @@
                                 <!-- Billing 2 -->
                                 <td class="text-center">
                                     @if(($item->billing_2_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 2, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="ssl-link">
                                             {{ number_format($item->billing_2_ssl) }}
                                         </a>
                                     @else
@@ -236,54 +214,6 @@
                                     @endif
                                 </td>
                                 <td class="text-end">Rp {{ number_format($item->billing_2_saldo ?? 0, 0, ',', '.') }}</td>
-
-                                <!-- Billing 3 -->
-                                <td class="text-center">
-                                    @if(($item->billing_3_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 3, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
-                                            {{ number_format($item->billing_3_ssl) }}
-                                        </a>
-                                    @else
-                                        0
-                                    @endif
-                                </td>
-                                <td class="text-end">Rp {{ number_format($item->billing_3_saldo ?? 0, 0, ',', '.') }}</td>
-
-                                <!-- Billing 4 -->
-                                <td class="text-center">
-                                    @if(($item->billing_4_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 4, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
-                                            {{ number_format($item->billing_4_ssl) }}
-                                        </a>
-                                    @else
-                                        0
-                                    @endif
-                                </td>
-                                <td class="text-end">Rp {{ number_format($item->billing_4_saldo ?? 0, 0, ',', '.') }}</td>
-
-                                <!-- Billing 5 -->
-                                <td class="text-center">
-                                    @if(($item->billing_5_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 5, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
-                                            {{ number_format($item->billing_5_ssl) }}
-                                        </a>
-                                    @else
-                                        0
-                                    @endif
-                                </td>
-                                <td class="text-end">Rp {{ number_format($item->billing_5_saldo ?? 0, 0, ',', '.') }}</td>
-
-                                <!-- Billing 6 -->
-                                <td class="text-center">
-                                    @if(($item->billing_6_ssl ?? 0) > 0)
-                                        <a href="{{ route('billing.detail', ['billing_ke' => 6, 'agency' => $item->agency_psb, 'sales' => $item->sales_agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
-                                            {{ number_format($item->billing_6_ssl) }}
-                                        </a>
-                                    @else
-                                        0
-                                    @endif
-                                </td>
-                                <td class="text-end">Rp {{ number_format($item->billing_6_saldo ?? 0, 0, ',', '.') }}</td>
                                 
                                 <!-- Total -->
                                 <td class="text-center fw-bold">{{ number_format($item->total_ssl ?? 0) }}</td>
@@ -294,7 +224,7 @@
                             @endphp
                         @empty
                             <tr>
-                                <td colspan="17" class="text-center py-5">
+                                <td colspan="9" class="text-center py-5">
                                     <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
                                     <span class="text-muted" style="font-size: 0.85rem;">Tidak ada data agency</span>
                                 </td>
@@ -312,22 +242,6 @@
                             <!-- B2 -->
                             <td class="text-center">{{ number_format($grandTotal2Ssl) }}</td>
                             <td class="text-end">Rp {{ number_format($grandTotal2Saldo, 0, ',', '.') }}</td>
-
-                            <!-- B3 -->
-                            <td class="text-center">{{ number_format($grandTotal3Ssl) }}</td>
-                            <td class="text-end">Rp {{ number_format($grandTotal3Saldo, 0, ',', '.') }}</td>
-
-                            <!-- B4 -->
-                            <td class="text-center">{{ number_format($grandTotal4Ssl) }}</td>
-                            <td class="text-end">Rp {{ number_format($grandTotal4Saldo, 0, ',', '.') }}</td>
-
-                            <!-- B5 -->
-                            <td class="text-center">{{ number_format($grandTotal5Ssl) }}</td>
-                            <td class="text-end">Rp {{ number_format($grandTotal5Saldo, 0, ',', '.') }}</td>
-
-                            <!-- B6 -->
-                            <td class="text-center">{{ number_format($grandTotal6Ssl) }}</td>
-                            <td class="text-end">Rp {{ number_format($grandTotal6Saldo, 0, ',', '.') }}</td>
                             
                             <!-- Total -->
                             <td class="text-center">{{ number_format($grandTotalSsl) }}</td>
@@ -347,6 +261,108 @@
                 <div>
                     {{ $rekap->appends(request()->query())->links() }}
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- TABEL BILLING KE - 1 AGENCY WITEL PRIANGAN TIMUR --}}
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 text-center pt-3 pb-0">
+            <h6 class="mb-1 fw-bold text-dark text-uppercase" style="font-size: 13px; letter-spacing: 0.5px;">
+                BILLING KE - 1
+            </h6>
+            <h6 class="mb-0 fw-bold text-dark text-uppercase" style="font-size: 13px; letter-spacing: 0.5px;">
+                AGENCY WITEL PRIANGAN TIMUR
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center table-hover table-striped mb-0" style="font-size: 11px; border-color: #dee2e6;">
+                    <thead style="background-color: #176B87; color: white;">
+                        <tr>
+                            <th class="py-2 text-start align-middle" style="background-color: #176B87; color: white; min-width: 180px;">AGENCY</th>
+                            @foreach($witelDatels as $datel)
+                                <th class="py-2 align-middle" style="background-color: #176B87; color: white;">{{ $datel }}</th>
+                            @endforeach
+                            <th class="py-2 align-middle" style="background-color: #176B87; color: white; min-width: 90px;">Grand Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $colTotals = [];
+                            foreach ($witelDatels as $datel) {
+                                $colTotals[$datel] = 0;
+                            }
+                            $grandTotalAll = 0;
+                        @endphp
+                        
+                        @forelse($witelAgencies as $agency)
+                            @php
+                                $rowTotal = 0;
+                            @endphp
+                            <tr>
+                                <td class="text-start fw-bold">{{ $agency }}</td>
+                                @foreach($witelDatels as $datel)
+                                    @php
+                                        $val = $witelData[$agency][$datel] ?? 0;
+                                        $rowTotal += $val;
+                                        $colTotals[$datel] += $val;
+                                        $grandTotalAll += $val;
+                                    @endphp
+                                    <td>
+                                        @if($val > 0)
+                                            <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $agency, 'datel' => $datel, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline fw-bold text-primary">
+                                                {{ number_format($val) }}
+                                            </a>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td class="fw-bold">
+                                    @if($rowTotal > 0)
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'agency' => $agency, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-dark fw-bold">
+                                            {{ number_format($rowTotal) }}
+                                        </a>
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ count($witelDatels) + 2 }}" class="text-center py-4 text-muted">
+                                    Tidak ada data belum bayar untuk Billing Ke-1 Agency Witel Priangan Timur
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    @if(count($witelAgencies) > 0)
+                        <tfoot class="fw-bold" style="background-color: #176B87; color: white;">
+                            <tr>
+                                <td class="text-start" style="background-color: #176B87; color: white;">Grand Total</td>
+                                @foreach($witelDatels as $datel)
+                                    <td style="background-color: #176B87; color: white;">
+                                        @if(($colTotals[$datel] ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', ['billing_ke' => 1, 'datel' => $datel, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-white fw-bold">
+                                                {{ number_format($colTotals[$datel]) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td style="background-color: #176B87; color: white;">
+                                    @if($grandTotalAll > 0)
+                                        <a href="{{ route('billing.detail', ['billing_ke' => 1, 'status' => 'Blm Bayar']) }}" class="text-decoration-underline text-white fw-bold">
+                                            {{ number_format($grandTotalAll) }}
+                                        </a>
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
+                </table>
             </div>
         </div>
     </div>

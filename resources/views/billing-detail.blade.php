@@ -41,7 +41,7 @@
         </div>
         <div class="card-body p-4">
             <form method="GET" class="row g-3 mb-4 p-3 bg-light rounded-3" style="border: 1px solid #f1f5f9;">
-                <div class="col-md-4">
+                <div class="col-md-8">
                     <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;">Agency</label>
                     <select name="agency" class="form-select form-select-sm">
                         <option value="">Semua Agency</option>
@@ -52,22 +52,11 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;">Status</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">Semua Status</option>
-                        @foreach($statuses as $status)
-                            <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                {{ $status == 'Sdh Bayar' ? 'Sudah Bayar' : 'Belum Bayar' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
                 <div class="col-md-4 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm px-4" style="border-radius: 8px;">
+                    <button type="submit" class="btn btn-primary btn-sm px-4 w-50" style="border-radius: 8px;">
                         <i class="bi bi-search me-1"></i> Filter
                     </button>
-                    <a href="{{ route('billing.detail', $billing_ke) }}" class="btn btn-secondary btn-sm px-4" style="border-radius: 8px;">
+                    <a href="{{ route('billing.detail', $billing_ke) }}" class="btn btn-secondary btn-sm px-4 w-50" style="border-radius: 8px;">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
                     </a>
                 </div>

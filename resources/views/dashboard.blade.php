@@ -3,6 +3,17 @@
 @section('title', 'Dashboard')
 
 @section('content')
+<style>
+    .ssl-grid-cell {
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .ssl-grid-cell:hover {
+        color: #0b5ed7 !important;
+        text-decoration: underline !important;
+        font-weight: bold !important;
+    }
+</style>
 <div class="container-fluid px-4" style="padding-top: 20px;">
 
     {{-- HEADER BRANDING --}}
@@ -505,10 +516,10 @@
                                                     $blmVal = $item ? $item->blm_bayar : 0;
                                                     $rpVal = $item ? $item->blm_bayar_rp : 0;
                                                 @endphp
-                                                <td class="text-center text-nowrap px-2 py-1 text-dark" style="font-size: 0.75rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
+                                                <td class="text-center text-nowrap px-2 py-1 text-dark ssl-grid-cell" style="font-size: 0.75rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
                                                     {{ $blmVal > 0 ? $blmVal : '' }}
                                                 </td>
-                                                <td class="text-end text-nowrap px-2 py-1 text-danger" style="font-size:0.65rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
+                                                <td class="text-end text-nowrap px-2 py-1 text-danger ssl-grid-cell" style="font-size:0.65rem;" onclick="showDetail('{{ $datelItem }}', {{ $billingKe }})">
                                                     {{ $rpVal > 0 ? 'Rp ' . number_format($rpVal, 0, ',', '.') : '' }}
                                                 </td>
                                             @endforeach
