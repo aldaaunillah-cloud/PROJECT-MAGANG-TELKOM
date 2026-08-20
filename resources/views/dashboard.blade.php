@@ -937,59 +937,82 @@ function filterChange(type) {
 
 // Function to export detail modal content as PDF
 function exportDetailPdf() {
-    const billingKe = document.getElementById('detailBillingKe').textContent;
-    const datel = document.getElementById('detailDatel').textContent;
-    
-    // Create temporary styled print wrapper
-    const pdfWrapper = document.createElement('div');
-    pdfWrapper.style.padding = '20px';
-    pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-    pdfWrapper.style.backgroundColor = '#ffffff';
-    
-    // Add header branding
-    pdfWrapper.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px;">
-            <div>
-                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 16px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
-                <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 14px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
-                <div style="font-size: 9px; color: #868e96;">Telkom Customer Management System</div>
-            </div>
-        </div>
+    try {
+        const billingKe = document.getElementById('detailBillingKe') ? document.getElementById('detailBillingKe').textContent.trim() : '';
+        const datel = document.getElementById('detailDatel') ? document.getElementById('detailDatel').textContent.trim() : '';
         
-        <div style="margin-bottom: 15px;">
-            ${document.getElementById('detailContent').innerHTML}
-        </div>
+        // Create temporary styled print wrapper as a visible fixed overlay so browser is forced to paint it
+        const pdfWrapper = document.createElement('div');
+        pdfWrapper.style.position = 'fixed';
+        pdfWrapper.style.top = '0';
+        pdfWrapper.style.left = '0';
+        pdfWrapper.style.width = '100vw';
+        pdfWrapper.style.height = '100vh';
+        pdfWrapper.style.zIndex = '99999';
+        pdfWrapper.style.backgroundColor = '#ffffff';
+        pdfWrapper.style.overflow = 'auto';
+        pdfWrapper.style.padding = '30px';
+        pdfWrapper.style.boxSizing = 'border-box';
+        pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
         
-        <div style="border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 20px; text-align: center; font-size: 9px; color: #868e96;">
-            Laporan Detail ini diunduh secara resmi melalui Telkom Customer Management System.<br>
-            © ${new Date().getFullYear()} Telkom Indonesia. All Rights Reserved.
-        </div>
-    `;
-    
-    // Remove pagination, buttons, forms inside print container
-    pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #btnExportExcel').forEach(el => el.remove());
-    
-    // Append to body temporarily
-    document.body.appendChild(pdfWrapper);
-    
-    const opt = {
-        margin:       10,
-        filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2.5, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-    
-    html2pdf().from(pdfWrapper).set(opt).save().then(() => {
-        document.body.removeChild(pdfWrapper);
-    }).catch(err => {
-        console.error(err);
-        document.body.removeChild(pdfWrapper);
-        alert('Gagal menghasilkan file PDF.');
-    });
+        // Add header branding
+        pdfWrapper.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px; width: 100%;">
+                <div>
+                    <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 18px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 16px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
+                    <div style="font-size: 10px; color: #868e96;">Telkom Customer Management System</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px; width: 100%;">
+                ${document.getElementById('detailContent').innerHTML}
+            </div>
+            
+            <div style="border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 20px; text-align: center; font-size: 10px; color: #868e96; width: 100%;">
+                Laporan Detail ini diunduh secara resmi melalui Telkom Customer Management System.<br>
+                © ${new Date().getFullYear()} Telkom Indonesia. All Rights Reserved.
+            </div>
+        `;
+        
+        // Remove pagination, buttons, forms inside print container
+        pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #btnExportExcel').forEach(el => el.remove());
+        
+        // Make the table display fully without scrollbars in the print overlay
+        const container = pdfWrapper.querySelector('.table-responsive');
+        if (container) {
+            container.style.overflow = 'visible';
+            container.style.width = '100%';
+        }
+        const table = pdfWrapper.querySelector('table');
+        if (table) {
+            table.style.width = '100%';
+        }
+        
+        // Append to body temporarily
+        document.body.appendChild(pdfWrapper);
+        
+        const opt = {
+            margin:       10,
+            filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2.5, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        
+        html2pdf().from(pdfWrapper).set(opt).save().then(() => {
+            document.body.removeChild(pdfWrapper);
+        }).catch(err => {
+            console.error(err);
+            document.body.removeChild(pdfWrapper);
+            alert('Gagal menghasilkan file PDF: ' + err.message);
+        });
+    } catch (e) {
+        alert('Gagal memproses PDF: ' + e.message);
+    }
 }
 
 // Function to export whole dashboard page layout (stats & tables) as PDF
