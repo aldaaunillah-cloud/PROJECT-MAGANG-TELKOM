@@ -702,6 +702,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+let currentModalCustomers = []; // Simpan data customer modal secara global
 // STATUS CHART REMOVED
 
 // ============================================
@@ -782,7 +783,8 @@ function showDetail(datel, billingKe) {
 // FUNGSI RENDER DETAIL TABLE
 // ============================================
 function renderDetailTable(response) {
-    const customers = response.customers;
+    currentModalCustomers = response.customers;
+    const customers = currentModalCustomers;
     
     let html = `
         <div class="row g-2 mb-3">
@@ -845,6 +847,7 @@ function renderDetailTable(response) {
                         <th rowspan="2" class="align-middle text-nowrap px-2 py-1" style="min-width:80px;">Sales Agency</th>
                         <th rowspan="2" class="align-middle text-nowrap px-2 py-1" style="min-width:60px;">PPP</th>
                         <th rowspan="2" class="align-middle text-nowrap px-2 py-1" style="min-width:90px;">Caring</th>
+                        <th rowspan="2" class="align-middle text-center text-nowrap px-2 py-1" style="min-width:70px; background-color: #0b2240; color: white;">Aksi</th>
                     </tr>
                     <tr>
                         <th class="text-center text-nowrap px-2 py-1">Total</th>
@@ -893,6 +896,11 @@ function renderDetailTable(response) {
                 <td class="text-nowrap px-2 py-1">${cust.sales_agency || '-'}</td>
                 <td class="text-nowrap px-2 py-1">${cust.ppp || '-'}</td>
                 <td class="text-nowrap px-2 py-1">${cust.caring_mybrains || '-'}</td>
+                <td class="text-center text-nowrap px-2 py-1">
+                    <button type="button" class="btn btn-sm btn-primary px-2 py-0" style="font-size:0.65rem;" onclick="exportSingleCustomerPdf(${index})">
+                        <i class="bi bi-download"></i> Unduh
+                    </button>
+                </td>
             </tr>
         `;
     });
@@ -904,7 +912,7 @@ function renderDetailTable(response) {
                         <td colspan="13" class="text-end text-nowrap px-2 py-1">TOTAL</td>
                         <td class="text-end text-nowrap px-2 py-1">${new Intl.NumberFormat('id-ID').format(response.total_tagihan)}</td>
                         <td class="text-end text-nowrap px-2 py-1">${new Intl.NumberFormat('id-ID').format(response.total_saldo)}</td>
-                        <td colspan="14" class="text-nowrap px-2 py-1"></td>
+                        <td colspan="15" class="text-nowrap px-2 py-1"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -935,6 +943,7 @@ function filterChange(type) {
 }
 
 // Function to export detail modal content as PDF
+// Function to export detail modal content as PDF
 function exportDetailPdf() {
     const billingKe = document.getElementById('detailBillingKe').textContent;
     const datel = document.getElementById('detailDatel').textContent;
@@ -945,8 +954,137 @@ function exportDetailPdf() {
     pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     pdfWrapper.style.backgroundColor = '#ffffff';
     
-    // Add header branding
+    // Add header branding and custom styles for PDF output
     pdfWrapper.innerHTML = `
+        <style>
+            /* Reset table width and layout to fit landscape A4 page */
+            #detailTable {
+                width: 100% !important;
+                min-width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                margin-top: 15px !important;
+            }
+            #detailTable th, #detailTable td {
+                font-size: 8px !important;
+                padding: 5px 6px !important;
+                word-wrap: break-word !important;
+                white-space: normal !important;
+            }
+            #detailTable th {
+                background-color: #000361 !important;
+                color: #ffffff !important;
+                border: 1px solid #000361 !important;
+                text-align: left !important;
+            }
+            #detailTable td {
+                border: 1px solid #e2e8f0 !important;
+            }
+            #detailTable tr:nth-child(even) td {
+                background-color: #f8fafc !important;
+            }
+            
+            /* Precise Column width allocations */
+            #detailTable th:nth-child(1), #detailTable td:nth-child(1) { width: 4% !important; text-align: center !important; }
+            #detailTable th:nth-child(2), #detailTable td:nth-child(2) { width: 9% !important; text-align: center !important; }
+            #detailTable th:nth-child(3), #detailTable td:nth-child(3) { width: 13% !important; }
+            #detailTable th:nth-child(6), #detailTable td:nth-child(6) { width: 22% !important; font-weight: 600 !important; }
+            #detailTable th:nth-child(7), #detailTable td:nth-child(7) { width: 24% !important; }
+            #detailTable th:nth-child(8), #detailTable td:nth-child(8) { width: 8% !important; }
+            #detailTable th:nth-child(9), #detailTable td:nth-child(9) { width: 9% !important; }
+            #detailTable th:nth-child(10), #detailTable td:nth-child(10) { width: 8% !important; }
+            #detailTable th:nth-child(14), #detailTable td:nth-child(14) { width: 13% !important; text-align: right !important; font-weight: 700 !important; color: #000361 !important; }
+
+            /* Hide tfoot and double header sub-row */
+            #detailTable tfoot {
+                display: none !important;
+            }
+            #detailTable thead tr:nth-child(2) {
+                display: none !important;
+            }
+
+            /* Hide unnecessary columns to fit landscape A4 page */
+            #detailTable th:nth-child(4), #detailTable td:nth-child(4),
+            #detailTable th:nth-child(5), #detailTable td:nth-child(5),
+            #detailTable th:nth-child(11), #detailTable td:nth-child(11),
+            #detailTable th:nth-child(12), #detailTable td:nth-child(12),
+            #detailTable th:nth-child(13), #detailTable td:nth-child(13),
+            #detailTable th:nth-child(15), #detailTable td:nth-child(15),
+            #detailTable th:nth-child(16), #detailTable td:nth-child(16),
+            #detailTable th:nth-child(17), #detailTable td:nth-child(17),
+            #detailTable th:nth-child(18), #detailTable td:nth-child(18),
+            #detailTable th:nth-child(19), #detailTable td:nth-child(19),
+            #detailTable th:nth-child(20), #detailTable td:nth-child(20),
+            #detailTable th:nth-child(21), #detailTable td:nth-child(21),
+            #detailTable th:nth-child(22), #detailTable td:nth-child(22),
+            #detailTable th:nth-child(23), #detailTable td:nth-child(23),
+            #detailTable th:nth-child(24), #detailTable td:nth-child(24),
+            #detailTable th:nth-child(25), #detailTable td:nth-child(25),
+            #detailTable th:nth-child(26), #detailTable td:nth-child(26),
+            #detailTable th:nth-child(27), #detailTable td:nth-child(27),
+            #detailTable th:nth-child(28), #detailTable td:nth-child(28),
+            #detailTable th:nth-child(29), #detailTable td:nth-child(29) {
+                display: none !important;
+            }
+            
+            /* Summary cards layout inside PDF */
+            .row.g-2.mb-3 {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 15px !important;
+                margin-bottom: 20px !important;
+            }
+            .row.g-2.mb-3 > div {
+                flex: 1 !important;
+                width: 32% !important;
+            }
+            .card {
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                padding: 10px 15px !important;
+                box-shadow: none !important;
+            }
+            .bg-primary {
+                background-color: #f8fafc !important;
+                border-left: 4px solid #000361 !important;
+                color: #000361 !important;
+            }
+            .bg-warning {
+                background-color: #f8fafc !important;
+                border-left: 4px solid #e2001a !important;
+                color: #e2001a !important;
+            }
+            .bg-info {
+                background-color: #f8fafc !important;
+                border-left: 4px solid #0284c7 !important;
+                color: #0284c7 !important;
+            }
+            .card-body {
+                padding: 0 !important;
+            }
+            .card small {
+                font-size: 8px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                color: #64748b !important;
+                display: block !important;
+                margin-bottom: 4px !important;
+            }
+            .card h5 {
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                margin: 0 !important;
+            }
+            code {
+                font-family: 'Consolas', 'Courier New', Courier, monospace !important;
+                font-size: 8px !important;
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+                padding: 2px 4px !important;
+                border-radius: 4px !important;
+            }
+        </style>
+        
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px;">
             <div>
                 <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 16px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
@@ -971,24 +1109,30 @@ function exportDetailPdf() {
     // Remove pagination, buttons, forms inside print container
     pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #btnExportExcel').forEach(el => el.remove());
     
-    // Append to body temporarily
-    document.body.appendChild(pdfWrapper);
+    const originalScrollX = window.scrollX;
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+    document.body.insertBefore(pdfWrapper, document.body.firstChild);
     
     const opt = {
         margin:       10,
         filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2.5, useCORS: true, logging: false },
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
     
-    html2pdf().from(pdfWrapper).set(opt).save().then(() => {
-        document.body.removeChild(pdfWrapper);
-    }).catch(err => {
-        console.error(err);
-        document.body.removeChild(pdfWrapper);
-        alert('Gagal menghasilkan file PDF.');
-    });
+    setTimeout(() => {
+        html2pdf().from(pdfWrapper).set(opt).save().then(() => {
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+        }).catch(err => {
+            console.error(err);
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+            alert('Gagal menghasilkan file PDF.');
+        });
+    }, 150);
 }
 
 // Function to export whole dashboard page layout (stats & tables) as PDF
@@ -1002,7 +1146,15 @@ function exportDashboardPdf() {
     const title = document.querySelector('h3.fw-bold') ? document.querySelector('h3.fw-bold').textContent : 'PROSES PEMBAYARAN BILLING 1- 6';
     const subtitle = document.querySelector('p.text-muted') ? document.querySelector('p.text-muted').textContent : 'Per Telkom Daerah';
     const statsHTML = document.querySelector('.row.g-3.mb-4') ? document.querySelector('.row.g-3.mb-4').outerHTML : '';
-    const tableHTML = document.querySelector('.card.border-0.shadow-sm.w-100.overflow-hidden.mb-5') ? document.querySelector('.card.border-0.shadow-sm.w-100.overflow-hidden.mb-5').outerHTML : '';
+    
+    // Grab all cards that represent data (excluding the filter card)
+    const dataCards = Array.from(document.querySelectorAll('.container-fluid > .card'))
+        .filter(card => !card.querySelector('#dashboardFilterForm'));
+
+    let cardsHTML = '';
+    dataCards.forEach(card => {
+        cardsHTML += `<div style="margin-bottom: 25px;">${card.outerHTML}</div>`;
+    });
     
     pdfWrapper.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px;">
@@ -1020,8 +1172,8 @@ function exportDashboardPdf() {
             ${statsHTML}
         </div>
         
-        <div style="margin-bottom: 20px;">
-            ${tableHTML}
+        <div>
+            ${cardsHTML}
         </div>
         
         <div style="border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 30px; text-align: center; font-size: 9px; color: #868e96;">
@@ -1033,23 +1185,313 @@ function exportDashboardPdf() {
     // Remove forms, buttons, pagination inside container
     pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #dashboardFilterForm, #btnExportExcel').forEach(el => el.remove());
     
-    document.body.appendChild(pdfWrapper);
+    const originalScrollX = window.scrollX;
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+    document.body.insertBefore(pdfWrapper, document.body.firstChild);
     
     const opt = {
         margin:       10,
         filename:     `Laporan_Rekap_Dashboard_${new Date().toISOString().slice(0,10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2.5, useCORS: true, logging: false },
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
     
-    html2pdf().from(pdfWrapper).set(opt).save().then(() => {
-        document.body.removeChild(pdfWrapper);
-    }).catch(err => {
-        console.error(err);
-        document.body.removeChild(pdfWrapper);
-        alert('Gagal menghasilkan file PDF.');
-    });
+    setTimeout(() => {
+        html2pdf().from(pdfWrapper).set(opt).save().then(() => {
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+        }).catch(err => {
+            console.error(err);
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+            alert('Gagal menghasilkan file PDF.');
+        });
+    }, 150);
+}
+
+// Function to export single customer card receipt / invoice layout as PDF
+function exportSingleCustomerPdf(index) {
+    if (!currentModalCustomers || !currentModalCustomers[index]) {
+        alert('Data customer tidak ditemukan.');
+        return;
+    }
+    
+    const cust = currentModalCustomers[index];
+    
+    const pdfWrapper = document.createElement('div');
+    pdfWrapper.style.width = '800px';
+    pdfWrapper.style.padding = '20px';
+    pdfWrapper.style.margin = '0 auto';
+    pdfWrapper.style.fontFamily = "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif";
+    pdfWrapper.style.backgroundColor = '#ffffff';
+    
+    // Set up single customer invoice HTML (exact Figma mockup replica)
+    pdfWrapper.innerHTML = `
+        <style>
+            .invoice-container {
+                width: 100% !important;
+                background-color: #ffffff !important;
+                color: #1e293b !important;
+                box-sizing: border-box !important;
+            }
+            
+            /* Top Card */
+            .top-card {
+                display: flex !important;
+                align-items: center !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 12px !important;
+                padding: 18px 25px !important;
+                margin-bottom: 20px !important;
+                background: #ffffff !important;
+            }
+            .top-card-left {
+                flex: 1.5 !important;
+            }
+            .top-card-divider {
+                width: 1px !important;
+                height: 50px !important;
+                background-color: #cbd5e1 !important;
+                margin: 0 30px !important;
+            }
+            .top-card-right {
+                flex: 1 !important;
+                text-align: center !important;
+            }
+            .label-muted {
+                font-size: 13px !important;
+                color: #64748b !important;
+                font-weight: 500 !important;
+                margin-bottom: 8px !important;
+            }
+            .value-bold {
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                color: #0f172a !important;
+            }
+            .status-badge-pill {
+                display: inline-block !important;
+                padding: 6px 24px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                border-radius: 20px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                background-color: ${cust.status_bayar == 'Sdh Bayar' ? '#dcfce7' : '#fee2e2'} !important;
+                color: ${cust.status_bayar == 'Sdh Bayar' ? '#15803d' : '#ef4444'} !important;
+                border: 1px solid ${cust.status_bayar == 'Sdh Bayar' ? '#bbf7d0' : '#fecaca'} !important;
+            }
+            
+            /* General Cards */
+            .info-card {
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 10px !important;
+                overflow: hidden !important;
+                background: #ffffff !important;
+                margin-bottom: 20px !important;
+            }
+            .info-card-header {
+                background-color: #eff6ff !important; /* Soft Telkom Blue background */
+                border-bottom: 1px solid #cbd5e1 !important;
+                padding: 10px 15px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                color: #1e40af !important; /* Blue text */
+                display: flex !important;
+                align-items: center !important;
+                letter-spacing: 0.5px !important;
+            }
+            .info-card-header i {
+                font-size: 13px !important;
+                margin-right: 8px !important;
+                color: #1e40af !important;
+            }
+            
+            /* Two Column Row */
+            .two-col-row {
+                display: flex !important;
+                gap: 20px !important;
+                margin-bottom: 20px !important;
+            }
+            .two-col-row > div {
+                flex: 1 !important;
+                margin-bottom: 0 !important;
+            }
+            
+            /* Card Table styles */
+            .card-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            .card-table td {
+                padding: 10px 15px !important;
+                font-size: 11px !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                color: #334155 !important;
+            }
+            .card-table tr:last-child td {
+                border-bottom: none !important;
+            }
+            .card-table td.col-label {
+                width: 35% !important;
+                color: #64748b !important;
+            }
+            .card-table td.col-val {
+                font-weight: 500 !important;
+                color: #0f172a !important;
+            }
+            
+            /* Highlighted Row for Tagihan Total */
+            .total-row td {
+                background-color: #eff6ff !important;
+                color: #1e40af !important;
+                font-weight: 700 !important;
+            }
+            .total-row td.col-val {
+                color: #1e40af !important;
+                font-weight: 700 !important;
+            }
+            
+            /* Address body */
+            .address-body {
+                padding: 15px !important;
+                font-size: 11px !important;
+                color: #334155 !important;
+                line-height: 1.5 !important;
+                background-color: #ffffff !important;
+            }
+        </style>
+        
+        <div class="invoice-container">
+            <!-- Top Card -->
+            <div class="top-card">
+                <div class="top-card-left">
+                    <div class="label-muted">Nama Customer</div>
+                    <div class="value-bold">${cust.nama || '-'}</div>
+                </div>
+                <div class="top-card-divider"></div>
+                <div class="top-card-right">
+                    <div class="label-muted">Status</div>
+                    <span class="status-badge-pill">${cust.status_bayar == 'Sdh Bayar' ? 'Sudah Bayar' : 'Belum Bayar'}</span>
+                </div>
+            </div>
+            
+            <!-- Two Column Section -->
+            <div class="two-col-row">
+                <!-- Informasi Customer -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="bi bi-person-fill"></i> INFORMASI CUSTOMER
+                    </div>
+                    <table class="card-table">
+                        <tr>
+                            <td class="col-label">NCLI</td>
+                            <td class="col-val">${cust.ncli || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-label">SND</td>
+                            <td class="col-val">${cust.snd || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-label">Produk</td>
+                            <td class="col-val">${cust.produk || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-label">Billing</td>
+                            <td class="col-val">Billing Ke-${cust.billing_ke || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Informasi Tagihan -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="bi bi-file-earmark-text-fill"></i> INFORMASI TAGIHAN
+                    </div>
+                    <table class="card-table">
+                        <tr>
+                            <td class="col-label">Internet</td>
+                            <td class="col-val">Rp ${new Intl.NumberFormat('id-ID').format(cust.tag_inet || 0)}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-label">Telepon</td>
+                            <td class="col-val">Rp ${new Intl.NumberFormat('id-ID').format(cust.tag_tlp || 0)}</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td class="col-label" style="color: #1e40af !important;">Total Tagihan</td>
+                            <td class="col-val">Rp ${new Intl.NumberFormat('id-ID').format(cust.tag_total || 0)}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Agency & Lokasi -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="bi bi-geo-alt-fill"></i> AGENCY & LOKASI
+                </div>
+                <table class="card-table">
+                    <tr>
+                        <td class="col-label" style="width: 25% !important;">Agency</td>
+                        <td class="col-val">${cust.agency_psb || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td class="col-label" style="width: 25% !important;">Sales</td>
+                        <td class="col-val">${cust.sales_agency || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td class="col-label" style="width: 25% !important;">STO</td>
+                        <td class="col-val">${cust.sto || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td class="col-label" style="width: 25% !important;">DATEL</td>
+                        <td class="col-val">${cust.datel || '-'}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Alamat -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="bi bi-house-door-fill"></i> ALAMAT
+                </div>
+                <div class="address-body">
+                    ${cust.alamat || '-'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Fix html2canvas scroll bug by scrolling to top and inserting at the very top of the body
+    const originalScrollX = window.scrollX;
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+    
+    // Insert as first child so it sits exactly at coordinate 0,0
+    document.body.insertBefore(pdfWrapper, document.body.firstChild);
+    
+    const opt = {
+        margin:       10,
+        filename:     `Laporan_Customer_${cust.nama.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Beri jeda 150ms agar browser sempat me-render elemen (mencegah bug blank putih)
+    setTimeout(() => {
+        html2pdf().from(pdfWrapper).set(opt).save().then(() => {
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+        }).catch(err => {
+            console.error(err);
+            document.body.removeChild(pdfWrapper);
+            window.scrollTo(originalScrollX, originalScrollY);
+            alert('Gagal menghasilkan file PDF.');
+        });
+    }, 150);
 }
 </script>
 @endpush
