@@ -757,6 +757,7 @@ function showDetail(datel, billingKe) {
         .then(response => {
             console.log('Response:', response);
             if (response.customers && response.customers.length > 0) {
+                window.currentHotdData = response;
                 renderDetailTable(response);
             } else {
                 document.getElementById('detailContent').innerHTML = `
@@ -937,57 +938,54 @@ function filterChange(type) {
 // Function to export detail modal content as PDF
 // Function to export detail modal content as PDF (Optimized and Neat)
 function exportDetailPdf() {
-    const billingKe = document.getElementById('detailBillingKe').textContent;
-    const datel = document.getElementById('detailDatel').textContent;
+    const data = window.currentHotdData;
+    if (!data || !data.customers) {
+        alert('Data detail belum termuat sempurna atau kosong. Silakan tunggu sebentar.');
+        return;
+    }
     
-    // Read from the active table rows
-    const rows = document.querySelectorAll('#detailTable tbody tr');
+    const billingKe = data.billing_ke;
+    const datel = data.datel;
+    const customers = data.customers;
+    
     let tableRowsHtml = '';
-    
-    rows.forEach((row) => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length >= 28) {
-            const no = cells[0].textContent.trim();
-            const status = cells[1].textContent.trim();
-            const snd = cells[2].textContent.trim();
-            const nama = cells[5].textContent.trim();
-            const datelVal = cells[8].textContent.trim();
-            const billing = 'B' + cells[16].textContent.replace('B', '').trim();
-            const tagihan = cells[13].textContent.trim();
-            const agencyVal = cells[25].textContent.trim();
-            const salesVal = cells[26].textContent.trim();
-            
-            const statusBg = status === 'Sdh Bayar' ? '#d1e7dd' : '#f8d7da';
-            const statusColor = status === 'Sdh Bayar' ? '#0f5132' : '#842029';
-            
-            tableRowsHtml += `
-                <tr>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${no}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">
-                        <span style="background-color: ${statusBg}; color: ${statusColor}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5px; display: inline-block;">
-                            ${status}
-                        </span>
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-family: monospace;">${snd}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-weight: bold; color: #000361;">${nama}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${datelVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${agencyVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${salesVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${billing}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: right; font-weight: bold; color: #dc3545;">Rp ${tagihan}</td>
-                </tr>
-            `;
-        }
+    customers.forEach((cust, index) => {
+        const no = index + 1;
+        const status = cust.status_bayar || 'Blm Bayar';
+        const snd = cust.snd || '-';
+        const nama = cust.nama || '-';
+        const datelVal = cust.datel || '-';
+        const agencyVal = cust.agency_psb || '-';
+        const salesVal = cust.sales_agency || '-';
+        const billing = 'B' + (cust.billing_ke ? String(cust.billing_ke).replace('B', '').trim() : '');
+        const tagihan = cust.tag_total ? new Intl.NumberFormat('id-ID').format(cust.tag_total) : '0';
+        
+        const statusBg = status === 'Sdh Bayar' ? '#d1e7dd' : '#f8d7da';
+        const statusColor = status === 'Sdh Bayar' ? '#0f5132' : '#842029';
+        
+        tableRowsHtml += `
+            <tr>
+                <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${no}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">
+                    <span style="background-color: ${statusBg}; color: ${statusColor}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5px; display: inline-block;">
+                        ${status}
+                    </span>
+                </td>
+                <td style="border: 1px solid #dee2e6; padding: 4px; font-family: monospace;">${snd}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px; font-weight: bold; color: #000361;">${nama}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px;">${datelVal}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px;">${agencyVal}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px;">${salesVal}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${billing}</td>
+                <td style="border: 1px solid #dee2e6; padding: 4px; text-align: right; font-weight: bold; color: #dc3545;">Rp ${tagihan}</td>
+            </tr>
+        `;
     });
 
-    // Get total tagihan and total saldo from tfoot
-    const totalTagihanCell = document.querySelector('#detailTable tfoot tr td:nth-child(2)');
-    const totalTagihan = totalTagihanCell ? totalTagihanCell.textContent.trim() : '0';
-
-    // Get cards stats to keep it neat
-    const cardBelumBayar = document.querySelector('#detailContent .card.bg-primary h5') ? document.querySelector('#detailContent .card.bg-primary h5').textContent.trim() : '0';
-    const cardTagihan = document.querySelector('#detailContent .card.bg-warning h5') ? document.querySelector('#detailContent .card.bg-warning h5').textContent.trim() : 'Rp 0';
-    const cardSaldo = document.querySelector('#detailContent .card.bg-info h5') ? document.querySelector('#detailContent .card.bg-info h5').textContent.trim() : 'Rp 0';
+    const totalTagihan = data.total_tagihan ? new Intl.NumberFormat('id-ID').format(data.total_tagihan) : '0';
+    const cardBelumBayar = data.total_blm_bayar !== undefined ? data.total_blm_bayar : '0';
+    const cardTagihan = data.total_tagihan !== undefined ? 'Rp ' + new Intl.NumberFormat('id-ID').format(data.total_tagihan) : 'Rp 0';
+    const cardSaldo = data.total_saldo !== undefined ? 'Rp ' + new Intl.NumberFormat('id-ID').format(data.total_saldo) : 'Rp 0';
 
     // Create temporary styled print wrapper
     const pdfWrapper = document.createElement('div');
