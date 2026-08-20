@@ -935,35 +935,36 @@ function filterChange(type) {
     document.getElementById('dashboardFilterForm').submit();
 }
 
-// Function to export detail modal content as PDF
+// Function to export detail modal content as PDF (Full data, neat layout)
 function exportDetailPdf() {
     const billingKe = document.getElementById('detailBillingKe') ? document.getElementById('detailBillingKe').textContent.trim() : '';
     const datel = document.getElementById('detailDatel') ? document.getElementById('detailDatel').textContent.trim() : '';
     
     // Create temporary styled print wrapper
     const pdfWrapper = document.createElement('div');
-    pdfWrapper.style.padding = '20px';
+    pdfWrapper.style.padding = '25px';
     pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     pdfWrapper.style.backgroundColor = '#ffffff';
+    pdfWrapper.style.width = '2800px'; // Set explicit width to fit all 30 columns without squeezing
     
     // Copy the original HTML content
     pdfWrapper.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000361; padding-bottom: 12px; margin-bottom: 25px; width: 100%;">
             <div>
-                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 16px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
-                <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
+                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 24px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
+                <div style="font-size: 16px; color: #6c757d; margin-top: 6px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 14px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
-                <div style="font-size: 9px; color: #868e96;">Telkom Customer Management System</div>
+                <div style="font-size: 20px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
+                <div style="font-size: 13px; color: #868e96;">Telkom Customer Management System</div>
             </div>
         </div>
         
-        <div style="margin-bottom: 15px;" id="pdfTableContainer">
+        <div style="margin-bottom: 20px; width: 100%;" id="pdfTableContainer">
             ${document.getElementById('detailContent').innerHTML}
         </div>
         
-        <div style="border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 20px; text-align: center; font-size: 9px; color: #868e96;">
+        <div style="border-top: 2px dashed #dee2e6; padding-top: 15px; margin-top: 30px; text-align: center; font-size: 13px; color: #868e96; width: 100%;">
             Laporan Detail ini diunduh secara resmi melalui Telkom Customer Management System.<br>
             © ${new Date().getFullYear()} Telkom Indonesia. All Rights Reserved.
         </div>
@@ -972,95 +973,29 @@ function exportDetailPdf() {
     // Clean up pagination, buttons, forms inside print container
     pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #btnExportExcel').forEach(el => el.remove());
     
-    // Now tidy up the columns inside pdfWrapper to only keep the 9 essential columns!
+    // Expand table-responsive container so the complete table width displays in the PDF
+    const tableContainer = pdfWrapper.querySelector('.table-responsive');
+    if (tableContainer) {
+        tableContainer.style.overflow = 'visible';
+        tableContainer.style.width = '100%';
+    }
+    
     const table = pdfWrapper.querySelector('table');
     if (table) {
-        // Fix table styles for printing
         table.style.width = '100%';
-        table.style.fontSize = '8px';
-        table.style.tableLayout = 'auto';
-        
-        // Remove the multi-row headers and make a clean single-row header
-        const thead = table.querySelector('thead');
-        if (thead) {
-            thead.innerHTML = `
-                <tr style="background-color: #0b2240; color: #ffffff;">
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 4%;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 10%;">STATUS</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">SND</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 22%;">NAMA CUSTOMER</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">DATEL</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 14%;">AGENCY</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">SALES</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 6%;">BILLING</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: right; width: 12%;">TAGIHAN</th>
-                </tr>
-            `;
-        }
-        
-        // Process table body rows (tbody tr)
-        const tbodyRows = table.querySelectorAll('tbody tr');
-        tbodyRows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td'));
-            if (cells.length > 0) {
-                // Read values from the original indices
-                const no = cells[0] ? cells[0].textContent.trim() : '';
-                const status = cells[1] ? cells[1].textContent.trim() : '';
-                const snd = cells[2] ? cells[2].textContent.trim() : '';
-                const nama = cells[5] ? cells[5].textContent.trim() : '';
-                const datelVal = cells[8] ? cells[8].textContent.trim() : '';
-                const billingRaw = cells[16] ? cells[16].textContent.trim() : '';
-                const billing = billingRaw ? 'B' + billingRaw.replace('B', '').trim() : '';
-                const tagihan = cells[13] ? cells[13].textContent.trim() : '0';
-                const agencyVal = cells[25] ? cells[25].textContent.trim() : '';
-                const salesVal = cells[26] ? cells[26].textContent.trim() : '';
-                
-                const statusBg = status === 'Sdh Bayar' ? '#d1e7dd' : '#f8d7da';
-                const statusColor = status === 'Sdh Bayar' ? '#0f5132' : '#842029';
-                
-                // Reconstruct the row with only the 9 columns
-                row.innerHTML = `
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${no}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">
-                        <span style="background-color: ${statusBg}; color: ${statusColor}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5px; display: inline-block;">
-                            ${status}
-                        </span>
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-family: monospace;">${snd}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-weight: bold; color: #000361;">${nama}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${datelVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${agencyVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${salesVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${billing}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: right; font-weight: bold; color: #dc3545;">Rp ${tagihan}</td>
-                `;
-            }
-        });
-        
-        // Process table foot rows (tfoot tr)
-        const tfoot = table.querySelector('tfoot');
-        if (tfoot) {
-            const data = window.currentHotdData;
-            const totalTagihanVal = data && data.total_tagihan ? new Intl.NumberFormat('id-ID').format(data.total_tagihan) : '0';
-            
-            tfoot.innerHTML = `
-                <tr style="background-color: #f8f9fa; font-weight: bold;">
-                    <td colspan="8" style="border: 1px solid #dee2e6; padding: 5px; text-align: right; color: #0b2240; font-size: 9px;">TOTAL TAGIHAN</td>
-                    <td style="border: 1px solid #dee2e6; padding: 5px; text-align: right; color: #dc3545; font-size: 9px;">Rp ${totalTagihanVal}</td>
-                </tr>
-            `;
-        }
+        table.style.fontSize = '10px'; // Easy to read font size
     }
     
     // Append to body temporarily
     document.body.appendChild(pdfWrapper);
     
+    // Custom landscape page size (780mm x 400mm) to accommodate the full 29 columns horizontally
     const opt = {
         margin:       10,
         filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2.5, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        html2canvas:  { scale: 1.5, useCORS: true, logging: false, width: 2850 },
+        jsPDF:        { unit: 'mm', format: [780, 400], orientation: 'landscape' }
     };
     
     html2pdf().from(pdfWrapper).set(opt).save().then(() => {
