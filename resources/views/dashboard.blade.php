@@ -501,7 +501,7 @@
                                     </tr>
                                     <tr>
                                         @foreach(range(1, 6) as $billingKe)
-                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:35px; font-size: 0.65rem; background-color: #f8f9fa;">SSL</th>
+                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:35px; font-size: 0.65rem; background-color: #f8f9fa;">SL</th>
                                             <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:70px; font-size: 0.65rem; background-color: #f8f9fa;">RUPIAH</th>
                                         @endforeach
                                     </tr>
@@ -935,133 +935,50 @@ function filterChange(type) {
 }
 
 // Function to export detail modal content as PDF
-// Function to export detail modal content as PDF (Optimized and Neat)
 function exportDetailPdf() {
     const billingKe = document.getElementById('detailBillingKe').textContent;
     const datel = document.getElementById('detailDatel').textContent;
     
-    // Read from the active table rows
-    const rows = document.querySelectorAll('#detailTable tbody tr');
-    let tableRowsHtml = '';
-    
-    rows.forEach((row) => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length >= 28) {
-            const no = cells[0].textContent.trim();
-            const status = cells[1].textContent.trim();
-            const snd = cells[2].textContent.trim();
-            const nama = cells[5].textContent.trim();
-            const datelVal = cells[8].textContent.trim();
-            const billing = 'B' + cells[16].textContent.replace('B', '').trim();
-            const tagihan = cells[13].textContent.trim();
-            const agencyVal = cells[25].textContent.trim();
-            const salesVal = cells[26].textContent.trim();
-            
-            const statusBg = status === 'Sdh Bayar' ? '#d1e7dd' : '#f8d7da';
-            const statusColor = status === 'Sdh Bayar' ? '#0f5132' : '#842029';
-            
-            tableRowsHtml += `
-                <tr>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${no}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">
-                        <span style="background-color: ${statusBg}; color: ${statusColor}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 7.5px; display: inline-block;">
-                            ${status}
-                        </span>
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-family: monospace;">${snd}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; font-weight: bold; color: #000361;">${nama}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${datelVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${agencyVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px;">${salesVal}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: center;">${billing}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 4px; text-align: right; font-weight: bold; color: #dc3545;">Rp ${tagihan}</td>
-                </tr>
-            `;
-        }
-    });
-
-    // Get total tagihan and total saldo from tfoot
-    const totalTagihanCell = document.querySelector('#detailTable tfoot tr td:nth-child(2)');
-    const totalTagihan = totalTagihanCell ? totalTagihanCell.textContent.trim() : '0';
-
-    // Get cards stats to keep it neat
-    const cardBelumBayar = document.querySelector('#detailContent .card.bg-primary h5') ? document.querySelector('#detailContent .card.bg-primary h5').textContent.trim() : '0';
-    const cardTagihan = document.querySelector('#detailContent .card.bg-warning h5') ? document.querySelector('#detailContent .card.bg-warning h5').textContent.trim() : 'Rp 0';
-    const cardSaldo = document.querySelector('#detailContent .card.bg-info h5') ? document.querySelector('#detailContent .card.bg-info h5').textContent.trim() : 'Rp 0';
-
     // Create temporary styled print wrapper
     const pdfWrapper = document.createElement('div');
-    pdfWrapper.style.padding = '15px';
+    pdfWrapper.style.padding = '20px';
     pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     pdfWrapper.style.backgroundColor = '#ffffff';
     
-    // Add header branding & simplified layout
+    // Add header branding
     pdfWrapper.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 8px; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000361; padding-bottom: 10px; margin-bottom: 20px;">
             <div>
-                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 15px;">LAPORAN DETAIL CUSTOMER - BILLING 1 - 6</h4>
-                <div style="font-size: 10px; color: #6c757d; margin-top: 3px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
+                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 16px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
+                <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 13px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
-                <div style="font-size: 8px; color: #868e96;">Telkom Customer Management System</div>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex: 1; border: 1px solid #dee2e6; border-radius: 5px; padding: 6px 10px; background-color: #f8f9fa;">
-                <div style="font-size: 8px; color: #6c757d; text-transform: uppercase;">Customer Belum Bayar</div>
-                <div style="font-size: 13px; font-weight: bold; color: #000361; margin-top: 1px;">${cardBelumBayar}</div>
-            </div>
-            <div style="flex: 1; border: 1px solid #dee2e6; border-radius: 5px; padding: 6px 10px; background-color: #f8f9fa;">
-                <div style="font-size: 8px; color: #6c757d; text-transform: uppercase;">Total Tagihan</div>
-                <div style="font-size: 13px; font-weight: bold; color: #c2410c; margin-top: 1px;">${cardTagihan}</div>
-            </div>
-            <div style="flex: 1; border: 1px solid #dee2e6; border-radius: 5px; padding: 6px 10px; background-color: #f8f9fa;">
-                <div style="font-size: 8px; color: #6c757d; text-transform: uppercase;">Total Saldo</div>
-                <div style="font-size: 13px; font-weight: bold; color: #0891b2; margin-top: 1px;">${cardSaldo}</div>
+                <div style="font-size: 14px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
+                <div style="font-size: 9px; color: #868e96;">Telkom Customer Management System</div>
             </div>
         </div>
         
-        <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; border: 1px solid #dee2e6;">
-            <thead>
-                <tr style="background-color: #0b2240; color: #ffffff;">
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 4%;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 10%;">STATUS</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">SND</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 22%;">NAMA CUSTOMER</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">DATEL</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 14%;">AGENCY</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: left; width: 12%;">SALES</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: center; width: 6%;">BILLING</th>
-                    <th style="border: 1px solid #dee2e6; padding: 5px; text-align: right; width: 12%;">TAGIHAN</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableRowsHtml}
-            </tbody>
-            <tfoot>
-                <tr style="background-color: #f8f9fa; font-weight: bold;">
-                    <td colspan="8" style="border: 1px solid #dee2e6; padding: 5px; text-align: right; color: #0b2240; font-size: 9px;">TOTAL TAGIHAN</td>
-                    <td style="border: 1px solid #dee2e6; padding: 5px; text-align: right; color: #dc3545; font-size: 9px;">Rp ${totalTagihan}</td>
-                </tr>
-            </tfoot>
-        </table>
+        <div style="margin-bottom: 15px;">
+            ${document.getElementById('detailContent').innerHTML}
+        </div>
         
-        <div style="border-top: 1px dashed #dee2e6; padding-top: 8px; margin-top: 15px; text-align: center; font-size: 8px; color: #868e96;">
+        <div style="border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 20px; text-align: center; font-size: 9px; color: #868e96;">
             Laporan Detail ini diunduh secara resmi melalui Telkom Customer Management System.<br>
             © ${new Date().getFullYear()} Telkom Indonesia. All Rights Reserved.
         </div>
     `;
     
+    // Remove pagination, buttons, forms inside print container
+    pdfWrapper.querySelectorAll('.pagination, .btn, button, select, input, #btnExportExcel').forEach(el => el.remove());
+    
     // Append to body temporarily
     document.body.appendChild(pdfWrapper);
     
     const opt = {
-        margin:       6,
+        margin:       10,
         filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2.2, useCORS: true, logging: false },
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
     
