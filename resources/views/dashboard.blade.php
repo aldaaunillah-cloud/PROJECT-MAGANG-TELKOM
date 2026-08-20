@@ -501,7 +501,7 @@
                                     </tr>
                                     <tr>
                                         @foreach(range(1, 6) as $billingKe)
-                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:35px; font-size: 0.65rem; background-color: #f8f9fa;">SL</th>
+                                            <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:35px; font-size: 0.65rem; background-color: #f8f9fa;">SSL</th>
                                             <th class="text-center text-nowrap px-2 py-1 text-dark" style="min-width:70px; font-size: 0.65rem; background-color: #f8f9fa;">RUPIAH</th>
                                         @endforeach
                                     </tr>
@@ -531,8 +531,8 @@
                                                     $rowBlmRp += $item ? $item->blm_bayar_rp : 0;
                                                 }
                                             @endphp
-                                            <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#868e96; font-size: 0.75rem;">{{ $rowBlm }}</td>
-                                            <td class="text-end text-white text-nowrap px-2 py-1" style="background-color:#868e96; font-size:0.65rem;">Rp {{ number_format($rowBlmRp, 0, ',', '.') }}</td>
+                                            <td class="text-center text-white text-nowrap px-2 py-1 ssl-grid-cell" style="background-color:#868e96; font-size: 0.75rem;" onclick="showDetail('{{ $datelItem }}', 'All')">{{ $rowBlm }}</td>
+                                            <td class="text-end text-white text-nowrap px-2 py-1 ssl-grid-cell" style="background-color:#868e96; font-size:0.65rem;" onclick="showDetail('{{ $datelItem }}', 'All')">Rp {{ number_format($rowBlmRp, 0, ',', '.') }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -543,8 +543,8 @@
                                             @php
                                                 $total = $billingTotals[$billingKe] ?? ['blm_bayar' => 0, 'blm_bayar_rp' => 0];
                                             @endphp
-                                            <td class="text-center text-nowrap px-2 py-1" style="font-size: 0.65rem; background-color: #eaeaea;">{{ $total['blm_bayar'] }}</td>
-                                            <td class="text-center text-nowrap px-2 py-1 text-danger" style="font-size:0.6rem; background-color: #eaeaea;">Rp {{ number_format($total['blm_bayar_rp'] ?? 0, 0, ',', '.') }}</td>
+                                            <td class="text-center text-nowrap px-2 py-1 ssl-grid-cell" style="font-size: 0.65rem; background-color: #eaeaea;" onclick="showDetail('Nasional', {{ $billingKe }})">{{ $total['blm_bayar'] }}</td>
+                                            <td class="text-center text-nowrap px-2 py-1 text-danger ssl-grid-cell" style="font-size:0.6rem; background-color: #eaeaea;" onclick="showDetail('Nasional', {{ $billingKe }})">Rp {{ number_format($total['blm_bayar_rp'] ?? 0, 0, ',', '.') }}</td>
                                         @endforeach
                                         @php
                                             $allBlm = 0; $allBlmRp = 0;
@@ -554,8 +554,8 @@
                                                 $allBlmRp += $total['blm_bayar_rp'];
                                             }
                                         @endphp
-                                        <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#6c757d; font-size: 0.65rem;">{{ $allBlm }}</td>
-                                        <td class="text-center text-white text-nowrap px-2 py-1" style="background-color:#6c757d; font-size:0.6rem;">Rp {{ number_format($allBlmRp, 0, ',', '.') }}</td>
+                                        <td class="text-center text-white text-nowrap px-2 py-1 ssl-grid-cell" style="background-color:#6c757d; font-size: 0.65rem;" onclick="showDetail('Nasional', 'All')">{{ $allBlm }}</td>
+                                        <td class="text-center text-white text-nowrap px-2 py-1 ssl-grid-cell" style="background-color:#6c757d; font-size:0.6rem;" onclick="showDetail('Nasional', 'All')">Rp {{ number_format($allBlmRp, 0, ',', '.') }}</td>
                                      </tr>
                                 </tfoot>
                             </table>

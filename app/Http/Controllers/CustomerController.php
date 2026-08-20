@@ -378,10 +378,14 @@ class CustomerController extends Controller
     public function hotdDetail($billingKe, $datel, ?Request $request = null)
     {
         $request = $request ?? request();
-        $query = Customer::where('billing_ke', $billingKe)
+        $query = Customer::query()
             ->where('status_bayar', '!=', 'Sdh Bayar');
 
-        if ($datel && $datel !== 'Nasional' && $datel !== 'Semua Datel') {
+        if ($billingKe && $billingKe !== 'All' && $billingKe !== 'Semua Billing' && $billingKe !== 'all' && $billingKe !== 'TOTAL' && $billingKe != 0) {
+            $query->where('billing_ke', $billingKe);
+        }
+
+        if ($datel && $datel !== 'Nasional' && $datel !== 'Semua Datel' && $datel !== 'Semua' && $datel !== 'TOTAL') {
             $query->where('datel', $datel);
         }
 

@@ -28,9 +28,15 @@ class HotdDetailExport implements FromQuery, WithHeadings, WithMapping
     public function query()
     {
         $query = Customer::query()
-            ->where('billing_ke', $this->billingKe)
-            ->where('datel', $this->datel)
             ->where('status_bayar', '!=', 'Sdh Bayar');
+
+        if ($this->billingKe && $this->billingKe !== 'All' && $this->billingKe !== 'Semua Billing' && $this->billingKe !== 'all' && $this->billingKe !== 'TOTAL' && $this->billingKe != 0) {
+            $query->where('billing_ke', $this->billingKe);
+        }
+
+        if ($this->datel && $this->datel !== 'Nasional' && $this->datel !== 'Semua Datel' && $this->datel !== 'Semua' && $this->datel !== 'TOTAL') {
+            $query->where('datel', $this->datel);
+        }
 
         if ($this->agency) {
             $agency = $this->agency;
