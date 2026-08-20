@@ -945,18 +945,18 @@ function exportDetailPdf() {
     pdfWrapper.style.padding = '25px';
     pdfWrapper.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     pdfWrapper.style.backgroundColor = '#ffffff';
-    pdfWrapper.style.width = '2800px'; // Set explicit width to fit all 30 columns without squeezing
+    pdfWrapper.style.width = '1800px'; // 1800px is safe for canvas memory and wide enough for all 29 columns
     
     // Copy the original HTML content
     pdfWrapper.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000361; padding-bottom: 12px; margin-bottom: 25px; width: 100%;">
             <div>
-                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 24px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
-                <div style="font-size: 16px; color: #6c757d; margin-top: 6px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
+                <h4 style="margin: 0; color: #000361; font-weight: bold; font-size: 20px;">PROSES PEMBAYARAN BILLING 1 - 6</h4>
+                <div style="font-size: 13px; color: #6c757d; margin-top: 6px;">Detail Billing: ${billingKe} | Datel: ${datel}</div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 20px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
-                <div style="font-size: 13px; color: #868e96;">Telkom Customer Management System</div>
+                <div style="font-size: 16px; font-weight: bold; color: #dc3545; letter-spacing: 0.5px;">CONFIDENTIAL</div>
+                <div style="font-size: 11px; color: #868e96;">Telkom Customer Management System</div>
             </div>
         </div>
         
@@ -964,7 +964,7 @@ function exportDetailPdf() {
             ${document.getElementById('detailContent').innerHTML}
         </div>
         
-        <div style="border-top: 2px dashed #dee2e6; padding-top: 15px; margin-top: 30px; text-align: center; font-size: 13px; color: #868e96; width: 100%;">
+        <div style="border-top: 2px dashed #dee2e6; padding-top: 15px; margin-top: 30px; text-align: center; font-size: 11px; color: #868e96; width: 100%;">
             Laporan Detail ini diunduh secara resmi melalui Telkom Customer Management System.<br>
             © ${new Date().getFullYear()} Telkom Indonesia. All Rights Reserved.
         </div>
@@ -983,19 +983,26 @@ function exportDetailPdf() {
     const table = pdfWrapper.querySelector('table');
     if (table) {
         table.style.width = '100%';
-        table.style.fontSize = '10px'; // Easy to read font size
+        table.style.fontSize = '8.5px'; // Perfect font size for A3 landscape
+        table.style.borderCollapse = 'collapse';
+        
+        // Ensure borders are clean and clear
+        table.querySelectorAll('th, td').forEach(cell => {
+            cell.style.border = '1px solid #dee2e6';
+            cell.style.padding = '4px 6px';
+        });
     }
     
     // Append to body temporarily
     document.body.appendChild(pdfWrapper);
     
-    // Custom landscape page size (780mm x 400mm) to accommodate the full 29 columns horizontally
+    // Standard A3 landscape size (420mm x 297mm) scales perfectly with 1800px width
     const opt = {
         margin:       10,
         filename:     `Laporan_Detail_Billing_${billingKe}_${datel.replace(/[^a-z0-9]/gi, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 1.5, useCORS: true, logging: false, width: 2850 },
-        jsPDF:        { unit: 'mm', format: [780, 400], orientation: 'landscape' }
+        html2canvas:  { scale: 1.5, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
     };
     
     html2pdf().from(pdfWrapper).set(opt).save().then(() => {
