@@ -72,32 +72,47 @@
                         </div>
 
                         <!-- EDIT MODE (FORM) -->
-                        <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" class="d-none ps-2" enctype="multipart/form-data">
+                        <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" class="@if($errors->has('name') || $errors->has('email') || $errors->has('profile_photo')) d-block @else d-none @endif ps-2" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Foto Profil</label>
-                                <input type="file" name="profile_photo" class="form-control" accept="image/*">
+                                <input type="file" name="profile_photo" class="form-control @error('profile_photo') is-invalid @enderror" accept="image/*">
+                                @error('profile_photo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                                 <small class="text-muted d-block mt-1">Format: JPG, JPEG, PNG, GIF (Maks. 2MB)</small>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Nama Lengkap</label>
-                                <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Divisi</label>
-                                <input type="text" name="divisi" class="form-control" value="{{ $user->divisi ?? 'Business Service' }}">
+                                <input type="text" name="divisi" class="form-control @error('divisi') is-invalid @enderror" value="{{ old('divisi', $user->divisi ?? 'Business Service') }}">
+                                @error('divisi')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Witel</label>
-                                <input type="text" name="witel" class="form-control" value="{{ $user->witel ?? 'Telkom Cirebon' }}">
+                                <input type="text" name="witel" class="form-control @error('witel') is-invalid @enderror" value="{{ old('witel', $user->witel ?? 'Telkom Cirebon') }}">
+                                @error('witel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1" style="font-size: 0.85rem;">Email</label>
-                                <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mt-4">
@@ -119,37 +134,46 @@
                         
                         <!-- Current Password -->
                         <div class="mb-4">
-                            <div class="input-group" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
+                            <div class="input-group @error('current_password') border-danger @enderror" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
                                 <span class="input-group-text bg-transparent border-0 px-3" style="color: #475569;">
                                     <i class="bi bi-lock-fill"></i>
                                 </span>
                                 <input type="password" name="current_password" class="form-control bg-transparent border-0 py-2.5" 
                                        placeholder="Masukkan password saat ini" style="font-size: 0.9rem;" required>
                             </div>
+                            @error('current_password')
+                                <small class="text-danger d-block mt-1 ms-1">{{ $message }}</small>
+                            @enderror
                         </div>
 
-                        <!-- New Password -->
+                        <!-- Password Baru -->
                         <div class="mb-4">
                             <label class="form-label fw-bold mb-2" style="color: #000361; font-size: 0.9rem;">Password Baru</label>
-                            <div class="input-group" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
+                            <div class="input-group @error('password') border-danger @enderror" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
                                 <span class="input-group-text bg-transparent border-0 px-3" style="color: #475569;">
                                     <i class="bi bi-lock-fill"></i>
                                 </span>
                                 <input type="password" name="password" class="form-control bg-transparent border-0 py-2.5" 
                                        placeholder="Masukkan password baru" style="font-size: 0.9rem;" required>
                             </div>
+                            @error('password')
+                                <small class="text-danger d-block mt-1 ms-1">{{ $message }}</small>
+                            @enderror
                         </div>
 
-                        <!-- Confirm New Password -->
+                        <!-- Konfirmasi Password Baru -->
                         <div class="mb-4">
                             <label class="form-label fw-bold mb-2" style="color: #000361; font-size: 0.9rem;">Konfirmasi Password Baru</label>
-                            <div class="input-group" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
+                            <div class="input-group @error('password_confirmation') border-danger @enderror" style="border-radius: 10px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
                                 <span class="input-group-text bg-transparent border-0 px-3" style="color: #475569;">
                                     <i class="bi bi-lock-fill"></i>
                                 </span>
                                 <input type="password" name="password_confirmation" class="form-control bg-transparent border-0 py-2.5" 
                                        placeholder="Konfirmasi password baru" style="font-size: 0.9rem;" required>
                             </div>
+                            @error('password_confirmation')
+                                <small class="text-danger d-block mt-1 ms-1">{{ $message }}</small>
+                            @enderror
                         </div>
 
                         <!-- Action Button -->
