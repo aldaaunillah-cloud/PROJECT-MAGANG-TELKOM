@@ -54,7 +54,7 @@ class SyncController extends Controller
             return response()->json([
                 'success' => true,
                 'total_rows' => $totalDataRows,
-                'batch_size' => 5000,
+                'batch_size' => 2000,
                 'message' => 'Inisialisasi berhasil.'
             ]);
         } catch (\Exception $e) {
