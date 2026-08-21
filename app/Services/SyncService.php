@@ -322,7 +322,9 @@ class SyncService
                 }
 
                 if (!empty($insertData)) {
-                    Customer::insert($insertData);
+                    foreach (array_chunk($insertData, 1000) as $chunk) {
+                        Customer::insert($chunk);
+                    }
                 }
             });
 
