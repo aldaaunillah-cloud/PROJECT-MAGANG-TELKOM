@@ -47,9 +47,8 @@ class SyncController extends Controller
             // Simpan header ke Cache selama 10 menit
             \Illuminate\Support\Facades\Cache::put('sync_headers', $headers, 600);
 
-            // Hitung total baris secara cepat dengan meload kolom A saja
-            $colData = $googleSheetService->getData('DataAll!A:A');
-            $totalRows = count($colData);
+            // Hitung total baris secara cepat menggunakan getRowCount()
+            $totalRows = $googleSheetService->getRowCount();
             $totalDataRows = max(0, $totalRows - 1);
 
             return response()->json([
