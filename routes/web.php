@@ -57,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [SyncController::class, 'index'])->name('sync.index');
         Route::get('/google-sheets', [SyncController::class, 'sync'])->name('sync.google-sheets');
         Route::post('/excel', [SyncController::class, 'syncExcel'])->name('sync.excel');
+        Route::get('/init', [SyncController::class, 'init'])->name('sync.init');
+        Route::post('/batch', [SyncController::class, 'syncBatch'])->name('sync.batch');
         Route::get('/status', [SyncController::class, 'status'])->name('sync.status');
     });
 
