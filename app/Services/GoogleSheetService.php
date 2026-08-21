@@ -51,17 +51,87 @@ class GoogleSheetService
         return new Sheets($client);
     }
 
-    public function getData(): array
+    public function getRowCount(): int
     {
+        try {
+            $response = $this->service->spreadsheets_values->get(
+                $this->spreadsheetId,
+                'DataAll!A:A',
+                ['valueRenderOption' => 'UNFORMATTED_VALUE']
+            );
+            $values = $response->getValues();
+            return is_array($values) ? count($values) : 0;
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch row count from Google Sheets: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function getHeaders(): array
+    {
+        try {
+            $response = $this->service->spreadsheets_values->get(
+                $this->spreadsheetId,
+                'DataAll!A1:AE1',
+                ['valueRenderOption' => 'UNFORMATTED_VALUE']
+            );
+            $rows = $response->getValues();
+            if (empty($rows)) {
+                return [];
+            }
+            return array_map('trim', $rows[0]);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch headers from Google Sheets: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getDataWithHeaders(string $range, array $headers): array
+    {
+        try {
+            $response = $this->service->spreadsheets_values->get(
+                $this->spreadsheetId,
+                $range,
+                ['valueRenderOption' => 'UNFORMATTED_VALUE']
+            );
+            
+            $rows = $response->getValues();
+            if (empty($rows)) {
+                return [];
+            }
+
+            $data = [];
+            foreach ($rows as $row) {
+                $rowData = [];
+                foreach ($headers as $index => $header) {
+                    $header = trim($header);
+                    $value = isset($row[$index]) ? trim($row[$index]) : '';
+                    $key = $this->mapHeaderToKey($header);
+                    if ($key) {
+                        $rowData[$key] = $value;
+                    }
+                }
+                $data[] = $rowData;
+            }
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch data with headers from Google Sheets: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getData(?string $range = null): array
+    {
+        $targetRange = $range ?? $this->range;
         try {
             Log::info('Fetching data from Google Sheets', [
                 'spreadsheet_id' => $this->spreadsheetId,
-                'range' => $this->range
+                'range' => $targetRange
             ]);
 
             $response = $this->service->spreadsheets_values->get(
                 $this->spreadsheetId,
-                $this->range,
+                $targetRange,
                 ['valueRenderOption' => 'UNFORMATTED_VALUE']
             );
             
