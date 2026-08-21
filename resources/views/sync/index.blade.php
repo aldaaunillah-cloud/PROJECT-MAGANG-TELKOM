@@ -49,78 +49,12 @@
                         </ul>
                     </div>
 
-                    {{-- Tombol Sync Google Sheets --}}
-                    <div class="text-center mb-5 pb-4 border-bottom">
+                    {{-- Tombol Sync --}}
+                    <div class="text-center">
                         <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm" id="btnStartSync">
-                            <i class="bi bi-arrow-repeat me-2"></i>
-                            Ambil Data dari Google Sheets
+                            <i class="bi bi-cloud-arrow-down me-2"></i>
+                            Mulai Sinkronisasi
                         </button>
-                        <p class="text-muted mt-3 small mb-0">
-                            <i class="bi bi-clock me-1"></i>
-                            Gunakan ini jika perubahan data dilakukan di Google Sheets tim Anda.
-                        </p>
-                    </div>
-
-                    {{-- Upload Excel Mentor --}}
-                    <div>
-                        <h6 class="fw-bold text-primary mb-3">
-                            <i class="bi bi-file-earmark-excel me-2"></i>
-                            Sinkronisasi Menggunakan File Excel Mentor
-                        </h6>
-                        <p class="text-muted small">
-                            Jika mentor Anda tetap menggunakan Excel lokal dan melakukan perubahan di dalamnya, silakan unggah file Excel mentor tersebut (.xlsx) ke sini. Sistem akan menyelaraskan database lokal agar 100% sama dengan Excel mentor.
-                        </p>
-
-                        <form action="{{ route('sync.excel') }}" method="POST" enctype="multipart/form-data" class="mt-4" id="excelSyncForm" onsubmit="showExcelLoading()">
-                            @csrf
-                            
-                            <!-- Opsi 1: Masukkan Path Lokal (OneDrive) -->
-                            <div class="row g-2 align-items-center justify-content-center mb-4">
-                                <div class="col-md-8">
-                                    <label class="form-label fw-semibold text-dark small mb-1">Metode A: Sinkronisasi Otomatis Via Jalur Folder OneDrive/SharePoint Lokal</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem;"><i class="bi bi-folder-fill"></i></span>
-                                        <input type="text" name="excel_path" class="form-control" 
-                                               placeholder="Contoh: C:\Users\intern\OneDrive - Telkom Indonesia\Documents\BILL 1-6 HOTD & AGENCY 2026.xlsx" style="font-size: 0.85rem;">
-                                        <button class="btn btn-primary px-4" type="submit">
-                                            <i class="bi bi-play-fill me-1"></i> Sinkron Path
-                                        </button>
-                                    </div>
-                                    <small class="text-muted d-block mt-2">Sangat direkomendasikan! Cukup sync folder OneDrive mentor Anda ke Windows Explorer laptop Anda, masukkan path filenya ke sini, lalu klik tombol ini untuk sinkronisasi otomatis kapan saja tanpa perlu mengunduh file berkali-kali.</small>
-                                </div>
-                            </div>
-                            
-                            <div class="row align-items-center justify-content-center mb-4">
-                                <div class="col-md-8 text-center">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <hr class="w-25 my-0">
-                                        <span class="px-3 text-muted small fw-bold">ATAU</span>
-                                        <hr class="w-25 my-0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Opsi 2: Upload File -->
-                            <div class="row g-2 align-items-center justify-content-center">
-                                <div class="col-md-8">
-                                    <label class="form-label fw-semibold text-dark small mb-1">Metode B: Unggah Salinan File Excel Secara Manual</label>
-                                    <div class="input-group">
-                                        <input type="file" name="excel_file" class="form-control">
-                                        <button class="btn btn-dark px-4" type="submit">
-                                            <i class="bi bi-cloud-arrow-up me-1"></i> Unggah & Sinkron
-                                        </button>
-                                    </div>
-                                    <small class="text-muted d-block mt-2">Dukungan format: .xlsx, .xls, .csv (Maks. 10MB)</small>
-                                </div>
-                            </div>
-                        </form>
-
-                        <div id="excelLoading" class="text-center py-4 d-none">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="text-muted mt-2 small">Membaca file Excel dan memperbarui database. Mohon tunggu, jangan tutup halaman ini...</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -262,11 +196,6 @@ async function startSyncProcess() {
         
         progressStatus.after(closeBtn);
     }
-}
-
-function showExcelLoading() {
-    document.getElementById('excelSyncForm').classList.add('d-none');
-    document.getElementById('excelLoading').classList.remove('d-none');
 }
 </script>
 @endsection
