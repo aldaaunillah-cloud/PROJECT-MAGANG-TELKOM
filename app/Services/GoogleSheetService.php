@@ -51,6 +51,22 @@ class GoogleSheetService
         return new Sheets($client);
     }
 
+    public function getRowCount(): int
+    {
+        try {
+            $response = $this->service->spreadsheets_values->get(
+                $this->spreadsheetId,
+                'DataAll!A:A',
+                ['valueRenderOption' => 'UNFORMATTED_VALUE']
+            );
+            $values = $response->getValues();
+            return is_array($values) ? count($values) : 0;
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch row count from Google Sheets: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
     public function getHeaders(): array
     {
         try {
