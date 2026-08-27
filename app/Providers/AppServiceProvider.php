@@ -20,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
+        // Paksa HTTPS di lingkungan produksi agar form action menggunakan https://
+        if (config('app.env') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Share total customer ke semua view
         View::composer('layouts.app', function ($view) {
             $view->with('totalCustomer', Cache::remember('total_customer_count', 3600, function() {
