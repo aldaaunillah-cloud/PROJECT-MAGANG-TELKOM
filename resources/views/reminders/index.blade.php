@@ -152,9 +152,9 @@
                         </div>
                     </div>
                     <div class="position-relative">
-                        <pre class="bg-dark text-light p-4 rounded-3 mb-0" 
+                        <pre class="bg-light text-dark p-4 rounded-4 mb-0 border" 
                              id="msgContent{{ $reminder->id }}"
-                             style="white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.95rem; line-height: 1.6; border: none;">{{ $reminder->keterangan }}</pre>
+                             style="white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.95rem; line-height: 1.6; border-color: #e2e8f0 !important; color: #2d3748 !important; background-color: #f8fafc !important;">{{ strip_tags($reminder->keterangan) }}</pre>
                     </div>
                 </div>
             </div>
