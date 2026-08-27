@@ -104,15 +104,115 @@
         }
     }
 
-    .pagination {
-        margin-bottom: 0 !important;
-        gap: 3px !important;
+    /* ============================================================
+   PAGINATION BILLING 1 & 2
+   ============================================================ */
+
+    .billing-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding: 0 5px;
+        width: 100%;
+        gap: 20px;
     }
 
-    .pagination .page-item .page-link {
-        padding: 4px 10px !important;
-        font-size: 0.7rem !important;
-        border-radius: 6px !important;
+    .billing-pagination-info {
+        font-size: 0.75rem;
+        color: #6c757d;
+        white-space: nowrap;
+    }
+
+    .billing-pagination-nav {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+
+    .billing-page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 32px;
+        height: 32px;
+
+        padding: 4px 9px;
+
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+
+        background-color: #fff;
+        color: #495057;
+
+        font-size: 0.72rem;
+        text-decoration: none !important;
+
+        transition: all 0.15s ease;
+    }
+
+    .billing-page-link:hover {
+        background-color: #f1f5f9;
+        border-color: #adb5bd;
+        color: #212529;
+    }
+
+    .billing-page-link.active {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .billing-page-link.disabled {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+
+        .billing-pagination {
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .billing-pagination-info {
+            text-align: center;
+        }
+
+        .billing-pagination-nav {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Supaya tidak bertabrakan pada layar kecil */
+    @media (max-width: 768px) {
+        .pagination-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .pagination-container {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .pagination-info {
+            text-align: center;
+            width: 100%;
+        }
     }
 
     .ssl-link {
@@ -251,14 +351,131 @@
         }
 
     }
+
+
+    /* ============================================================
+    TABEL BILLING 1 & 2
+    STYLE AGAR BILLING KE-1 DAN KE-2 KONSISTEN
+    ============================================================ */
+
+    .billing-card {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .billing-card .card-header {
+        padding: 15px !important;
+    }
+
+    .billing-title {
+        font-size: 0.9rem !important;
+        line-height: 1.3;
+        letter-spacing: 0.3px;
+    }
+
+    .billing-table {
+        width: 100% !important;
+        min-width: 1000px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .billing-table th,
+    .billing-table td {
+        white-space: nowrap !important;
+        padding: 5px 8px !important;
+        font-size: 0.72rem !important;
+        vertical-align: middle !important;
+        border: 1px solid #dee2e6 !important;
+    }
+
+    .billing-table thead th {
+        font-weight: 600 !important;
+    }
+
+    .billing-table tbody td {
+        background-color: #ffffff;
+    }
+
+    .billing-table tbody tr:nth-child(even) td {
+        background-color: #f8f9fa;
+    }
+
+    .billing-table tbody tr:hover td {
+        background-color: #f1f5f9 !important;
+    }
+
+    /* ============================================================
+    HEADER TABEL BILLING
+    ============================================================ */
+
+    /* Header default */
+    .billing-header {
+        background-color: #176B87 !important;
+        color: white !important;
+        font-weight: 600 !important;
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
+    /* Header khusus Billing Ke-1 */
+    .billing-header.billing-1-header {
+        background-color: #E2001A !important;
+        color: white !important;
+    }
+
+    /* Header khusus Billing Ke-2 */
+    .billing-header.billing-2-header {
+        background-color: #2F3A4A !important;
+        color: white !important;
+    }
+
+    /* Header Grand Total */
+    .billing-header.billing-total-header {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+
+
+    /* ============================================================
+    GRAND TOTAL
+    ============================================================ */
+
+    .billing-footer {
+        background-color: #176B87 !important;
+        color: white !important;
+        font-weight: bold !important;
+    }
+
+    .billing-footer td {
+        background-color: #176B87 !important;
+        color: white !important;
+    }
+
+    /* Link angka */
+    .billing-link {
+        color: #0b5ed7 !important;
+        text-decoration: underline !important;
+        font-weight: bold !important;
+    }
+
+    .billing-link:hover {
+        color: #084298 !important;
+    }
+
+    /* Link grand total */
+    .billing-footer-link {
+        color: white !important;
+        text-decoration: underline !important;
+        font-weight: bold !important;
+    }
 </style>
 
 
 <div class="container-fluid">
 
-    {{-- ============================================================
-    PILIH TAMPILAN TABEL
-    ============================================================= --}}
+    {{-- FILTER PILIH TABEL --}}
     <div class="billing-filter">
 
         {{-- BILLING 1 & 2 --}}
@@ -306,10 +523,7 @@
 
 
 
-    {{-- ============================================================
-        VIEW BILLING 1 & 2
-        FILTER + JUDUL + SUMMARY + TABEL HANYA MUNCUL DI SINI
-    ============================================================= --}}
+    {{-- BILLING 1 & 2 --}}
     @if(request('view', 'rekap') == 'rekap')
 
         <div class="card border-0 shadow-sm"
@@ -345,16 +559,16 @@
                     HANYA BERLAKU UNTUK BILLING 1 & 2
                 ===================================================== --}}
                 <form method="GET"
-                      action="{{ route('rekap.agency') }}"
-                      class="row g-2 mb-3 p-3 bg-light rounded-3"
-                      style="border: 1px solid #f1f5f9;">
+                    action="{{ route('rekap.agency') }}"
+                    class="row g-2 mb-3 p-3 bg-light rounded-3"
+                    style="border: 1px solid #f1f5f9;">
 
-                    {{-- Supaya setelah filter tetap berada di view rekap --}}
+                    {{-- Tetap berada di tampilan Billing 1 & 2 --}}
                     <input type="hidden" name="view" value="rekap">
 
 
                     {{-- AGENCY --}}
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-md-5 col-sm-6">
 
                         <label class="form-label fw-bold text-secondary">
                             Agency
@@ -385,7 +599,7 @@
 
 
                     {{-- SALES AGENCY --}}
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-md-5 col-sm-6">
 
                         <label class="form-label fw-bold text-secondary">
                             Sales Agency
@@ -415,37 +629,12 @@
                     </div>
 
 
-                    {{-- TANGGAL --}}
-                    <div class="col-md-3 col-sm-6">
-
-                        <label class="form-label fw-bold text-secondary">
-                            Dari Tanggal
-                        </label>
-
-                        <input type="date"
-                               name="date_from"
-                               class="form-control form-control-sm"
-                               value="{{ request('date_from') }}">
-
-                    </div>
-
-
-                    {{-- BUTTON --}}
-                    <div class="col-md-3 col-sm-6 d-flex align-items-end gap-1">
-
-                        <button type="submit"
-                                class="btn btn-primary btn-sm w-50"
-                                style="border-radius: 8px;">
-
-                            <i class="bi bi-search me-1"></i>
-                            Filter
-
-                        </button>
-
+                    {{-- RESET --}}
+                    <div class="col-md-2 col-sm-12 d-flex align-items-end">
 
                         <a href="{{ route('rekap.agency', ['view' => 'rekap']) }}"
-                           class="btn btn-secondary btn-sm w-50"
-                           style="border-radius: 8px;">
+                        class="btn btn-secondary btn-sm w-100"
+                        style="border-radius: 8px;">
 
                             <i class="bi bi-arrow-counterclockwise me-1"></i>
                             Reset
@@ -917,143 +1106,189 @@
                     </table>
 
                 </div>
+            {{-- ============================================================
+            PAGINATION BILLING 1 & 2
+            ============================================================= --}}
+            <div class="billing-pagination">
+
+                {{-- INFORMASI DATA --}}
+                <div class="billing-pagination-info">
+
+                    Menampilkan
+                    <strong>{{ $rekap->firstItem() ?? 0 }}</strong>
+                    -
+                    <strong>{{ $rekap->lastItem() ?? 0 }}</strong>
+                    dari
+                    <strong>{{ number_format($rekap->total()) }}</strong>
+                    data
+
+                </div>
 
 
+                {{-- NAVIGASI PAGINATION --}}
+                <div class="billing-pagination-nav">
 
-                {{-- PAGINATION --}}
-                <div class="d-flex justify-content-between
-                            align-items-center mt-3
-                            flex-wrap gap-2">
+                    {{-- PREVIOUS --}}
+                    @if ($rekap->onFirstPage())
 
-                    <div>
+                        <span class="billing-page-link disabled">
+                            <i class="bi bi-chevron-left"></i>
+                        </span>
 
-                        <small class="text-muted"
-                               style="font-size:0.75rem;">
+                    @else
 
-                            Menampilkan
-                            {{ $rekap->firstItem() ?? 0 }}
-                            -
-                            {{ $rekap->lastItem() ?? 0 }}
+                        <a href="{{ $rekap->appends(request()->query())->previousPageUrl() }}"
+                        class="billing-page-link">
 
-                            dari
+                            <i class="bi bi-chevron-left"></i>
 
-                            {{ number_format($rekap->total()) }}
-                            data
+                        </a>
 
-                        </small>
-
-                    </div>
+                    @endif
 
 
-                    <div>
+                    {{-- NOMOR HALAMAN --}}
+                    @foreach ($rekap->getUrlRange(
+                        max(1, $rekap->currentPage() - 2),
+                        min($rekap->lastPage(), $rekap->currentPage() + 2)
+                    ) as $page => $url)
 
-                        {{ $rekap
-                            ->appends(request()->query())
-                            ->links()
-                        }}
+                        @if ($page == $rekap->currentPage())
 
-                    </div>
+                            <span class="billing-page-link active">
+                                {{ $page }}
+                            </span>
+
+                        @else
+
+                            <a href="{{ $url }}&{{ http_build_query(request()->except('page')) }}"
+                            class="billing-page-link">
+
+                                {{ $page }}
+
+                            </a>
+
+                        @endif
+
+                    @endforeach
+
+
+                    {{-- NEXT --}}
+                    @if ($rekap->hasMorePages())
+
+                        <a href="{{ $rekap->appends(request()->query())->nextPageUrl() }}"
+                        class="billing-page-link">
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                    @else
+
+                        <span class="billing-page-link disabled">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+
+                    @endif
 
                 </div>
 
             </div>
-
         </div>
 
     @endif
 
 
 
-    {{-- ============================================================
-        VIEW BILLING KE-1
-        TIDAK ADA FILTER
-        TIDAK ADA JUDUL PENYELESAIAN BILLING 1 DAN 2
-    ============================================================= --}}
+    {{-- BILLING KE-1 --}}
     @if(request('view') == 'billing1')
 
-        <div class="card border-0 shadow-sm mt-4">
+        <div class="card border-0 shadow-sm mt-4"
+            style="border: 1px solid #e2e8f0 !important;
+                    border-radius: 12px;
+                    overflow: hidden;">
 
-            <div class="card-header bg-white border-0
-                        text-center pt-3 pb-0">
+            {{-- JUDUL --}}
+            <div class="card-header bg-white border-0 text-center"
+                style="padding: 15px !important;">
 
-                <h6 class="mb-1 fw-bold text-dark text-uppercase"
-                    style="font-size: 13px; letter-spacing: 0.5px;">
-
+                <h6 class="mb-1 fw-bold text-primary-custom"
+                    style="font-size: 0.9rem;">
                     BILLING KE - 1
-
                 </h6>
 
-                <h6 class="mb-0 fw-bold text-dark text-uppercase"
-                    style="font-size: 13px; letter-spacing: 0.5px;">
-
+                <h6 class="mb-0 fw-bold text-primary-custom"
+                    style="font-size: 0.9rem;">
                     AGENCY WITEL PRIANGAN TIMUR
-
                 </h6>
 
             </div>
 
 
+            {{-- ISI TABEL --}}
             <div class="card-body">
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered
-                                  align-middle text-center
-                                  table-hover table-striped mb-0"
-                           style="font-size: 11px;
-                                  border-color: #dee2e6;">
+                    <table class="table table-bordered table-hover table-striped mb-0"
+                        style="min-width: 1000px !important; width: 100%;">
 
-                        <thead style="background-color:#176B87;color:white;">
-
+                        {{-- HEADER --}}
+                        <thead>
                             <tr>
 
-                                <th class="py-2 text-start align-middle"
+                                <th class="text-center"
                                     style="
                                         background-color:#176B87;
                                         color:white;
-                                        min-width:180px;
+                                        min-width:45px;
+                                        vertical-align:middle;
                                     ">
-
-                                    AGENCY
-
+                                    No
                                 </th>
 
+                                <th class="text-start"
+                                    style="
+                                        background-color:#176B87;
+                                        color:white;
+                                        min-width:200px;
+                                        vertical-align:middle;
+                                    ">
+                                    Agency
+                                </th>
 
                                 @foreach($witelDatels as $datel)
 
-                                    <th class="py-2 align-middle"
+                                    <th class="text-center"
                                         style="
                                             background-color:#176B87;
                                             color:white;
+                                            min-width:120px;
+                                            vertical-align:middle;
                                         ">
-
                                         {{ $datel }}
-
                                     </th>
 
                                 @endforeach
 
-
-                                <th class="py-2 align-middle"
+                                <th class="text-center"
                                     style="
                                         background-color:#176B87;
                                         color:white;
-                                        min-width:90px;
+                                        min-width:120px;
+                                        vertical-align:middle;
                                     ">
-
                                     Grand Total
-
                                 </th>
 
                             </tr>
-
                         </thead>
 
 
+                        {{-- BODY --}}
                         <tbody>
 
                             @php
-
                                 $colTotals = [];
 
                                 foreach ($witelDatels as $datel) {
@@ -1061,7 +1296,7 @@
                                 }
 
                                 $grandTotalAll = 0;
-
+                                $no = 1;
                             @endphp
 
 
@@ -1071,32 +1306,32 @@
                                     $rowTotal = 0;
                                 @endphp
 
-
                                 <tr>
 
-                                    <td class="text-start fw-bold">
+                                    {{-- NO --}}
+                                    <td class="text-center">
+                                        {{ $no++ }}
+                                    </td>
+
+
+                                    {{-- AGENCY --}}
+                                    <td class="fw-bold">
                                         {{ $agency }}
                                     </td>
 
 
+                                    {{-- DATEL --}}
                                     @foreach($witelDatels as $datel)
 
                                         @php
-
-                                            $val =
-                                                $witelData[$agency][$datel]
-                                                ?? 0;
+                                            $val = $witelData[$agency][$datel] ?? 0;
 
                                             $rowTotal += $val;
-
                                             $colTotals[$datel] += $val;
-
                                             $grandTotalAll += $val;
-
                                         @endphp
 
-
-                                        <td>
+                                        <td class="text-center">
 
                                             @if($val > 0)
 
@@ -1106,12 +1341,15 @@
                                                     'datel' => $datel,
                                                     'status' => 'Blm Bayar'
                                                 ]) }}"
-                                                class="text-decoration-underline
-                                                       fw-bold text-primary">
+                                                class="ssl-link">
 
                                                     {{ number_format($val) }}
 
                                                 </a>
+
+                                            @else
+
+                                                0
 
                                             @endif
 
@@ -1120,7 +1358,8 @@
                                     @endforeach
 
 
-                                    <td class="fw-bold">
+                                    {{-- GRAND TOTAL BARIS --}}
+                                    <td class="text-center fw-bold">
 
                                         @if($rowTotal > 0)
 
@@ -1129,8 +1368,7 @@
                                                 'agency' => $agency,
                                                 'status' => 'Blm Bayar'
                                             ]) }}"
-                                            class="text-decoration-underline
-                                                   text-dark fw-bold">
+                                            class="ssl-link">
 
                                                 {{ number_format($rowTotal) }}
 
@@ -1146,17 +1384,22 @@
 
                                 </tr>
 
-
                             @empty
 
                                 <tr>
 
-                                    <td colspan="{{ count($witelDatels) + 2 }}"
-                                        class="text-center py-4 text-muted">
+                                    <td colspan="{{ count($witelDatels) + 3 }}"
+                                        class="text-center py-5">
 
-                                        Tidak ada data belum bayar
-                                        untuk Billing Ke-1 Agency
-                                        Witel Priangan Timur
+                                        <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
+
+                                        <span class="text-muted"
+                                            style="font-size:0.85rem;">
+
+                                            Tidak ada data belum bayar
+                                            untuk Billing Ke-1 Agency Witel Priangan Timur
+
+                                        </span>
 
                                     </td>
 
@@ -1167,33 +1410,32 @@
                         </tbody>
 
 
+                        {{-- GRAND TOTAL --}}
                         @if(count($witelAgencies) > 0)
 
-                            <tfoot class="fw-bold"
-                                   style="
-                                       background-color:#176B87;
-                                       color:white;
-                                   ">
+                            <tfoot>
 
-                                <tr>
+                                <tr class="fw-bold">
 
-                                    <td class="text-start"
+                                    <td colspan="2"
+                                        class="text-end"
                                         style="
                                             background-color:#176B87;
                                             color:white;
                                         ">
 
-                                        Grand Total
+                                        GRAND TOTAL
 
                                     </td>
 
 
                                     @foreach($witelDatels as $datel)
 
-                                        <td style="
-                                            background-color:#176B87;
-                                            color:white;
-                                        ">
+                                        <td class="text-center"
+                                            style="
+                                                background-color:#176B87;
+                                                color:white;
+                                            ">
 
                                             @if(($colTotals[$datel] ?? 0) > 0)
 
@@ -1202,12 +1444,10 @@
                                                     'datel' => $datel,
                                                     'status' => 'Blm Bayar'
                                                 ]) }}"
-                                                class="text-decoration-underline
-                                                       text-white fw-bold">
+                                                class="text-white fw-bold"
+                                                style="text-decoration:underline;">
 
-                                                    {{ number_format(
-                                                        $colTotals[$datel]
-                                                    ) }}
+                                                    {{ number_format($colTotals[$datel]) }}
 
                                                 </a>
 
@@ -1222,10 +1462,11 @@
                                     @endforeach
 
 
-                                    <td style="
-                                        background-color:#176B87;
-                                        color:white;
-                                    ">
+                                    <td class="text-center"
+                                        style="
+                                            background-color:#176B87;
+                                            color:white;
+                                        ">
 
                                         @if($grandTotalAll > 0)
 
@@ -1233,12 +1474,10 @@
                                                 'billing_ke' => 1,
                                                 'status' => 'Blm Bayar'
                                             ]) }}"
-                                            class="text-decoration-underline
-                                                   text-white fw-bold">
+                                            class="text-white fw-bold"
+                                            style="text-decoration:underline;">
 
-                                                {{ number_format(
-                                                    $grandTotalAll
-                                                ) }}
+                                                {{ number_format($grandTotalAll) }}
 
                                             </a>
 
@@ -1268,101 +1507,95 @@
 
 
 
-    {{-- ============================================================
-        VIEW BILLING KE-2
-        TIDAK ADA FILTER
-        TIDAK ADA JUDUL PENYELESAIAN BILLING 1 DAN 2
-    ============================================================= --}}
+    {{-- BILLING KE-2 --}}
     @if(request('view') == 'billing2')
 
-        <div class="card border-0 shadow-sm mt-4">
+        <div class="card border-0 shadow-sm mt-4"
+            style="border: 1px solid #e2e8f0 !important;
+                    border-radius: 12px;
+                    overflow: hidden;">
 
-            <div class="card-header bg-white border-0
-                        text-center pt-3 pb-0">
+            {{-- JUDUL --}}
+            <div class="card-header bg-white border-0 text-center"
+                style="padding: 15px !important;">
 
-                <h6 class="mb-1 fw-bold text-dark text-uppercase"
-                    style="font-size: 13px; letter-spacing: 0.5px;">
-
+                <h6 class="mb-1 fw-bold text-primary-custom"
+                    style="font-size: 0.9rem;">
                     BILLING KE - 2
-
                 </h6>
 
-                <h6 class="mb-0 fw-bold text-dark text-uppercase"
-                    style="font-size: 13px; letter-spacing: 0.5px;">
-
+                <h6 class="mb-0 fw-bold text-primary-custom"
+                    style="font-size: 0.9rem;">
                     AGENCY WITEL PRIANGAN TIMUR
-
                 </h6>
 
             </div>
 
 
+            {{-- ISI TABEL --}}
             <div class="card-body">
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered
-                                  align-middle text-center
-                                  table-hover table-striped mb-0"
-                           style="
-                               font-size: 11px;
-                               border-color:#dee2e6;
-                           ">
+                    <table class="table table-bordered table-hover table-striped mb-0"
+                        style="min-width: 1000px !important; width: 100%;">
 
-                        <thead style="
-                            background-color:#176B87;
-                            color:white;
-                        ">
-
+                        {{-- HEADER --}}
+                        <thead>
                             <tr>
 
-                                <th class="py-2 text-start align-middle"
+                                <th class="text-center"
                                     style="
                                         background-color:#176B87;
                                         color:white;
-                                        min-width:180px;
+                                        min-width:45px;
+                                        vertical-align:middle;
                                     ">
-
-                                    AGENCY
-
+                                    No
                                 </th>
 
+                                <th class="text-start"
+                                    style="
+                                        background-color:#176B87;
+                                        color:white;
+                                        min-width:200px;
+                                        vertical-align:middle;
+                                    ">
+                                    Agency
+                                </th>
 
                                 @foreach($witelDatels2 as $datel)
 
-                                    <th class="py-2 align-middle"
+                                    <th class="text-center"
                                         style="
                                             background-color:#176B87;
                                             color:white;
+                                            min-width:120px;
+                                            vertical-align:middle;
                                         ">
-
                                         {{ $datel }}
-
                                     </th>
 
                                 @endforeach
 
-
-                                <th class="py-2 align-middle"
+                                <th class="text-center"
                                     style="
                                         background-color:#176B87;
                                         color:white;
-                                        min-width:90px;
+                                        min-width:120px;
+                                        vertical-align:middle;
                                     ">
-
                                     Grand Total
-
                                 </th>
 
                             </tr>
-
                         </thead>
 
 
+                        {{-- BODY --}}
                         <tbody>
 
                             @php
-
                                 $colTotals2 = [];
 
                                 foreach ($witelDatels2 as $datel) {
@@ -1370,7 +1603,7 @@
                                 }
 
                                 $grandTotalAll2 = 0;
-
+                                $no2 = 1;
                             @endphp
 
 
@@ -1380,34 +1613,32 @@
                                     $rowTotal2 = 0;
                                 @endphp
 
-
                                 <tr>
 
-                                    <td class="text-start fw-bold">
-
-                                        {{ $agency }}
-
+                                    {{-- NO --}}
+                                    <td class="text-center">
+                                        {{ $no2++ }}
                                     </td>
 
 
+                                    {{-- AGENCY --}}
+                                    <td class="fw-bold">
+                                        {{ $agency }}
+                                    </td>
+
+
+                                    {{-- DATEL --}}
                                     @foreach($witelDatels2 as $datel)
 
                                         @php
-
-                                            $val =
-                                                $witelData2[$agency][$datel]
-                                                ?? 0;
+                                            $val = $witelData2[$agency][$datel] ?? 0;
 
                                             $rowTotal2 += $val;
-
                                             $colTotals2[$datel] += $val;
-
                                             $grandTotalAll2 += $val;
-
                                         @endphp
 
-
-                                        <td>
+                                        <td class="text-center">
 
                                             @if($val > 0)
 
@@ -1417,12 +1648,15 @@
                                                     'datel' => $datel,
                                                     'status' => 'Blm Bayar'
                                                 ]) }}"
-                                                class="text-decoration-underline
-                                                       fw-bold text-primary">
+                                                class="ssl-link">
 
                                                     {{ number_format($val) }}
 
                                                 </a>
+
+                                            @else
+
+                                                0
 
                                             @endif
 
@@ -1431,7 +1665,8 @@
                                     @endforeach
 
 
-                                    <td class="fw-bold">
+                                    {{-- GRAND TOTAL BARIS --}}
+                                    <td class="text-center fw-bold">
 
                                         @if($rowTotal2 > 0)
 
@@ -1440,8 +1675,7 @@
                                                 'agency' => $agency,
                                                 'status' => 'Blm Bayar'
                                             ]) }}"
-                                            class="text-decoration-underline
-                                                   text-dark fw-bold">
+                                            class="ssl-link">
 
                                                 {{ number_format($rowTotal2) }}
 
@@ -1457,17 +1691,22 @@
 
                                 </tr>
 
-
                             @empty
 
                                 <tr>
 
-                                    <td colspan="{{ count($witelDatels2) + 2 }}"
-                                        class="text-center py-4 text-muted">
+                                    <td colspan="{{ count($witelDatels2) + 3 }}"
+                                        class="text-center py-5">
 
-                                        Tidak ada data belum bayar
-                                        untuk Billing Ke-2 Agency
-                                        Witel Priangan Timur
+                                        <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
+
+                                        <span class="text-muted"
+                                            style="font-size:0.85rem;">
+
+                                            Tidak ada data belum bayar
+                                            untuk Billing Ke-2 Agency Witel Priangan Timur
+
+                                        </span>
 
                                     </td>
 
@@ -1478,33 +1717,32 @@
                         </tbody>
 
 
+                        {{-- GRAND TOTAL --}}
                         @if(count($witelAgencies2) > 0)
 
-                            <tfoot class="fw-bold"
-                                   style="
-                                       background-color:#176B87;
-                                       color:white;
-                                   ">
+                            <tfoot>
 
-                                <tr>
+                                <tr class="fw-bold">
 
-                                    <td class="text-start"
+                                    <td colspan="2"
+                                        class="text-end"
                                         style="
                                             background-color:#176B87;
                                             color:white;
                                         ">
 
-                                        Grand Total
+                                        GRAND TOTAL
 
                                     </td>
 
 
                                     @foreach($witelDatels2 as $datel)
 
-                                        <td style="
-                                            background-color:#176B87;
-                                            color:white;
-                                        ">
+                                        <td class="text-center"
+                                            style="
+                                                background-color:#176B87;
+                                                color:white;
+                                            ">
 
                                             @if(($colTotals2[$datel] ?? 0) > 0)
 
@@ -1513,12 +1751,10 @@
                                                     'datel' => $datel,
                                                     'status' => 'Blm Bayar'
                                                 ]) }}"
-                                                class="text-decoration-underline
-                                                       text-white fw-bold">
+                                                class="text-white fw-bold"
+                                                style="text-decoration:underline;">
 
-                                                    {{ number_format(
-                                                        $colTotals2[$datel]
-                                                    ) }}
+                                                    {{ number_format($colTotals2[$datel]) }}
 
                                                 </a>
 
@@ -1533,10 +1769,11 @@
                                     @endforeach
 
 
-                                    <td style="
-                                        background-color:#176B87;
-                                        color:white;
-                                    ">
+                                    <td class="text-center"
+                                        style="
+                                            background-color:#176B87;
+                                            color:white;
+                                        ">
 
                                         @if($grandTotalAll2 > 0)
 
@@ -1544,12 +1781,10 @@
                                                 'billing_ke' => 2,
                                                 'status' => 'Blm Bayar'
                                             ]) }}"
-                                            class="text-decoration-underline
-                                                   text-white fw-bold">
+                                            class="text-white fw-bold"
+                                            style="text-decoration:underline;">
 
-                                                {{ number_format(
-                                                    $grandTotalAll2
-                                                ) }}
+                                                {{ number_format($grandTotalAll2) }}
 
                                             </a>
 

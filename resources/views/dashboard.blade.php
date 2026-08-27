@@ -644,15 +644,7 @@
         @endif
     @endif
 
-    {{-- PRINT FLOATING DOWNLOAD BUTTON (Klik Unduh) AT BOTTOM RIGHT --}}
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-        <button class="btn btn-primary btn-lg shadow-lg d-flex align-items-center justify-content-center gap-2 rounded-circle" 
-                style="background-color: #0b2240; border-color: #0b2240; width: 60px; height: 60px;" 
-                onclick="exportDashboardPdf()" 
-                title="Cetak Halaman ke PDF">
-            <i class="bi bi-download fs-4"></i>
-        </button>
-    </div>
+
 </div>
 @endsection
 

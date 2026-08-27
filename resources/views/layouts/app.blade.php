@@ -571,8 +571,8 @@
                         <div>
                             <div class="fw-bold text-white" style="font-size: 0.85rem;">{{ Auth::user()->name ?? 'Admin' }}</div>
                             <small class="text-white-50" style="font-size: 0.7rem;">
-                                <i class="bi bi-shield-check me-1"></i>
-                                {{ Auth::user()->role ?? 'Supervisor' }}
+                                <i class="bi bi-briefcase me-1"></i>
+                                {{ Auth::user()->divisi ?? Auth::user()->role ?? 'Supervisor' }}
                             </small>
                         </div>
                     </a>
