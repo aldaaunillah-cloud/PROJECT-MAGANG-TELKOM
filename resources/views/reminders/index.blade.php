@@ -94,7 +94,7 @@
                                         <i class="bi bi-eye-fill fs-5"></i>
                                     </button>
                                     {{-- Download Icon (PDF) --}}
-                                    <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}')" 
+                                    <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}', '{{ $reminder->created_at ? $reminder->created_at->format('d M Y H:i:s') : '-' }}')" 
                                             class="btn btn-sm btn-light text-danger border-0 rounded-3 shadow-sm px-3 py-2 ms-1" 
                                             title="Unduh Laporan (.pdf)">
                                         <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
@@ -219,7 +219,7 @@
     });
 
     // Fungsi Client-side Export PDF untuk masing-masing baris
-    function downloadRowAsPdf(id) {
+    function downloadRowAsPdf(id, sentDate) {
         let contentElement = document.getElementById('msgContent' + id);
         let saNameElement = document.getElementById('saName' + id);
         
@@ -230,7 +230,6 @@
 
         let content = contentElement.textContent;
         let saName = saNameElement.textContent.trim();
-        let dateStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
         
         // Buat container tersembunyi di HTML body untuk me-render dokumen PDF
         let pdfContainer = document.createElement('div');
@@ -266,8 +265,8 @@
                         <strong style="font-size: 14px; color: #000361; text-transform: uppercase;">${saName}</strong>
                     </td>
                     <td style="padding: 15px; border-bottom: 1px solid #dee2e6; width: 50%;">
-                        <span style="font-size: 10px; color: #6c757d; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Tanggal Laporan</span>
-                        <strong style="font-size: 14px; color: #212529;">${dateStr}</strong>
+                        <span style="font-size: 10px; color: #6c757d; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Tanggal Kirim</span>
+                        <strong style="font-size: 14px; color: #212529;">${sentDate}</strong>
                     </td>
                 </tr>
                 <tr>
