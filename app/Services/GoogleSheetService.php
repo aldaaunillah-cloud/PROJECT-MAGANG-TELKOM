@@ -211,8 +211,11 @@ class GoogleSheetService
             
             // Identitas
             'SND' => 'snd',
+            'SDN' => 'snd',
             'SND_GROUP' => 'snd_group',
+            'SDN_GROUP' => 'snd_group',
             'SND GROUP' => 'snd_group',
+            'SDN GROUP' => 'snd_group',
             'NCLI' => 'ncli',
             'NAMA' => 'nama',
             'ALAMAT' => 'alamat',

@@ -275,6 +275,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NO</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">SND</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">CUSTOMER</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">DATEL</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">AGENCY</th>
@@ -288,6 +289,7 @@
                             @forelse($salesCustomers as $index => $customer)
                                 <tr>
                                     <td class="px-3 py-2" style="font-size:0.8rem;">{{ $salesCustomers->firstItem() + $index }}</td>
+                                    <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem; font-family: monospace;">{{ $customer->snd ?: '-' }}</td>
                                     <td class="px-3 py-2" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ $customer->nama }}</td>
                                     <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->datel }}</td>
                                     <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->agency_psb ?: '-' }}</td>
@@ -332,7 +334,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NO</th>
-                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NCLI</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">SND</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NAMA CUSTOMER</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">DATEL</th>
                                 <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">PRODUK</th>
@@ -348,22 +350,30 @@
                         <tbody>
                             @forelse($agencyCustomers as $index => $customer)
                                 <tr>
-                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $agencyCustomers->firstItem() + $index }}</td>
-                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->ncli ?: '-' }}</td>
-                                    <td class="px-3 py-2" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ $customer->nama }}</td>
-                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->datel }}</td>
-                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->produk }}</td>
-                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_inet ?? 0, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_tlp ?? 0, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem; font-weight: bold;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->sales_agency ?: '-' }}</td>
-                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
-                                    <td class="px-3 py-2">
+                                    <td class="px-3 py-2 align-middle" style="font-size:0.8rem;">{{ $agencyCustomers->firstItem() + $index }}</td>
+                                    <td class="px-3 py-2 align-middle text-nowrap" style="font-size:0.8rem;">{{ $customer->snd ?: '-' }}</td>
+                                    <td class="px-3 py-2 align-middle" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ $customer->nama }}</td>
+                                    <td class="px-3 py-2 align-middle text-nowrap" style="font-size:0.8rem;">{{ $customer->datel }}</td>
+                                    <td class="px-3 py-2 align-middle text-nowrap" style="font-size:0.8rem;">{{ $customer->produk }}</td>
+                                    <td class="px-3 py-2 align-middle text-end text-nowrap" style="font-size:0.8rem;">
+                                        <span style="font-size:0.75em; margin-right:2px;" class="text-muted">Rp</span>{{ number_format($customer->tag_inet ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-3 py-2 align-middle text-end text-nowrap" style="font-size:0.8rem;">
+                                        <span style="font-size:0.75em; margin-right:2px;" class="text-muted">Rp</span>{{ number_format($customer->tag_tlp ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-3 py-2 align-middle text-end text-nowrap" style="font-size:0.8rem; font-weight: bold;">
+                                        <span style="font-size:0.75em; margin-right:2px;" class="text-muted">Rp</span>{{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-3 py-2 align-middle text-nowrap" style="font-size:0.8rem;">{{ $customer->sales_agency ?: '-' }}</td>
+                                    <td class="px-3 py-2 align-middle text-end text-nowrap" style="font-size:0.8rem;">
+                                        <span style="font-size:0.75em; margin-right:2px;" class="text-muted">Rp</span>{{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-3 py-2 align-middle text-nowrap">
                                         <span class="badge bg-{{ ($customer->billing_ke ?? 0) <= 2 ? 'primary' : 'secondary' }} px-2 py-1" style="font-size:0.65rem;">
                                             Billing {{ $customer->billing_ke }}
                                         </span>
                                     </td>
-                                    <td class="px-3 py-2 text-center">
+                                    <td class="px-3 py-2 align-middle text-center text-nowrap">
                                         <span class="badge bg-danger px-2 py-1" style="font-size:0.65rem;">
                                             Belum Bayar
                                         </span>
