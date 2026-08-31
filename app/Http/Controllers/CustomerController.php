@@ -234,7 +234,15 @@ class CustomerController extends Controller
                 ->select(
                     'datel',
                     'billing_ke',
-                    DB::raw('COUNT(*) as blm_bayar'),
+                    DB::raw("
+                    COUNT(
+                        DISTINCT CASE
+                            WHEN ncli IS NOT NULL AND TRIM(ncli) != ''
+                                THEN CONCAT('NCLI_', TRIM(ncli))
+                            ELSE CONCAT('SND_', snd)
+                        END
+                    ) as blm_bayar
+                "),
                     DB::raw('SUM(tag_total) as blm_bayar_rp')
                 )
                 ->groupBy('datel', 'billing_ke')
@@ -378,34 +386,60 @@ class CustomerController extends Controller
     public function hotdDetail($billingKe, $datel, ?Request $request = null)
     {
         $request = $request ?? request();
+
+        // =========================================================
+        // 1. Ambil data customer belum bayar sesuai filter
+        // =========================================================
         $query = Customer::query()
             ->where('status_bayar', '!=', 'Sdh Bayar');
 
-        if ($billingKe && $billingKe !== 'All' && $billingKe !== 'Semua Billing' && $billingKe !== 'all' && $billingKe !== 'TOTAL' && $billingKe != 0) {
+        // Filter Billing
+        if (
+            $billingKe &&
+            $billingKe !== 'All' &&
+            $billingKe !== 'Semua Billing' &&
+            $billingKe !== 'all' &&
+            $billingKe !== 'TOTAL' &&
+            $billingKe != 0
+        ) {
             $query->where('billing_ke', $billingKe);
         }
 
-        if ($datel && $datel !== 'Nasional' && $datel !== 'Semua Datel' && $datel !== 'Semua' && $datel !== 'TOTAL') {
+        // Filter Datel
+        if (
+            $datel &&
+            $datel !== 'Nasional' &&
+            $datel !== 'Semua Datel' &&
+            $datel !== 'Semua' &&
+            $datel !== 'TOTAL'
+        ) {
             $query->where('datel', $datel);
         }
 
+        // Filter Agency
         if ($request->filled('agency')) {
             $agency = $request->agency;
+
             $query->where(function ($q) use ($agency) {
                 $q->where('agency_psb', $agency)
                     ->orWhere('agency', $agency);
             });
         }
 
+        // Filter Sales
         if ($request->filled('sales')) {
             $sales = $request->sales;
+
             $query->where(function ($q) use ($sales) {
                 $q->where('sales_agency', $sales)
                     ->orWhere('sales', $sales);
             });
         }
 
-        $customers = $query->select(
+        // =========================================================
+        // 2. Ambil data mentah
+        // =========================================================
+        $rawCustomers = $query->select(
             'status_bayar',
             'tag_total',
             'tag_inet',
@@ -440,15 +474,108 @@ class CustomerController extends Controller
             ->orderBy('tag_total', 'DESC')
             ->get();
 
+        // =========================================================
+        // 3. Group berdasarkan NCLI
+        //
+        // Kalau NCLI kosong, jangan digabung dengan data kosong lain.
+        // Gunakan SND sebagai key cadangan.
+        // =========================================================
+        $groupedCustomers = $rawCustomers
+            ->groupBy(function ($customer) {
+                $ncli = trim((string) $customer->ncli);
+
+                if ($ncli !== '') {
+                    return 'NCLI_' . $ncli;
+                }
+
+                return 'SND_' . $customer->snd;
+            })
+            ->map(function ($group) {
+
+                // Pilih record produk Internet sebagai data utama.
+                // Kalau tidak ditemukan, gunakan record pertama.
+                $primaryCustomer = $group->first(function ($customer) {
+                    return stripos((string) $customer->produk, 'internet') !== false;
+                });
+
+                if (!$primaryCustomer) {
+                    $primaryCustomer = $group->first();
+                }
+
+                // Clone agar data asli tidak ikut berubah.
+                $customer = clone $primaryCustomer;
+
+                // Ambil SND GROUP persis dari data sumber/Spreadsheet.
+                // Jika record utama Internet kosong, cari snd_group yang
+                // terisi dari anggota lain dalam NCLI yang sama.
+                $groupSnd = $group
+                    ->pluck('snd_group')
+                    ->filter(function ($value) {
+                        return $value !== null && trim((string) $value) !== '';
+                    })
+                    ->first();
+
+                if ($groupSnd !== null && trim((string) $groupSnd) !== '') {
+                    $customer->snd_group = $groupSnd;
+                }
+
+                // Jumlahkan nilai antar SND dalam NCLI yang sama.
+                $customer->tag_total = $group->sum(function ($item) {
+                    return (float) ($item->tag_total ?? 0);
+                });
+
+                $customer->tag_inet = $group->sum(function ($item) {
+                    return (float) ($item->tag_inet ?? 0);
+                });
+
+                $customer->tag_tlp = $group->sum(function ($item) {
+                    return (float) ($item->tag_tlp ?? 0);
+                });
+
+                $customer->saldo = $group->sum(function ($item) {
+                    return (float) ($item->saldo ?? 0);
+                });
+
+                // Informasi group sementara untuk response JSON.
+                // Tidak menambah kolom database maupun spreadsheet.
+                $customer->jumlah_snd = $group->count();
+
+                $customer->daftar_snd = $group
+                    ->pluck('snd')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->implode(', ');
+
+                // Detail tiap SND untuk tampilan badge "2 SND", "3 SND", dst.
+                $customer->detail_snd = $group
+                    ->map(function ($item) {
+                        return [
+                            'snd' => $item->snd,
+                            'snd_group' => $item->snd_group,
+                            'produk' => $item->produk,
+                            'tag_total' => (float) ($item->tag_total ?? 0),
+                        ];
+                    })
+                    ->values();
+
+                return $customer;
+            })
+            ->sortByDesc('tag_total')
+            ->values();
+
+        // =========================================================
+        // 4. Response ke popup HOTD
+        // =========================================================
         return response()->json([
             'billing_ke' => $billingKe,
             'datel' => $datel,
-            'total_customer' => $customers->count(),
-            'total_tagihan' => $customers->sum('tag_total'),
-            'total_saldo' => $customers->sum('tag_total'),
-            'total_blm_bayar' => $customers->where('status_bayar', '!=', 'Sdh Bayar')->count(),
-            'total_sdh_bayar' => $customers->where('status_bayar', 'Sdh Bayar')->count(),
-            'customers' => $customers
+            'total_customer' => $groupedCustomers->count(),
+            'total_tagihan' => $groupedCustomers->sum('tag_total'),
+            'total_saldo' => $groupedCustomers->sum('saldo'),
+            'total_blm_bayar' => $groupedCustomers->count(),
+            'total_sdh_bayar' => 0,
+            'customers' => $groupedCustomers,
         ]);
     }
 

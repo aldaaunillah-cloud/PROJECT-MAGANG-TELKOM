@@ -869,7 +869,16 @@ function renderDetailTable(response) {
                 </td>
                 <td class="text-nowrap px-2 py-1"><code>${cust.snd || '-'}</code></td>
                 <td class="text-nowrap px-2 py-1">${cust.snd_group || '-'}</td>
-                <td class="text-nowrap px-2 py-1">${cust.ncli || '-'}</td>
+                <td class="text-nowrap px-2 py-1">
+                    <span>${cust.ncli || '-'}</span>
+                    <button type="button"
+                            class="btn btn-sm ${(cust.jumlah_snd || 1) > 1 ? 'btn-primary' : 'btn-secondary'} ms-1 px-2 py-0"
+                            style="font-size:0.58rem; border-radius:999px;"
+                            onclick="showSndGroupDetail(${index})"
+                            title="Klik untuk lihat rincian SND">
+                            ${cust.jumlah_snd || 1} SND
+                    </button>
+                </td>
                 <td class="text-nowrap px-2 py-1" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;" title="${cust.nama || ''}">
                     ${cust.nama || '-'}
                 </td>
@@ -925,6 +934,130 @@ function renderDetailTable(response) {
     document.getElementById('totalCustomerCount').textContent = response.total_customer;
 }
 
+
+// ============================================
+// DETAIL SND DALAM GROUP NCLI
+// ============================================
+function showSndGroupDetail(index) {
+    const cust = currentModalCustomers[index];
+
+    if (!cust) {
+        alert('Data customer tidak ditemukan.');
+        return;
+    }
+
+    const details = Array.isArray(cust.detail_snd) ? cust.detail_snd : [];
+
+    const formatRupiah = (value) => new Intl.NumberFormat('id-ID').format(Number(value || 0));
+
+    const detailRows = details.map((item, detailIndex) => `
+        <tr>
+            <td class="text-center">${detailIndex + 1}</td>
+            <td><code>${item.snd || '-'}</code></td>
+            <td><code>${item.snd_group || '-'}</code></td>
+            <td>${item.produk || '-'}</td>
+            <td class="text-end fw-semibold">Rp ${formatRupiah(item.tag_total)}</td>
+        </tr>
+    `).join('');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'sndGroupDetailOverlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.zIndex = '2000';
+    overlay.style.background = 'rgba(15, 23, 42, 0.45)';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.padding = '20px';
+
+    overlay.innerHTML = `
+        <div class="card border-0 shadow-lg" style="width:min(720px, 96vw); border-radius:16px; overflow:hidden;">
+            <div class="card-header bg-white d-flex justify-content-between align-items-start py-3 px-4">
+                <div>
+                    <h6 class="mb-1 fw-bold" style="color:#000361;">
+                        <i class="bi bi-diagram-3-fill me-2"></i>Detail SND dalam Grup
+                    </h6>
+                    <div class="small text-muted">
+                        NCLI: <span class="fw-bold text-dark">${cust.ncli || '-'}</span>
+                    </div>
+                </div>
+                <button type="button"
+                        class="btn-close"
+                        onclick="closeSndGroupDetail()"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="alert alert-light border d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="small text-muted">Jumlah SND dalam NCLI</div>
+                        <div class="fw-bold">${details.length} SND</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="small text-muted">Total Grup</div>
+                        <div class="fw-bold text-primary">
+                            Rp ${formatRupiah(cust.tag_total)}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width:50px;">#</th>
+                                <th>SND</th>
+                                <th>SND Group</th>
+                                <th>Produk</th>
+                                <th class="text-end">Tagihan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${detailRows}
+                        </tbody>
+                        <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td colspan="4" class="text-end">TOTAL</td>
+                                <td class="text-end text-primary">
+                                    Rp ${formatRupiah(cust.tag_total)}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="small text-muted mt-3">
+                    NCLI yang sama ditampilkan sebagai satu customer, sedangkan tagihan seluruh SND di dalam grup tetap dijumlahkan.
+                </div>
+            </div>
+
+            <div class="card-footer bg-white text-end py-3 px-4">
+                <button type="button"
+                        class="btn btn-secondary btn-sm px-3"
+                        onclick="closeSndGroupDetail()">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    `;
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            closeSndGroupDetail();
+        }
+    });
+
+    document.body.appendChild(overlay);
+}
+
+function closeSndGroupDetail() {
+    const overlay = document.getElementById('sndGroupDetailOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
 // ============================================
 // FUNGSI EXPORT EXCEL (Sudah Diganti ke Backend)
 // ============================================
@@ -968,8 +1101,8 @@ function exportDetailPdf() {
                 margin-top: 15px !important;
             }
             #detailTable th, #detailTable td {
-                font-size: 8px !important;
-                padding: 5px 6px !important;
+                font-size: 7px !important;
+                padding: 4px 5px !important;
                 word-wrap: break-word !important;
                 white-space: normal !important;
             }
@@ -986,16 +1119,19 @@ function exportDetailPdf() {
                 background-color: #f8fafc !important;
             }
             
-            /* Precise Column width allocations */
-            #detailTable th:nth-child(1), #detailTable td:nth-child(1) { width: 4% !important; text-align: center !important; }
-            #detailTable th:nth-child(2), #detailTable td:nth-child(2) { width: 9% !important; text-align: center !important; }
-            #detailTable th:nth-child(3), #detailTable td:nth-child(3) { width: 13% !important; }
-            #detailTable th:nth-child(6), #detailTable td:nth-child(6) { width: 22% !important; font-weight: 600 !important; }
-            #detailTable th:nth-child(7), #detailTable td:nth-child(7) { width: 24% !important; }
-            #detailTable th:nth-child(8), #detailTable td:nth-child(8) { width: 8% !important; }
-            #detailTable th:nth-child(9), #detailTable td:nth-child(9) { width: 9% !important; }
-            #detailTable th:nth-child(10), #detailTable td:nth-child(10) { width: 8% !important; }
-            #detailTable th:nth-child(14), #detailTable td:nth-child(14) { width: 13% !important; text-align: right !important; font-weight: 700 !important; color: #000361 !important; }
+            /* Precise column widths for PDF.
+               SND Group and NCLI are intentionally included for auditability. */
+            #detailTable th:nth-child(1), #detailTable td:nth-child(1) { width: 3% !important; text-align: center !important; }
+            #detailTable th:nth-child(2), #detailTable td:nth-child(2) { width: 7% !important; text-align: center !important; }
+            #detailTable th:nth-child(3), #detailTable td:nth-child(3) { width: 10% !important; }
+            #detailTable th:nth-child(4), #detailTable td:nth-child(4) { width: 10% !important; }
+            #detailTable th:nth-child(5), #detailTable td:nth-child(5) { width: 8% !important; }
+            #detailTable th:nth-child(6), #detailTable td:nth-child(6) { width: 15% !important; font-weight: 600 !important; }
+            #detailTable th:nth-child(7), #detailTable td:nth-child(7) { width: 17% !important; }
+            #detailTable th:nth-child(8), #detailTable td:nth-child(8) { width: 7% !important; }
+            #detailTable th:nth-child(9), #detailTable td:nth-child(9) { width: 8% !important; }
+            #detailTable th:nth-child(10), #detailTable td:nth-child(10) { width: 7% !important; }
+            #detailTable th:nth-child(14), #detailTable td:nth-child(14) { width: 8% !important; text-align: right !important; font-weight: 700 !important; color: #000361 !important; }
 
             /* Hide tfoot and double header sub-row */
             #detailTable tfoot {
@@ -1005,9 +1141,8 @@ function exportDetailPdf() {
                 display: none !important;
             }
 
-            /* Hide unnecessary columns to fit landscape A4 page */
-            #detailTable th:nth-child(4), #detailTable td:nth-child(4),
-            #detailTable th:nth-child(5), #detailTable td:nth-child(5),
+            /* Hide unnecessary columns to fit landscape A4 page.
+               Columns 4 (SND Group) and 5 (NCLI) stay visible. */
             #detailTable th:nth-child(11), #detailTable td:nth-child(11),
             #detailTable th:nth-child(12), #detailTable td:nth-child(12),
             #detailTable th:nth-child(13), #detailTable td:nth-child(13),
