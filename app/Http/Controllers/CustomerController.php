@@ -540,14 +540,14 @@ class CustomerController extends Controller
                     : \Carbon\Carbon::parse($request->start_date)->endOfDay();
                 $query->whereBetween('created_at', [$dateFrom, $dateTo]);
             } catch (\Exception $e) {
-                \Log::error("Gagal parse start_date/end_date: " . $e->getMessage());
+                Log::error("Gagal parse start_date/end_date: " . $e->getMessage());
             }
         } elseif ($request->filled('end_date')) {
             try {
                 $dateTo = \Carbon\Carbon::parse($request->end_date)->endOfDay();
                 $query->where('created_at', '<=', $dateTo);
             } catch (\Exception $e) {
-                \Log::error("Gagal parse end_date: " . $e->getMessage());
+                Log::error("Gagal parse end_date: " . $e->getMessage());
             }
         }
 
