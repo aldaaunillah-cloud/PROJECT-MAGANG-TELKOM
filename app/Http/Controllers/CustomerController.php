@@ -815,27 +815,26 @@ class CustomerController extends Controller
     }
 
     /**
-     * ============================================
-     * DOWNLOAD SSL
-     * ============================================
-     */
-    public function downloadSsl($id)
-    {
-        $customer = Customer::findOrFail($id);
+ * ============================================
+ * DOWNLOAD SSL
+ * ============================================
+ */
+public function downloadSsl($snd)
+{
+    $customer = Customer::where('snd', $snd)->firstOrFail();
 
-        if (!$customer->ssl_file) {
-            return back()->with('error', 'File SSL tidak ditemukan untuk customer ini.');
-        }
-
-        $filePath = storage_path('app/ssl/' . $customer->ssl_file);
-
-        if (!file_exists($filePath)) {
-            return back()->with('error', 'File SSL tidak ditemukan di server.');
-        }
-
-        return response()->download($filePath, $customer->ssl_file);
+    if (!$customer->ssl_file) {
+        return back()->with('error', 'File SSL tidak ditemukan untuk customer ini.');
     }
 
+    $filePath = storage_path('app/ssl/' . $customer->ssl_file);
+
+    if (!file_exists($filePath)) {
+        return back()->with('error', 'File SSL tidak ditemukan di server.');
+    }
+
+    return response()->download($filePath, $customer->ssl_file);
+}
     /**
      * ============================================
      * EXPORT EXCEL HOTD DETAIL (DASHBOARD)

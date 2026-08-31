@@ -17,7 +17,7 @@ class Reminder extends Model
         'jenis_reminder',
         'status',
         'keterangan',
-        'tanggal_reminder'
+        'tanggal_reminder',
     ];
 
     protected $casts = [
@@ -26,7 +26,11 @@ class Reminder extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(
+            Customer::class,
+            'customer_id',
+            'id'
+        );
     }
 
     public function user(): BelongsTo

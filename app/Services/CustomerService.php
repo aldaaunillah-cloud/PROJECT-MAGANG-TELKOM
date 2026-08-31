@@ -85,6 +85,7 @@ class CustomerService
     public function getAgencyRekap(Request $request): LengthAwarePaginator
     {
         $query = $this->buildAgencyQuery($request);
+
         return $query->paginate(30)->withQueryString();
     }
 
@@ -93,7 +94,7 @@ class CustomerService
         try {
             $query = $this->buildAgencyQuery($request);
             $result = $query->first();
-            
+
             if (!$result) {
                 return [
                     'total_customer' => 0,
@@ -168,22 +169,36 @@ class CustomerService
     {
         $query = $this->model->query()
             ->select([
-                'id', 'snd', 'nama', 'alamat', 'datel', 'agency', 'sales',
-                'billing_ke', 'status_bayar', 'tag_total', 'ssl_file',
-                'tgl_klaim', 'tgl_paid', 'tgl_paid_n1', 'created_at'
+                'id',
+                'snd',
+                'nama',
+                'alamat',
+                'datel',
+                'agency',
+                'sales',
+                'billing_ke',
+                'status_bayar',
+                'tag_total',
+                'ssl_file',
+                'tgl_klaim',
+                'tgl_paid',
+                'tgl_paid_n1',
+                'created_at',
             ]);
 
         if ($request->filled('search')) {
             $search = $request->search;
+
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('snd', 'like', "%{$search}%")
-                  ->orWhere('sales', 'like', "%{$search}%");
+                    ->orWhere('snd', 'like', "%{$search}%")
+                    ->orWhere('sales', 'like', "%{$search}%");
             });
         }
 
         if ($request->filled('status')) {
             $status = $request->status;
+
             if ($status == 'klaim') {
                 $query->whereNotNull('tgl_klaim')->whereNull('tgl_paid');
             } elseif ($status == 'paid') {
@@ -206,26 +221,31 @@ class CustomerService
         }
 
         $query->orderBy('tgl_klaim', 'desc')
-              ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
 
         return $query->paginate(30)->withQueryString();
     }
 
-    public function downloadSslCertificate($id)
+    public function downloadSslCertificate($snd)
     {
-        $customer = $this->model->findOrFail($id);
-        
+        $customer = $this->model
+            ->where('snd', $snd)
+            ->firstOrFail();
+
         if (!$customer->ssl_file) {
             throw new \Exception('SSL certificate tidak ditemukan untuk customer ini.');
         }
 
         $filePath = storage_path('app/public/ssl/' . $customer->ssl_file);
-        
+
         if (!file_exists($filePath)) {
             throw new \Exception('File SSL tidak ditemukan.');
         }
 
-        return response()->download($filePath, 'ssl_' . $customer->snd . '.crt');
+        return response()->download(
+            $filePath,
+            'ssl_' . $customer->snd . '.crt'
+        );
     }
 
     public function clearCache(): void

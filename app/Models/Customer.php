@@ -12,6 +12,12 @@ class Customer extends Model
 
     protected $table = 'customers';
 
+    protected $primaryKey = 'snd';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         // Data utama
         'snd',
@@ -32,7 +38,7 @@ class Customer extends Model
         'desc_newbill',
         'usage_desc',
         'umur_customer',
-        
+
         // Data pembayaran
         'paid_l11',
         'tgl_paid',
@@ -42,13 +48,13 @@ class Customer extends Model
         'amount_klaim',
         'user_klaim',
         'tgl_paid_n1',
-        
+
         // Data agency
         'agency_psb',
         'sales_agency',
         'ppp',
         'caring_mybrains',
-        
+
         // File
         'ssl_file',
     ];
@@ -71,6 +77,7 @@ class Customer extends Model
         if ($status) {
             return $query->where('status_bayar', $status);
         }
+
         return $query;
     }
 
@@ -79,6 +86,7 @@ class Customer extends Model
         if ($datel) {
             return $query->where('datel', $datel);
         }
+
         return $query;
     }
 
@@ -87,6 +95,7 @@ class Customer extends Model
         if ($agency) {
             return $query->where('agency', $agency);
         }
+
         return $query;
     }
 
@@ -95,6 +104,7 @@ class Customer extends Model
         if ($sales) {
             return $query->where('sales', $sales);
         }
+
         return $query;
     }
 
@@ -103,11 +113,12 @@ class Customer extends Model
         if ($search) {
             return $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('snd', 'like', "%{$search}%")
-                  ->orWhere('alamat', 'like', "%{$search}%")
-                  ->orWhere('sales', 'like', "%{$search}%");
+                    ->orWhere('snd', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%")
+                    ->orWhere('sales', 'like', "%{$search}%");
             });
         }
+
         return $query;
     }
 
@@ -116,15 +127,19 @@ class Customer extends Model
         if (!empty($filters['datel'])) {
             $query->where('datel', $filters['datel']);
         }
+
         if (!empty($filters['agency'])) {
             $query->where('agency', $filters['agency']);
         }
+
         if (!empty($filters['sales'])) {
             $query->where('sales', $filters['sales']);
         }
+
         if (!empty($filters['status'])) {
             $query->where('status_bayar', $filters['status']);
         }
+
         return $query;
     }
 
@@ -141,6 +156,10 @@ class Customer extends Model
     // ============== RELATIONS ==============
     public function reminders()
     {
-        return $this->hasMany(Reminder::class);
+        return $this->hasMany(
+            Reminder::class,
+            'customer_id',
+            'id'
+        );
     }
 }
