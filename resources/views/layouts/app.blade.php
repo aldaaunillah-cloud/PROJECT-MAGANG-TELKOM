@@ -543,6 +543,15 @@
                         BILL 1-2 AGENCY
                     </a>
 
+                    {{-- REKAP AGENCY BILLING 3-6 HOTD --}}
+                    <a href="{{ route('rekap.agency.billing36') }}"
+                    class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('rekap.agency.billing36') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+
+                        <i class="bi bi-building-fill me-2 fs-5"></i>
+                        BILL 3-6 HOTD
+
+                    </a>    
+
                     {{-- RIWAYAT REMINDER --}}
                     <a href="{{ route('reminders.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('reminders.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
                         <i class="bi bi-clock-history me-2 fs-5"></i>

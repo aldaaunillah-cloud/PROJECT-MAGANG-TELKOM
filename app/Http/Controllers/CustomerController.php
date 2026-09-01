@@ -662,8 +662,8 @@ class CustomerController extends Controller
         if ($request->filled('start_date')) {
             try {
                 $dateFrom = \Carbon\Carbon::parse($request->start_date)->startOfDay();
-                $dateTo = $request->filled('end_date') 
-                    ? \Carbon\Carbon::parse($request->end_date)->endOfDay() 
+                $dateTo = $request->filled('end_date')
+                    ? \Carbon\Carbon::parse($request->end_date)->endOfDay()
                     : \Carbon\Carbon::parse($request->start_date)->endOfDay();
                 $query->whereBetween('created_at', [$dateFrom, $dateTo]);
             } catch (\Exception $e) {
@@ -799,10 +799,10 @@ class CustomerController extends Controller
             ->where('agency_psb', '!=', '')
             ->whereNotNull('datel')
             ->where('datel', '!=', '')
-            ->when($request->filled('agency_psb'), function($q) use ($request) {
+            ->when($request->filled('agency_psb'), function ($q) use ($request) {
                 return $q->where('agency_psb', $request->agency_psb);
             })
-            ->when($request->filled('sales_agency'), function($q) use ($request) {
+            ->when($request->filled('sales_agency'), function ($q) use ($request) {
                 return $q->where('sales_agency', $request->sales_agency);
             })
             ->groupBy('agency_psb', 'datel')
@@ -819,10 +819,10 @@ class CustomerController extends Controller
         // Query untuk tabel "BILLING KE - 2 AGENCY WITEL PRIANGAN TIMUR"
         // hanya yang "Blm Bayar" pada Billing 2
         $billing2WitelRaw = Customer::select(
-                'agency_psb',
-                'datel',
-                DB::raw('COUNT(*) as total')
-            )
+            'agency_psb',
+            'datel',
+            DB::raw('COUNT(*) as total')
+        )
             ->where('billing_ke', 2)
             ->where('status_bayar', 'Blm Bayar')
             ->whereNotNull('agency_psb')
@@ -873,6 +873,337 @@ class CustomerController extends Controller
             )
         );
     }
+
+    // ============================================================
+    // REKAP AGENCY BILLING 3 - 6 HOTD
+    // ============================================================
+    public function rekapAgencyBilling36(Request $request)
+    {
+        $billing = $request->input('billing', 'all');
+
+        // ============================================================
+        // TABEL UTAMA BILLING 3 - 6
+        // ============================================================
+
+        $rekap = Customer::select(
+            'agency_psb',
+            'sales_agency',
+
+            // BILLING 3
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 3
+                        AND snd IS NOT NULL
+                        AND snd != ''
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as billing_3_ssl
+            "),
+
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 3
+                        THEN saldo
+                        ELSE 0
+                    END
+                ) as billing_3_saldo
+            "),
+
+            // BILLING 4
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 4
+                        AND snd IS NOT NULL
+                        AND snd != ''
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as billing_4_ssl
+            "),
+
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 4
+                        THEN saldo
+                        ELSE 0
+                    END
+                ) as billing_4_saldo
+            "),
+
+            // BILLING 5
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 5
+                        AND snd IS NOT NULL
+                        AND snd != ''
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as billing_5_ssl
+            "),
+
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 5
+                        THEN saldo
+                        ELSE 0
+                    END
+                ) as billing_5_saldo
+            "),
+
+            // BILLING 6
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 6
+                        AND snd IS NOT NULL
+                        AND snd != ''
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as billing_6_ssl
+            "),
+
+            DB::raw("
+                SUM(
+                    CASE
+                        WHEN billing_ke = 6
+                        THEN saldo
+                        ELSE 0
+                    END
+                ) as billing_6_saldo
+            "),
+
+            // TOTAL BILLING 3 - 6
+            DB::raw("
+                COUNT(NULLIF(snd, '')) as total_ssl
+            "),
+
+            DB::raw("
+                SUM(saldo) as total_saldo
+            ")
+        )
+            ->whereNotNull('agency_psb')
+            ->where('status_bayar', 'Blm Bayar')
+            ->whereBetween('billing_ke', [3, 6])
+
+            // FILTER AGENCY
+            ->when($request->filled('agency_psb'), function ($q) use ($request) {
+                $q->where('agency_psb', $request->agency_psb);
+            })
+
+            // FILTER SALES
+            ->when($request->filled('sales_agency'), function ($q) use ($request) {
+                $q->where('sales_agency', $request->sales_agency);
+            })
+
+            ->groupBy(
+                'agency_psb',
+                'sales_agency'
+            )
+
+            ->orderBy('agency_psb', 'ASC')
+            ->orderBy('sales_agency', 'ASC')
+
+            ->paginate(25);
+
+
+        // ============================================================
+        // FILTER AGENCY & SALES
+        // ============================================================
+
+        $filters = [
+
+            // AGENCY
+            'agency_psb' => Customer::whereNotNull('agency_psb')
+                ->where('agency_psb', '!=', '')
+                ->where('status_bayar', 'Blm Bayar')
+                ->whereBetween('billing_ke', [3, 6])
+                ->distinct()
+                ->orderBy('agency_psb')
+                ->pluck('agency_psb'),
+
+            // SALES AGENCY
+            'sales_agency' => Customer::whereNotNull('sales_agency')
+                ->where('sales_agency', '!=', '')
+                ->where('status_bayar', 'Blm Bayar')
+                ->whereBetween('billing_ke', [3, 6])
+
+                ->when($request->filled('agency_psb'), function ($q) use ($request) {
+                    $q->where(
+                        'agency_psb',
+                        $request->agency_psb
+                    );
+                })
+
+                ->distinct()
+                ->orderBy('sales_agency')
+                ->pluck('sales_agency'),
+        ];
+
+
+        // ============================================================
+        // FUNCTION UNTUK MEMBUAT DATA TABEL BILLING PER BILLING
+        // ============================================================
+
+        $createBillingTable = function ($billingKe) use ($request) {
+
+            $raw = Customer::select(
+                'agency_psb',
+                'datel',
+                DB::raw('COUNT(*) as total')
+            )
+                ->where('billing_ke', $billingKe)
+                ->where('status_bayar', 'Blm Bayar')
+                ->whereNotNull('agency_psb')
+                ->where('agency_psb', '!=', '')
+                ->whereNotNull('datel')
+                ->where('datel', '!=', '')
+
+                // FILTER AGENCY
+                ->when($request->filled('agency_psb'), function ($q) use ($request) {
+                    $q->where(
+                        'agency_psb',
+                        $request->agency_psb
+                    );
+                })
+
+                // FILTER SALES
+                ->when($request->filled('sales_agency'), function ($q) use ($request) {
+                    $q->where(
+                        'sales_agency',
+                        $request->sales_agency
+                    );
+                })
+
+                ->groupBy(
+                    'agency_psb',
+                    'datel'
+                )
+
+                ->orderBy('agency_psb', 'ASC')
+                ->orderBy('datel', 'ASC')
+
+                ->get();
+
+
+            // DAFTAR AGENCY
+            $agencies = $raw
+                ->pluck('agency_psb')
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+
+
+            // DAFTAR DATEL
+            $datels = $raw
+                ->pluck('datel')
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+
+
+            // DATA MATRIX
+            $data = [];
+
+            foreach ($raw as $item) {
+
+                $data[$item->agency_psb][$item->datel] = $item->total;
+
+            }
+
+
+            return [
+                'agencies' => $agencies,
+                'datels'   => $datels,
+                'data'     => $data,
+            ];
+        };
+
+
+        // ============================================================
+        // BILLING 3
+        // ============================================================
+
+        $billing3 = $createBillingTable(3);
+
+        $witelAgencies3 = $billing3['agencies'];
+        $witelDatels3   = $billing3['datels'];
+        $witelData3     = $billing3['data'];
+
+
+        // ============================================================
+        // BILLING 4
+        // ============================================================
+
+        $billing4 = $createBillingTable(4);
+
+        $witelAgencies4 = $billing4['agencies'];
+        $witelDatels4   = $billing4['datels'];
+        $witelData4     = $billing4['data'];
+
+
+        // ============================================================
+        // BILLING 5
+        // ============================================================
+
+        $billing5 = $createBillingTable(5);
+
+        $witelAgencies5 = $billing5['agencies'];
+        $witelDatels5   = $billing5['datels'];
+        $witelData5     = $billing5['data'];
+
+
+        // ============================================================
+        // BILLING 6
+        // ============================================================
+
+        $billing6 = $createBillingTable(6);
+
+        $witelAgencies6 = $billing6['agencies'];
+        $witelDatels6   = $billing6['datels'];
+        $witelData6     = $billing6['data'];
+
+
+        // ============================================================
+        // KIRIM SEMUA DATA KE BLADE
+        // ============================================================
+
+        return view(
+        'rekap-billing36-hotd',
+        compact(
+            'rekap',
+            'filters',
+            'billing',
+
+            'witelAgencies3',
+            'witelDatels3',
+            'witelData3',
+
+            'witelAgencies4',
+            'witelDatels4',
+            'witelData4',
+
+            'witelAgencies5',
+            'witelDatels5',
+            'witelData5',
+
+            'witelAgencies6',
+            'witelDatels6',
+            'witelData6'
+        )
+    );
+    }
+
     /**
      * ============================================
      * EXPORT EXCEL

@@ -35,20 +35,37 @@ Route::middleware(['web'])->group(function () {
         });
 
         // AJAX Filter for Dashboard
-        Route::get('/filter/agencies', [CustomerController::class, 'getAgencies'])->name('filter.agencies');
-        Route::get('/filter/sales', [CustomerController::class, 'getSales'])->name('filter.sales');
+        Route::get('/filter/agencies', [CustomerController::class, 'getAgencies'])
+            ->name('filter.agencies');
 
-        Route::get('/rekap/agency', [CustomerController::class, 'rekapAgency'])->name('rekap.agency');
+        Route::get('/filter/sales', [CustomerController::class, 'getSales'])
+            ->name('filter.sales');
+
+        // Rekap Agency
+        Route::get('/rekap/agency', [CustomerController::class, 'rekapAgency'])
+            ->name('rekap.agency');
+
+        // Rekap Agency Billing 3-6 HOTD
+        Route::get('/rekap/agency-billing-3-6', [CustomerController::class, 'rekapAgencyBilling36'])
+            ->name('rekap.agency.billing36');
 
         // ============================================
-        // REMINDERS - UDAH BENER DI SINI!
+        // REMINDERS
         // ============================================
-        Route::get('/reminders', [CustomerController::class, 'riwayatReminder'])->name('reminders.index');
+        Route::get('/reminders', [CustomerController::class, 'riwayatReminder'])
+            ->name('reminders.index');
 
         // ============================================
-        Route::get('/billing/{billing_ke}', [BillingController::class, 'detail'])->name('billing.detail');
-        Route::get('/billing/{billing_ke}/export-excel', [BillingController::class, 'exportExcel'])->name('billing.detail.export-excel');
-        Route::get('/billing/{billing_ke}/print-pdf', [BillingController::class, 'printPdf'])->name('billing.detail.print-pdf');
+        // BILLING
+        // ============================================
+        Route::get('/billing/{billing_ke}', [BillingController::class, 'detail'])
+            ->name('billing.detail');
+
+        Route::get('/billing/{billing_ke}/export-excel', [BillingController::class, 'exportExcel'])
+            ->name('billing.detail.export-excel');
+
+        Route::get('/billing/{billing_ke}/print-pdf', [BillingController::class, 'printPdf'])
+            ->name('billing.detail.print-pdf');
 
         // ============================================
         // HOTD DETAIL
@@ -63,18 +80,32 @@ Route::middleware(['web'])->group(function () {
         // SYNC
         // ============================================
         Route::prefix('sync')->group(function () {
-            Route::get('/', [SyncController::class, 'index'])->name('sync.index');
-            Route::get('/google-sheets', [SyncController::class, 'sync'])->name('sync.google-sheets');
-            Route::get('/init', [SyncController::class, 'init'])->name('sync.init');
-            Route::post('/batch', [SyncController::class, 'syncBatch'])->name('sync.batch');
-            Route::get('/status', [SyncController::class, 'status'])->name('sync.status');
+            Route::get('/', [SyncController::class, 'index'])
+                ->name('sync.index');
+
+            Route::get('/google-sheets', [SyncController::class, 'sync'])
+                ->name('sync.google-sheets');
+
+            Route::get('/init', [SyncController::class, 'init'])
+                ->name('sync.init');
+
+            Route::post('/batch', [SyncController::class, 'syncBatch'])
+                ->name('sync.batch');
+
+            Route::get('/status', [SyncController::class, 'status'])
+                ->name('sync.status');
         });
 
         // ============================================
         // PROFILE / ADMINISTRATOR
         // ============================================
-        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
-        Route::post('/profile/update', [\App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
-        Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])
+            ->name('profile');
+
+        Route::post('/profile/update', [\App\Http\Controllers\ProfileController::class, 'updateProfile'])
+            ->name('profile.update');
+
+        Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])
+            ->name('profile.password');
     });
 });
