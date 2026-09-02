@@ -35,8 +35,14 @@ class HotdDetailExport extends DefaultValueBinder implements FromCollection, Wit
 
     public function collection()
     {
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
         $query = Customer::query()
-            ->where('status_bayar', '!=', 'Sdh Bayar');
+            ->where('status_bayar', '!=', 'Sdh Bayar')
+            ->whereBetween('billing_ke', [1, 6])
+            ->whereNotIn('datel', $invalidPlaceholders)
+            ->whereNotIn('agency_psb', $invalidPlaceholders)
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
         if (
             $this->billingKe &&
@@ -60,82 +66,16 @@ class HotdDetailExport extends DefaultValueBinder implements FromCollection, Wit
         }
 
         if ($this->agency) {
-            $agency = $this->agency;
-
-            $query->where(function ($q) use ($agency) {
-                $q->where('agency_psb', $agency)
-                    ->orWhere('agency', $agency);
-            });
+            $query->where('agency_psb', $this->agency);
         }
 
         if ($this->sales) {
-            $sales = $this->sales;
-
-            $query->where(function ($q) use ($sales) {
-                $q->where('sales_agency', $sales)
-                    ->orWhere('sales', $sales);
-            });
+            $query->where('sales_agency', $this->sales);
         }
 
-        $rawCustomers = $query
+        return $query
             ->orderBy('tag_total', 'DESC')
             ->get();
-
-        return $rawCustomers
-            ->groupBy(function ($customer) {
-                $ncli = trim((string) $customer->ncli);
-
-                if ($ncli !== '') {
-                    return 'NCLI_' . $ncli;
-                }
-
-                return 'SND_' . $customer->snd;
-            })
-            ->map(function ($group) {
-                $primaryCustomer = $group->first(function ($customer) {
-                    return stripos((string) $customer->produk, 'internet') !== false;
-                });
-
-                if (!$primaryCustomer) {
-                    $primaryCustomer = $group->first();
-                }
-
-                $customer = clone $primaryCustomer;
-
-                // Ambil SND Group asli dari source/Spreadsheet jika ada
-                // pada salah satu anggota NCLI yang sama.
-                $groupSnd = $group
-                    ->pluck('snd_group')
-                    ->filter(function ($value) {
-                        return $value !== null && trim((string) $value) !== '';
-                    })
-                    ->first();
-
-                if ($groupSnd !== null && trim((string) $groupSnd) !== '') {
-                    $customer->snd_group = $groupSnd;
-                }
-
-                // Jumlahkan nilai antar-SND pada NCLI yang sama.
-                $customer->tag_total = $group->sum(function ($item) {
-                    return (float) ($item->tag_total ?? 0);
-                });
-
-                $customer->tag_inet = $group->sum(function ($item) {
-                    return (float) ($item->tag_inet ?? 0);
-                });
-
-                $customer->tag_tlp = $group->sum(function ($item) {
-                    return (float) ($item->tag_tlp ?? 0);
-                });
-
-                $customer->saldo = $group->sum(function ($item) {
-                    return (float) ($item->saldo ?? 0);
-                });
-
-                return $customer;
-            })
-            ->sortByDesc('tag_total')
-            ->values();
     }
 
     public function headings(): array

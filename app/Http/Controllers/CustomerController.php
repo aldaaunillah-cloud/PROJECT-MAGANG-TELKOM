@@ -412,8 +412,17 @@ class CustomerController extends Controller
         // =========================================================
         // 1. Ambil data customer belum bayar sesuai filter
         // =========================================================
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
+        // =========================================================
+        // 1. Ambil data customer belum bayar sesuai filter (Billing 1-6)
+        // =========================================================
         $query = Customer::query()
-            ->where('status_bayar', '!=', 'Sdh Bayar');
+            ->where('status_bayar', '!=', 'Sdh Bayar')
+            ->whereBetween('billing_ke', [1, 6])
+            ->whereNotIn('datel', $invalidPlaceholders)
+            ->whereNotIn('agency_psb', $invalidPlaceholders)
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
 
         // Filter Billing
         if (
@@ -440,28 +449,18 @@ class CustomerController extends Controller
 
         // Filter Agency
         if ($request->filled('agency')) {
-            $agency = $request->agency;
-
-            $query->where(function ($q) use ($agency) {
-                $q->where('agency_psb', $agency)
-                    ->orWhere('agency', $agency);
-            });
+            $query->where('agency_psb', $request->agency);
         }
 
         // Filter Sales
         if ($request->filled('sales')) {
-            $sales = $request->sales;
-
-            $query->where(function ($q) use ($sales) {
-                $q->where('sales_agency', $sales)
-                    ->orWhere('sales', $sales);
-            });
+            $query->where('sales_agency', $request->sales);
         }
 
         // =========================================================
-        // 2. Ambil data mentah
+        // 2. Ambil data per SND (sambungan layanan) agar sinkron dengan SSL
         // =========================================================
-        $rawCustomers = $query->select(
+        $customers = $query->select(
             'status_bayar',
             'tag_total',
             'tag_inet',
@@ -496,108 +495,21 @@ class CustomerController extends Controller
             ->orderBy('tag_total', 'DESC')
             ->get();
 
-        // =========================================================
-        // 3. Group berdasarkan NCLI
-        //
-        // Kalau NCLI kosong, jangan digabung dengan data kosong lain.
-        // Gunakan SND sebagai key cadangan.
-        // =========================================================
-        $groupedCustomers = $rawCustomers
-            ->groupBy(function ($customer) {
-                $ncli = trim((string) $customer->ncli);
-
-                if ($ncli !== '') {
-                    return 'NCLI_' . $ncli;
-                }
-
-                return 'SND_' . $customer->snd;
-            })
-            ->map(function ($group) {
-
-                // Pilih record produk Internet sebagai data utama.
-                // Kalau tidak ditemukan, gunakan record pertama.
-                $primaryCustomer = $group->first(function ($customer) {
-                    return stripos((string) $customer->produk, 'internet') !== false;
-                });
-
-                if (!$primaryCustomer) {
-                    $primaryCustomer = $group->first();
-                }
-
-                // Clone agar data asli tidak ikut berubah.
-                $customer = clone $primaryCustomer;
-
-                // Ambil SND GROUP persis dari data sumber/Spreadsheet.
-                // Jika record utama Internet kosong, cari snd_group yang
-                // terisi dari anggota lain dalam NCLI yang sama.
-                $groupSnd = $group
-                    ->pluck('snd_group')
-                    ->filter(function ($value) {
-                        return $value !== null && trim((string) $value) !== '';
-                    })
-                    ->first();
-
-                if ($groupSnd !== null && trim((string) $groupSnd) !== '') {
-                    $customer->snd_group = $groupSnd;
-                }
-
-                // Jumlahkan nilai antar SND dalam NCLI yang sama.
-                $customer->tag_total = $group->sum(function ($item) {
-                    return (float) ($item->tag_total ?? 0);
-                });
-
-                $customer->tag_inet = $group->sum(function ($item) {
-                    return (float) ($item->tag_inet ?? 0);
-                });
-
-                $customer->tag_tlp = $group->sum(function ($item) {
-                    return (float) ($item->tag_tlp ?? 0);
-                });
-
-                $customer->saldo = $group->sum(function ($item) {
-                    return (float) ($item->saldo ?? 0);
-                });
-
-                // Informasi group sementara untuk response JSON.
-                // Tidak menambah kolom database maupun spreadsheet.
-                $customer->jumlah_snd = $group->count();
-
-                $customer->daftar_snd = $group
-                    ->pluck('snd')
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->implode(', ');
-
-                // Detail tiap SND untuk tampilan badge "2 SND", "3 SND", dst.
-                $customer->detail_snd = $group
-                    ->map(function ($item) {
-                        return [
-                            'snd' => $item->snd,
-                            'snd_group' => $item->snd_group,
-                            'produk' => $item->produk,
-                            'tag_total' => (float) ($item->tag_total ?? 0),
-                        ];
-                    })
-                    ->values();
-
-                return $customer;
-            })
-            ->sortByDesc('tag_total')
-            ->values();
+        $totalCustomer = $customers->count();
+        $totalTagihan = (float) $customers->sum('tag_total');
 
         // =========================================================
-        // 4. Response ke popup HOTD
+        // 3. Response ke popup HOTD (sinkron dengan SSL di tabel HOTD)
         // =========================================================
         return response()->json([
             'billing_ke' => $billingKe,
             'datel' => $datel,
-            'total_customer' => $groupedCustomers->count(),
-            'total_tagihan' => $groupedCustomers->sum('tag_total'),
-            'total_saldo' => $groupedCustomers->sum('saldo'),
-            'total_blm_bayar' => $groupedCustomers->count(),
+            'total_customer' => $totalCustomer,
+            'total_tagihan' => $totalTagihan,
+            'total_saldo' => $totalTagihan,
+            'total_blm_bayar' => $totalCustomer,
             'total_sdh_bayar' => 0,
-            'customers' => $groupedCustomers,
+            'customers' => $customers,
         ]);
     }
 

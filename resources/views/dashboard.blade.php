@@ -871,13 +871,14 @@ function renderDetailTable(response) {
                 <td class="text-nowrap px-2 py-1">${cust.snd_group || '-'}</td>
                 <td class="text-nowrap px-2 py-1">
                     <span>${cust.ncli || '-'}</span>
+                    ${(cust.jumlah_snd && cust.jumlah_snd > 1) ? `
                     <button type="button"
-                            class="btn btn-sm ${(cust.jumlah_snd || 1) > 1 ? 'btn-primary' : 'btn-secondary'} ms-1 px-2 py-0"
+                            class="btn btn-sm btn-primary ms-1 px-2 py-0"
                             style="font-size:0.58rem; border-radius:999px;"
                             onclick="showSndGroupDetail(${index})"
                             title="Klik untuk lihat rincian SND">
-                            ${cust.jumlah_snd || 1} SND
-                    </button>
+                            ${cust.jumlah_snd} SND
+                    </button>` : ''}
                 </td>
                 <td class="text-nowrap px-2 py-1" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;" title="${cust.nama || ''}">
                     ${cust.nama || '-'}
