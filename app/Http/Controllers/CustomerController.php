@@ -646,7 +646,7 @@ class CustomerController extends Controller
      */
     public function riwayatReminder(Request $request)
     {
-        $query = Reminder::query();
+        $query = Reminder::with('customer');
 
         // Filter Search
         if ($request->filled('search')) {
