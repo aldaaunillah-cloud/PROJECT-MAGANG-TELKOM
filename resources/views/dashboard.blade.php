@@ -46,41 +46,57 @@
     {{-- FILTER FORM --}}
     <div class="card mb-4 w-100">
         <div class="card-body p-3">
-            <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end" id="dashboardFilterForm">
-                <div class="col-md-3">
-                    <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">DATEL</label>
-                    <select name="datel" id="filter-datel" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('datel')">
-                        <option value="">Semua Datel</option>
-                        @foreach($datelsList ?? [] as $d)
-                            <option value="{{ $d }}" {{ request('datel') == $d ? 'selected' : '' }}>{{ $d }}</option>
-                        @endforeach
-                    </select>
+            <form action="{{ route('dashboard') }}" method="GET" id="dashboardFilterForm">
+                {{-- SECTION 1: SEARCH --}}
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">PENCARIAN CUSTOMER (NAMA/SND/DLL)</label>
+                        <input type="text" name="search" id="filter-search" class="form-control form-control-sm border-light-subtle text-muted" style="font-size: 0.8rem;" placeholder="Cari..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm text-white w-100 shadow-sm d-flex align-items-center justify-content-center" style="background-color: #0b5ed7; font-size: 0.8rem;">
+                            <i class="bi bi-search me-1"></i> Cari
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">AGENCY</label>
-                    <select name="agency" id="filter-agency" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('agency')">
-                        <option value="">Semua Agency</option>
-                        @foreach($agenciesList ?? [] as $a)
-                            <option value="{{ $a }}" {{ request('agency') == $a ? 'selected' : '' }}>{{ $a }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">SALES</label>
-                    <select name="sales" id="filter-sales" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('sales')">
-                        <option value="">Semua Sales Agency</option>
-                        @foreach($salesList ?? [] as $s)
-                            <option value="{{ $s }}" {{ request('sales') == $s ? 'selected' : '' }}>{{ $s }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-sm text-white flex-grow-1 shadow-sm d-flex align-items-center justify-content-center" style="background-color: #0b2240; font-size: 0.8rem;">
-                        <i class="bi bi-funnel-fill me-1"></i> Terapkan Filter
-                    </button>
-                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light flex-grow-1 shadow-sm d-flex align-items-center justify-content-center border" style="background-color: white; color: #333; font-size: 0.8rem;">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </a>
+
+                {{-- SECTION 2: FILTER --}}
+                <div class="row g-2 align-items-end border-top pt-3">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">DATEL</label>
+                        <select name="datel" id="filter-datel" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('datel')">
+                            <option value="">Semua Datel</option>
+                            @foreach($datelsList ?? [] as $d)
+                                <option value="{{ $d }}" {{ request('datel') == $d ? 'selected' : '' }}>{{ $d }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">AGENCY</label>
+                        <select name="agency" id="filter-agency" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('agency')">
+                            <option value="">Semua Agency</option>
+                            @foreach($agenciesList ?? [] as $a)
+                                <option value="{{ $a }}" {{ request('agency') == $a ? 'selected' : '' }}>{{ $a }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1 text-primary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">SALES</label>
+                        <select name="sales" id="filter-sales" class="form-select form-select-sm border-light-subtle text-muted" style="font-size: 0.8rem;" onchange="filterChange('sales')">
+                            <option value="">Semua Sales</option>
+                            @foreach($salesList ?? [] as $s)
+                                <option value="{{ $s }}" {{ request('sales') == $s ? 'selected' : '' }}>{{ $s }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm text-white flex-grow-1 shadow-sm d-flex align-items-center justify-content-center" style="background-color: #0b2240; font-size: 0.8rem;">
+                            <i class="bi bi-funnel-fill me-1"></i> Terapkan Filter
+                        </button>
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light flex-grow-1 shadow-sm d-flex align-items-center justify-content-center border" style="background-color: white; color: #333; font-size: 0.8rem;">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -393,6 +409,65 @@
                 <div class="p-3 d-flex justify-content-between align-items-center">
                     <small class="text-muted">Menampilkan {{ $agencyCustomers->firstItem() ?? 0 }} - {{ $agencyCustomers->lastItem() ?? 0 }} dari {{ number_format($agencyCustomers->total()) }} data</small>
                     <div>{{ $agencyCustomers->links() }}</div>
+                </div>
+            </div>
+        </div>
+
+    @elseif(request('search'))
+        {{-- CASE 4: Search View - Daftar Customer Hasil Pencarian --}}
+        <div class="card border-0 shadow-sm w-100 overflow-hidden mb-5">
+            <div class="card-header bg-white border-0 py-3 px-3">
+                <h6 class="mb-0 fw-bold text-primary">
+                    HASIL PENCARIAN CUSTOMER - "{{ request('search') }}"
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive w-100">
+                    <table class="table table-hover table-striped align-middle mb-0 w-100">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">NO</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">SND</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">CUSTOMER</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">DATEL</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">AGENCY</th>
+                                <th class="px-3 py-2 text-nowrap" style="font-size:0.7rem;">BILLING</th>
+                                <th class="px-3 py-2 text-nowrap text-end" style="font-size:0.7rem;">TAGIHAN</th>
+                                <th class="px-3 py-2 text-nowrap text-end" style="font-size:0.7rem;">SALDO</th>
+                                <th class="px-3 py-2 text-nowrap text-center" style="font-size:0.7rem;">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($searchCustomers as $index => $customer)
+                                <tr>
+                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $searchCustomers->firstItem() + $index }}</td>
+                                    <td class="px-3 py-2 text-nowrap" style="font-size:0.8rem; font-family: monospace;">{{ $customer->snd ?: '-' }}</td>
+                                    <td class="px-3 py-2" style="font-size:0.8rem; font-weight: 600; color: #000361;">{{ $customer->nama }}</td>
+                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->datel }}</td>
+                                    <td class="px-3 py-2" style="font-size:0.8rem;">{{ $customer->agency_psb ?: '-' }}</td>
+                                    <td class="px-3 py-2" style="font-size:0.8rem;">Billing {{ $customer->billing_ke }}</td>
+                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
+                                    <td class="px-3 py-2 text-end" style="font-size:0.8rem;">Rp {{ number_format($customer->status_bayar == 'Sdh Bayar' ? 0 : ($customer->tag_total ?? 0), 0, ',', '.') }}</td>
+                                    <td class="px-3 py-2 text-center">
+                                        <span class="badge bg-{{ $customer->status_bayar == 'Sdh Bayar' ? 'success' : 'danger' }} px-2 py-1" style="font-size:0.65rem;">
+                                            {{ $customer->status_bayar == 'Sdh Bayar' ? 'Lunas' : 'Belum Bayar' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="text-center py-4">
+                                        <i class="bi bi-search fs-2 text-muted d-block mb-1"></i>
+                                        <span class="text-muted" style="font-size:0.85rem;">Data tidak ditemukan</span>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Menampilkan {{ $searchCustomers->firstItem() ?? 0 }} - {{ $searchCustomers->lastItem() ?? 0 }} dari {{ number_format($searchCustomers->total()) }} data</small>
+                    <div>{{ $searchCustomers->links() }}</div>
                 </div>
             </div>
         </div>
@@ -1065,16 +1140,50 @@ function closeSndGroupDetail() {
 // ============================================
 // Filter reset logic and submission
 function filterChange(type) {
+    const datelVal = document.getElementById('filter-datel').value;
+    const agencySelect = document.getElementById('filter-agency');
+    const salesSelect = document.getElementById('filter-sales');
+
     if (type === 'datel') {
-        const agencySelect = document.getElementById('filter-agency');
-        const salesSelect = document.getElementById('filter-sales');
-        if (agencySelect) agencySelect.value = '';
-        if (salesSelect) salesSelect.value = '';
+        agencySelect.innerHTML = '<option value="">Memuat...</option>';
+        salesSelect.innerHTML = '<option value="">Memuat...</option>';
+        
+        // Fetch Agencies
+        fetch(`/filter/agencies?datel=${encodeURIComponent(datelVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = '<option value="">Semua Agency</option>';
+                data.forEach(item => {
+                    html += `<option value="${item}">${item}</option>`;
+                });
+                agencySelect.innerHTML = html;
+            });
+            
+        // Fetch Sales
+        fetch(`/filter/sales?datel=${encodeURIComponent(datelVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = '<option value="">Semua Sales</option>';
+                data.forEach(item => {
+                    html += `<option value="${item}">${item}</option>`;
+                });
+                salesSelect.innerHTML = html;
+            });
     } else if (type === 'agency') {
-        const salesSelect = document.getElementById('filter-sales');
-        if (salesSelect) salesSelect.value = '';
+        const agencyVal = agencySelect.value;
+        salesSelect.innerHTML = '<option value="">Memuat...</option>';
+        
+        // Fetch Sales
+        fetch(`/filter/sales?datel=${encodeURIComponent(datelVal)}&agency=${encodeURIComponent(agencyVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = '<option value="">Semua Sales</option>';
+                data.forEach(item => {
+                    html += `<option value="${item}">${item}</option>`;
+                });
+                salesSelect.innerHTML = html;
+            });
     }
-    document.getElementById('dashboardFilterForm').submit();
 }
 
 // Function to export detail modal content as PDF
