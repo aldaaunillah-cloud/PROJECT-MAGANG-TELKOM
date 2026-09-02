@@ -87,56 +87,29 @@ class CustomerController extends Controller
         }
 
         // 2. Compute statistics for Default/Datel/Agency views
+        // 2. Compute statistics for Default/Datel/Agency/Sales views (HANYA DATA BLM BAYAR)
         $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
         $totalBelumLunas = (clone $unpaidQuery)->count();
         $totalTagihan = (clone $unpaidQuery)->sum('tag_total');
 
-        // Calculate total sales and agency counts from the entire customer base (including billing 0)
-        $salesCountQuery = Customer::query()
-            ->whereNotIn('sales_agency', $invalidPlaceholders)
+        // Hitung total sales agency dan agency dari customer yang belum bayar
+        $salesCountQuery = (clone $unpaidQuery)
             ->whereNotNull('sales_agency')
-            ->where('sales_agency', '!=', '');
-
-        $agencyCountQuery = Customer::query()
-            ->whereNotIn('agency_psb', $invalidPlaceholders)
-            ->whereNotNull('agency_psb')
-            ->where('agency_psb', '!=', '');
-
-        if ($datel) {
-            $salesCountQuery->where('datel', $datel);
-            $agencyCountQuery->where('datel', $datel);
-        }
-        if ($agency) {
-            $salesCountQuery->where('agency_psb', $agency);
-            $agencyCountQuery->where('agency_psb', $agency);
-        }
-        if ($search) {
-            $salesCountQuery->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('snd', 'like', "%{$search}%")
-                  ->orWhere('ncli', 'like', "%{$search}%")
-                  ->orWhere('agency_psb', 'like', "%{$search}%")
-                  ->orWhere('sales_agency', 'like', "%{$search}%")
-                  ->orWhere('datel', 'like', "%{$search}%");
-            });
-            $agencyCountQuery->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('snd', 'like', "%{$search}%")
-                  ->orWhere('ncli', 'like', "%{$search}%")
-                  ->orWhere('agency_psb', 'like', "%{$search}%")
-                  ->orWhere('sales_agency', 'like', "%{$search}%")
-                  ->orWhere('datel', 'like', "%{$search}%");
-            });
-        }
-
+            ->where('sales_agency', '!=', '')
+            ->whereNotIn('sales_agency', $invalidPlaceholders);
         $totalSales = $salesCountQuery->distinct()->pluck('sales_agency')->filter()->count();
+
+        $agencyCountQuery = (clone $unpaidQuery)
+            ->whereNotNull('agency_psb')
+            ->where('agency_psb', '!=', '')
+            ->whereNotIn('agency_psb', $invalidPlaceholders);
         $totalAgency = $agencyCountQuery->distinct()->pluck('agency_psb')->filter()->count();
 
-        // 3. Compute statistics for Sales view (All base vs Unpaid)
-        $totalCustomer = (clone $baseQuery)->count();
-        $totalBelumBayarSales = (clone $unpaidQuery)->count();
-        $totalTagihanSales = (clone $baseQuery)->sum('tag_total');
-        $totalSaldoSales = (clone $unpaidQuery)->sum('tag_total');
+        // 3. Compute statistics for Sales view (sinkron hanya data belum bayar)
+        $totalCustomer = $totalBelumLunas;
+        $totalBelumBayarSales = $totalBelumLunas;
+        $totalTagihanSales = $totalTagihan;
+        $totalSaldoSales = $totalTagihan;
 
         // Default Case Variables
         $rekapBilling = null;
@@ -144,24 +117,22 @@ class CustomerController extends Controller
         $salesCustomers = null;
         $searchCustomers = null;
 
-        // 4. Load case-specific data
+        // 4. Load case-specific data (HANYA CUSTOMER BELUM BAYAR)
         if ($sales) {
-            // Case 3: Sales Agency Terpilih (Menampilkan semua customer baik lunas maupun belum bayar)
-            $salesCustomers = (clone $baseQuery)
-                ->orderBy('status_bayar', 'desc') // Belum bayar first
+            // Case 3: Sales Agency Terpilih (HANYA customer belum bayar)
+            $salesCustomers = (clone $unpaidQuery)
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
         } elseif ($agency) {
-            // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
+            // Case 2: Agency Terpilih (HANYA customer belum bayar)
             $agencyCustomers = (clone $unpaidQuery)
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
         } elseif ($search) {
-            // Case 4: Hanya Search (dan Datel jika ada). Tampilkan list semua customer yang match
-            $searchCustomers = (clone $baseQuery)
-                ->orderBy('status_bayar', 'desc')
+            // Case 4: Hanya Search (HANYA customer belum bayar)
+            $searchCustomers = (clone $unpaidQuery)
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
@@ -282,15 +253,7 @@ class CustomerController extends Controller
                 ->select(
                     'datel',
                     'billing_ke',
-                    DB::raw("
-                    COUNT(
-                        DISTINCT CASE
-                            WHEN ncli IS NOT NULL AND TRIM(ncli) != ''
-                                THEN CONCAT('NCLI_', TRIM(ncli))
-                            ELSE CONCAT('SND_', snd)
-                        END
-                    ) as blm_bayar
-                "),
+                    DB::raw('COUNT(snd) as blm_bayar'),
                     DB::raw('SUM(tag_total) as blm_bayar_rp')
                 )
                 ->groupBy('datel', 'billing_ke')
@@ -312,8 +275,10 @@ class CustomerController extends Controller
                 ->get();
         }
 
-        // List datels untuk dropdown filter
+        // List datels untuk dropdown filter (hanya customer belum bayar billing 1-6)
         $datelsList = Customer::distinct('datel')
+            ->whereBetween('billing_ke', [1, 6])
+            ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereNotNull('datel')
             ->where('datel', '!=', '')
             ->whereNotIn('datel', $invalidPlaceholders)
@@ -321,6 +286,8 @@ class CustomerController extends Controller
             ->pluck('datel');
 
         $agenciesQuery = Customer::query()
+            ->whereBetween('billing_ke', [1, 6])
+            ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereNotNull('agency_psb')
             ->where('agency_psb', '!=', '')
             ->whereNotIn('agency_psb', $invalidPlaceholders);
@@ -335,6 +302,8 @@ class CustomerController extends Controller
             ->pluck('agency_val');
 
         $salesQuery = Customer::query()
+            ->whereBetween('billing_ke', [1, 6])
+            ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereNotNull('sales_agency')
             ->where('sales_agency', '!=', '')
             ->whereNotIn('sales_agency', $invalidPlaceholders);
@@ -384,6 +353,8 @@ class CustomerController extends Controller
         $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
 
         $query = Customer::query()
+            ->whereBetween('billing_ke', [1, 6])
+            ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereNotNull('agency_psb')
             ->where('agency_psb', '!=', '')
             ->whereNotIn('agency_psb', $invalidPlaceholders);
@@ -406,6 +377,8 @@ class CustomerController extends Controller
         $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
 
         $query = Customer::query()
+            ->whereBetween('billing_ke', [1, 6])
+            ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereNotNull('sales_agency')
             ->where('sales_agency', '!=', '')
             ->whereNotIn('sales_agency', $invalidPlaceholders);
