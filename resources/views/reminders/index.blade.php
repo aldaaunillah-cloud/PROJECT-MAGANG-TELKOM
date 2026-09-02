@@ -355,97 +355,96 @@
             return 'Rp ' + Number(val).toLocaleString('id-ID');
         }
 
-        // Buat container surat A4 yang rapi dan presisi
+        // Buat container surat A4 yang rapi, proporsional, dan pas 1 lembar utuh
         let suratContainer = document.createElement('div');
-        suratContainer.style.width = '794px';
-        suratContainer.style.minHeight = '1120px';
+        suratContainer.style.width = '750px';
         suratContainer.style.boxSizing = 'border-box';
         suratContainer.style.background = '#ffffff';
-        suratContainer.style.padding = '40px 52px 30px 52px';
+        suratContainer.style.padding = '26px 40px 18px 40px';
         suratContainer.style.fontFamily = 'Arial, Helvetica, sans-serif';
         suratContainer.style.color = '#000000';
-        suratContainer.style.fontSize = '13.5px';
-        suratContainer.style.lineHeight = '1.42';
+        suratContainer.style.fontSize = '11.5px';
+        suratContainer.style.lineHeight = '1.38';
 
         suratContainer.innerHTML = `
             <!-- Header: Nomor & Logo Telkom Indonesia -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 12px;">
                 <tr>
-                    <td style="width: 58%; vertical-align: top; padding-top: 10px;">
-                        <div style="font-size: 13.5px; color: #000000; font-family: Arial, sans-serif;">
+                    <td style="width: 60%; vertical-align: top; padding-top: 8px;">
+                        <div style="font-size: 11.5px; color: #000000; font-family: Arial, sans-serif;">
                             Nomor : C.Tel. /CBN/YN 000/ T2W-0H000000/2025
                         </div>
                     </td>
-                    <td style="width: 42%; text-align: right; vertical-align: top; padding-top: 2px; padding-right: 5px;">
-                        <img src="${telkomLogo}" style="width: 165px; height: auto; display: inline-block; max-width: 100%;" alt="Telkom Indonesia">
+                    <td style="width: 40%; text-align: right; vertical-align: top; padding-top: 0; padding-right: 2px;">
+                        <img src="${telkomLogo}" style="width: 140px; height: auto; display: inline-block; max-width: 100%;" alt="Telkom Indonesia">
                     </td>
                 </tr>
             </table>
 
             <!-- Tanggal & Kepada Yth -->
-            <div style="margin-bottom: 16px;">
+            <div style="margin-bottom: 10px;">
                 <div>Cirebon, ${tglSurat}</div>
-                <div style="margin-top: 8px;">Kepada Yth,</div>
+                <div style="margin-top: 5px;">Kepada Yth,</div>
                 <div style="font-weight: bold; text-transform: uppercase;">${cust.name}</div>
-                <div style="max-width: 600px;">${cust.alamat}</div>
+                <div style="max-width: 580px;">${cust.alamat}</div>
             </div>
 
             <!-- Perihal -->
-            <div style="margin-bottom: 14px;">
+            <div style="margin-bottom: 10px;">
                 Perihal &nbsp;: Penyelesaian Tunggakan Layanan Telkom dengan nomor <strong>${cust.snd}</strong>
             </div>
 
             <!-- Paragraf Pembuka -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+            <div style="text-align: justify; margin-bottom: 8px; line-height: 1.38;">
                 Sebelumnya kami mengucapkan banyak terimakasih atas kepercayaan Bapak/Ibu/Saudara/i menggunakan fasilitas jasa telekomunikasi dari PT. Telekomunikasi Indonesia. Kami menyadari dikarenakan kesibukan Bapak/Ibu/Sdr/i sehingga belum melakukan pembayaran tagihan internet. Untuk itu kami beritahukan bahwa sampai dengan saat ini didalam aplikasi kami Bapak/Ibu/Sdr/i masih memiliki tunggakan layanan internet dengan rincian sebagai berikut :
             </div>
 
             <!-- Tabel Rincian Tunggakan Sesuai Template -->
-            <table style="width: 100%; border-collapse: collapse; margin: 12px 0 6px 0;">
+            <table style="width: 100%; border-collapse: collapse; margin: 8px 0 4px 0; font-size: 11px;">
                 <thead>
                     <tr style="background-color: #f8f9fa;">
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 8px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 8px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 8px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Mei 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill1)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Mei 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Mei 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 10px; text-align: end; font-weight: 500;">${formatRp(cust.bill1)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Pemakaian bulan Mei 2025</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juni 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill2)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juni 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Juni 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 10px; text-align: end; font-weight: 500;">${formatRp(cust.bill2)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Pemakaian bulan Juni 2025</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juli 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill3)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juli 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Juli 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 10px; text-align: end; font-weight: 500;">${formatRp(cust.bill3)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 8px; text-align: center;">Pemakaian bulan Juli 2025</td>
                     </tr>
                     <tr style="background-color: #f8f9fa;">
-                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; font-weight: bold;">Total</td>
-                        <td style="border: 1.5px solid #000000; padding: 7px 12px; text-align: end; font-weight: bold;">${formatRp(cust.tagTotal)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center;"></td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 8px; text-align: center; font-weight: bold;">Total</td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 10px; text-align: end; font-weight: bold;">${formatRp(cust.tagTotal)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 8px; text-align: center;"></td>
                     </tr>
                 </tbody>
             </table>
-            <div style="font-size: 12.5px; font-weight: bold; margin-bottom: 14px;">
+            <div style="font-size: 10.5px; font-weight: bold; margin-bottom: 8px;">
                 *Tagihan sudah termasuk Denda, Materai.
             </div>
 
             <!-- Paragraf Metode Pembayaran -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+            <div style="text-align: justify; margin-bottom: 8px; line-height: 1.38;">
                 Kami mengharapkan Bapak/Ibu/Sdr/i dapat meluangkan waktu untuk segera menyelesaikan pembayaran tunggakan layanan internet tersebut melalui Autodebet, ATM, Mobile Banking, Internet Banking dan SMS Banking. Pembayaran juga bisa dilakukan melalui gerai retail Indomaret, Alfamart dan channel e-commerce melalui Tokopedia, Shopee, Bukalapak, Gojek &amp; LinkAja dan Plasa Telkom.
             </div>
 
             <!-- Paragraf Konsekuensi -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+            <div style="text-align: justify; margin-bottom: 8px; line-height: 1.38;">
                 Perlu kami sampaikan juga bahwa konsekuensi bagi pelanggan internet Telkom yang mempunyai tunggakan tagihan,<br>
                 diantaranya :
-                <div style="margin-top: 4px; padding-left: 2px;">
+                <div style="margin-top: 3px; padding-left: 2px;">
                     <div>1. Adanya mekanisme blacklist (daftar hitam) pelanggan, sehingga permintaan pasang baru ulang tidak bisa dilayani.</div>
                     <div>2. Adanya biaya pendaftaran pasang baru Internet Telkom, untuk permintaan pasang baru kembali.</div>
                     <div>3. Adanya denda penalti Rp 1.000.000,- bagi pelanggan yang berhenti berlangganan sebelum satu tahun.</div>
@@ -453,37 +452,37 @@
             </div>
 
             <!-- Peringatan Kuasa Hukum -->
-            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.45;">
+            <div style="text-align: justify; margin-bottom: 10px; line-height: 1.38;">
                 Apabila sampai dengan batas waktu pembayaran <strong>20 September 2026</strong> tunggakan Bapak / Ibu / Saudara (i) belum melakukan pembayaran, maka akan kami limpahkan kepada <strong>KUASA HUKUM</strong> untuk proses penanganan lebih lanjut.
             </div>
 
             <!-- Bagian Kontak PIC, QR Code, dan Tanda Tangan Resmi -->
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
                 <tr>
-                    <td style="width: 76%; vertical-align: top; padding-right: 15px;">
-                        <div style="margin-bottom: 10px; line-height: 1.45;">
+                    <td style="width: 77%; vertical-align: top; padding-right: 12px;">
+                        <div style="margin-bottom: 5px; line-height: 1.35;">
                             Untuk informasi lebih lanjut dapat menghubungi pic : <strong>${saName}</strong> (085137634949),<br>
                             Serta pembayaran lebih mudah dengan melakukan scan QR-Code disamping
                         </div>
-                        <div style="margin-bottom: 10px; line-height: 1.45;">
+                        <div style="margin-bottom: 5px; line-height: 1.35;">
                             Mohon diabaikan pemberitahuan ini, apabila Bapak/Ibu/Sdr/i telah menyelesaikan pembayaran tagihan sebelum surat ini diterima.
                         </div>
-                        <div style="margin-bottom: 14px; line-height: 1.45;">
+                        <div style="margin-bottom: 8px; line-height: 1.35;">
                             Demikian disampaikan, atas perhatian dan pengertiannya kami ucapkan terimaksih.
                         </div>
-                        <div style="font-weight: bold; margin-bottom: 4px;">
+                        <div style="font-weight: bold; margin-bottom: 2px;">
                             Hormat Kami,
                         </div>
                         <div>
-                            <img src="${ttdGm}" style="width: 130px; height: auto; display: block; margin: 4px 0;" alt="Tanda Tangan GM Witel">
+                            <img src="${ttdGm}" style="width: 110px; height: auto; display: block; margin: 1px 0;" alt="Tanda Tangan GM Witel">
                         </div>
-                        <div style="font-weight: bold; margin-top: 2px;">
+                        <div style="font-weight: bold; line-height: 1.25; margin-top: 1px;">
                             Nugroho Setio Budi<br>
                             GM Witel Priangan Timur
                         </div>
                     </td>
-                    <td style="width: 24%; text-align: center; vertical-align: top; padding-top: 5px;">
-                        <img src="${qrCode}" style="width: 95px; height: 95px; display: block; margin: 0 auto; border: 1px solid #ddd; padding: 2px;" alt="QR Code Telkom">
+                    <td style="width: 23%; text-align: center; vertical-align: top; padding-top: 2px;">
+                        <img src="${qrCode}" style="width: 82px; height: 82px; display: block; margin: 0 auto; border: 1px solid #ccc; padding: 2px;" alt="QR Code Telkom">
                     </td>
                 </tr>
             </table>
@@ -502,9 +501,9 @@
         let safeSnd = cust.snd.replace(/[^a-z0-9]/gi, '');
         let safeSaName = saName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
-        // Konfigurasi html2pdf
+        // Konfigurasi html2pdf: Pas 1 halaman utuh A4 tanpa page-break
         let opt = {
-            margin:       [8, 8, 8, 8], // 8mm margin
+            margin:       [5, 5, 5, 5], // 5mm margin
             filename:     'Surat_Penyelesaian_Tunggakan_' + safeSaName + '_' + safeSnd + '.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
@@ -514,7 +513,8 @@
                 scrollY: 0,
                 scrollX: 0
             },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
         // Jalankan generator PDF
