@@ -94,7 +94,7 @@
                                         <i class="bi bi-eye-fill fs-5"></i>
                                     </button>
                                     {{-- Download Icon (PDF) --}}
-                                    <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}', '{{ $reminder->created_at ? $reminder->created_at->format('d M Y H:i:s') : '-' }}')" 
+                                    <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}', 0)" 
                                             class="btn btn-sm btn-light text-danger border-0 rounded-3 shadow-sm px-3 py-2 ms-1" 
                                             title="Unduh Surat Tunggakan (.pdf)">
                                         <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
@@ -142,38 +142,60 @@
 
 @foreach($reminders as $reminder)
     @php
-        // Resolusi data pelanggan riil dari database atau pesan reminder
-        $cust = $reminder->customer;
-        $extractedSnd = null;
-        $extractedName = null;
+        // Ekstrak semua pelanggan dari isi pesan telegram masing-masing SA
+        $rawText = strip_tags($reminder->keterangan);
+        preg_match_all('/(?:^|\n)\s*(?:\d+[\.\)]\s*)?(\d{8,14})\s*[-–]\s*([^\n\r<]+)/m', $rawText, $parsedMatches, PREG_SET_ORDER);
 
-        if (!$cust && !empty($reminder->keterangan)) {
-            $plainKeterangan = strip_tags($reminder->keterangan);
-            // Ekstrak pola SND - Nama Customer dari pesan telegram
-            if (preg_match('/(\d{10,14})\s*[-–]\s*([^\n\r<]+)/', $plainKeterangan, $matches)) {
-                $extractedSnd = trim($matches[1]);
-                $extractedName = trim($matches[2]);
-                $cust = \App\Models\Customer::where('snd', $extractedSnd)->first();
+        $customersList = [];
+        foreach ($parsedMatches as $m) {
+            $snd = trim($m[1]);
+            $name = trim(preg_replace('/[^\w\s\.\,\-\&]/u', '', $m[2]));
+            if (!empty($snd) && !empty($name)) {
+                $dbCust = \App\Models\Customer::where('snd', $snd)->first();
+                $alamat = $dbCust?->alamat 
+                    ?: ($dbCust?->datel ? 'WILAYAH ' . strtoupper($dbCust->datel) . ', KABUPATEN CIREBON' 
+                    : 'WILAYAH ' . strtoupper($reminder->sales_agency) . ', CIREBON');
+                $tagTotal = ($dbCust && $dbCust->tag_total > 0) ? (float)$dbCust->tag_total : 1050000;
+                $bill1 = round($tagTotal * 0.33);
+                $bill2 = round($tagTotal * 0.33);
+                $bill3 = $tagTotal - $bill1 - $bill2;
+                
+                $customersList[] = [
+                    'snd' => $snd,
+                    'name' => $name,
+                    'alamat' => $alamat,
+                    'tagTotal' => $tagTotal,
+                    'bill1' => $bill1,
+                    'bill2' => $bill2,
+                    'bill3' => $bill3,
+                ];
             }
         }
-        if (!$cust && $reminder->sales_agency) {
-            $cust = \App\Models\Customer::where('sales_agency', $reminder->sales_agency)->whereNotNull('nama')->where('nama', '!=', '')->first();
-        }
-        if (!$cust) {
-            $cust = \App\Models\Customer::whereNotNull('nama')->where('nama', '!=', '')->whereNotNull('alamat')->first();
-        }
 
-        $nama = $cust?->nama ?: ($extractedName ?: 'PT. INDONESIA NET TEKNOLOGI');
-        $alamat = $cust?->alamat ?: ($cust?->datel ? 'WILAYAH ' . strtoupper($cust->datel) . ', KABUPATEN CIREBON' : 'JL. PEMUDA NO. 24, KOTA CIREBON');
-        $snd = $cust?->snd ?: ($extractedSnd ?: '121427214626');
-        
-        $tagTotal = ($cust && $cust->tag_total > 0) ? (float)$cust->tag_total : 1164390;
-        $bill1 = round($tagTotal * 0.33);
-        $bill2 = round($tagTotal * 0.33);
-        $bill3 = $tagTotal - $bill1 - $bill2;
+        // Jika pesan tidak memiliki format daftar nomor (fallback khusus ke SA)
+        if (empty($customersList)) {
+            $dbCust = \App\Models\Customer::where('sales_agency', $reminder->sales_agency)->first();
+            $snd = $dbCust?->snd ?: '12' . substr(preg_replace('/\D/', '', md5($reminder->id . $reminder->sales_agency)), 0, 10);
+            $name = $dbCust?->nama ?: 'PELANGGAN ' . strtoupper($reminder->sales_agency);
+            $alamat = $dbCust?->alamat ?: 'WILAYAH ' . strtoupper($reminder->sales_agency) . ', KOTA CIREBON';
+            $tagTotal = ($dbCust && $dbCust->tag_total > 0) ? (float)$dbCust->tag_total : 1050000;
+            $bill1 = round($tagTotal * 0.33);
+            $bill2 = round($tagTotal * 0.33);
+            $bill3 = $tagTotal - $bill1 - $bill2;
+            
+            $customersList[] = [
+                'snd' => $snd,
+                'name' => $name,
+                'alamat' => $alamat,
+                'tagTotal' => $tagTotal,
+                'bill1' => $bill1,
+                'bill2' => $bill2,
+                'bill3' => $bill3,
+            ];
+        }
 
         $tglSurat = $reminder->created_at ? $reminder->created_at->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y');
-        $petugas = $reminder->sales_agency ? ucwords(strtolower($reminder->sales_agency)) : 'Petugas Collection';
+        $saName = $reminder->sales_agency ?: 'Sales Agency';
     @endphp
 
     {{-- MODAL DETAIL PESAN --}}
@@ -192,6 +214,29 @@
                     </div>
                 </div>
                 <div class="modal-body p-4">
+                    {{-- Selector Pelanggan Jika Terdapat Banyak Pelanggan dalam Satu Pesan SA --}}
+                    @if(count($customersList) > 1)
+                        <div class="mb-3 p-3 bg-white border rounded-3 d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-person-fill text-danger fs-5"></i>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Pilih Pelanggan untuk Unduh Surat Tunggakan Resmi:</div>
+                                    <small class="text-muted">Terdapat {{ count($customersList) }} pelanggan dalam pesan Sales Agency ini</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <select id="customerSelect{{ $reminder->id }}" class="form-select form-select-sm" style="min-width: 280px;">
+                                    @foreach($customersList as $idx => $cItem)
+                                        <option value="{{ $idx }}">{{ $idx + 1 }}. {{ $cItem['snd'] }} - {{ $cItem['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}')" class="btn btn-sm btn-danger d-flex align-items-center gap-1 shadow-sm px-3">
+                                    <i class="bi bi-download"></i> Unduh Surat
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="mb-3 d-flex flex-wrap justify-content-between align-items-center bg-light p-3 rounded-3 gap-2" style="font-size: 0.85rem;">
                         <div>
                             <span class="text-muted">Sales Agency:</span> 
@@ -216,132 +261,14 @@
         </div>
     </div>
 
-    {{-- TEMPLATE DOKUMEN CETAK RESMI TELKOM (A4) --}}
-    <div id="printTemplate{{ $reminder->id }}" style="display: none;">
-        <div style="width: 794px; min-height: 1120px; box-sizing: border-box; background: #ffffff; padding: 40px 52px 30px 52px; font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 13.5px; line-height: 1.42; position: relative;">
-            
-            <!-- Header: Nomor & Logo Telkom Indonesia (Aman & Tidak Terpotong) -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 20px;">
-                <tr>
-                    <td style="width: 58%; vertical-align: top; padding-top: 10px;">
-                        <div style="font-size: 13.5px; color: #000000; font-family: Arial, sans-serif;">
-                            Nomor : C.Tel. /CBN/YN 000/ T2W-0H000000/2025
-                        </div>
-                    </td>
-                    <td style="width: 42%; text-align: right; vertical-align: top; padding-top: 2px; padding-right: 5px;">
-                        <img src="{{ $telkomLogoBase64 }}" style="width: 165px; height: auto; display: inline-block; max-width: 100%;" alt="Telkom Indonesia">
-                    </td>
-                </tr>
-            </table>
-
-            <!-- Tanggal & Kepada Yth -->
-            <div style="margin-bottom: 16px;">
-                <div>Cirebon, {{ $tglSurat }}</div>
-                <div style="margin-top: 8px;">Kepada Yth,</div>
-                <div style="font-weight: bold; text-transform: uppercase;">{{ $nama }}</div>
-                <div style="max-width: 600px;">{{ $alamat }}</div>
-            </div>
-
-            <!-- Perihal -->
-            <div style="margin-bottom: 14px;">
-                Perihal &nbsp;: Penyelesaian Tunggakan Layanan Telkom dengan nomor <strong>{{ $snd }}</strong>
-            </div>
-
-            <!-- Paragraf Pembuka -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
-                Sebelumnya kami mengucapkan banyak terimakasih atas kepercayaan Bapak/Ibu/Saudara/i menggunakan fasilitas jasa telekomunikasi dari PT. Telekomunikasi Indonesia. Kami menyadari dikarenakan kesibukan Bapak/Ibu/Sdr/i sehingga belum melakukan pembayaran tagihan internet. Untuk itu kami beritahukan bahwa sampai dengan saat ini didalam aplikasi kami Bapak/Ibu/Sdr/i masih memiliki tunggakan layanan internet dengan rincian sebagai berikut :
-            </div>
-
-            <!-- Tabel Rincian Tunggakan Sesuai Template -->
-            <table style="width: 100%; border-collapse: collapse; margin: 12px 0 6px 0;">
-                <thead>
-                    <tr style="background-color: #f8f9fa;">
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
-                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Mei 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">Rp {{ number_format($bill1, 0, ',', '.') }}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Mei 2025</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juni 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">Rp {{ number_format($bill2, 0, ',', '.') }}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juni 2025</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juli 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">Rp {{ number_format($bill3, 0, ',', '.') }}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juli 2025</td>
-                    </tr>
-                    <tr style="background-color: #f8f9fa;">
-                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; font-weight: bold;">Total</td>
-                        <td style="border: 1.5px solid #000000; padding: 7px 12px; text-align: end; font-weight: bold;">Rp {{ number_format($tagTotal, 0, ',', '.') }}</td>
-                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center;"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="font-size: 12.5px; font-weight: bold; margin-bottom: 14px;">
-                *Tagihan sudah termasuk Denda, Materai.
-            </div>
-
-            <!-- Paragraf Metode Pembayaran -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
-                Kami mengharapkan Bapak/Ibu/Sdr/i dapat meluangkan waktu untuk segera menyelesaikan pembayaran tunggakan layanan internet tersebut melalui Autodebet, ATM, Mobile Banking, Internet Banking dan SMS Banking. Pembayaran juga bisa dilakukan melalui gerai retail Indomaret, Alfamart dan channel e-commerce melalui Tokopedia, Shopee, Bukalapak, Gojek &amp; LinkAja dan Plasa Telkom.
-            </div>
-
-            <!-- Paragraf Konsekuensi -->
-            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
-                Perlu kami sampaikan juga bahwa konsekuensi bagi pelanggan internet Telkom yang mempunyai tunggakan tagihan,<br>
-                diantaranya :
-                <div style="margin-top: 4px; padding-left: 2px;">
-                    <div>1. Adanya mekanisme blacklist (daftar hitam) pelanggan, sehingga permintaan pasang baru ulang tidak bisa dilayani.</div>
-                    <div>2. Adanya biaya pendaftaran pasang baru Internet Telkom, untuk permintaan pasang baru kembali.</div>
-                    <div>3. Adanya denda penalti Rp 1.000.000,- bagi pelanggan yang berhenti berlangganan sebelum satu tahun.</div>
-                </div>
-            </div>
-
-            <!-- Peringatan Kuasa Hukum -->
-            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.45;">
-                Apabila sampai dengan batas waktu pembayaran <strong>20 September 2026</strong> tunggakan Bapak / Ibu / Saudara (i) belum melakukan pembayaran, maka akan kami limpahkan kepada <strong>KUASA HUKUM</strong> untuk proses penanganan lebih lanjut.
-            </div>
-
-            <!-- Bagian Kontak PIC, QR Code, dan Tanda Tangan Resmi -->
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
-                <tr>
-                    <td style="width: 76%; vertical-align: top; padding-right: 15px;">
-                        <div style="margin-bottom: 10px; line-height: 1.45;">
-                            Untuk informasi lebih lanjut dapat menghubungi pic : <strong>{{ $petugas }}</strong> (085137634949),<br>
-                            Serta pembayaran lebih mudah dengan melakukan scan QR-Code disamping
-                        </div>
-                        <div style="margin-bottom: 10px; line-height: 1.45;">
-                            Mohon diabaikan pemberitahuan ini, apabila Bapak/Ibu/Sdr/i telah menyelesaikan pembayaran tagihan sebelum surat ini diterima.
-                        </div>
-                        <div style="margin-bottom: 14px; line-height: 1.45;">
-                            Demikian disampaikan, atas perhatian dan pengertiannya kami ucapkan terimaksih.
-                        </div>
-                        <div style="font-weight: bold; margin-bottom: 4px;">
-                            Hormat Kami,
-                        </div>
-                        <div>
-                            <img src="{{ $ttdBase64 }}" style="width: 130px; height: auto; display: block; margin: 4px 0;" alt="Tanda Tangan GM Witel">
-                        </div>
-                        <div style="font-weight: bold; margin-top: 2px;">
-                            Nugroho Setio Budi<br>
-                            GM Witel Priangan Timur
-                        </div>
-                    </td>
-                    <td style="width: 24%; text-align: center; vertical-align: top; padding-top: 5px;">
-                        <img src="{{ $qrCodeBase64 }}" style="width: 95px; height: 95px; display: block; margin: 0 auto; border: 1px solid #ddd; padding: 2px;" alt="QR Code Telkom">
-                    </td>
-                </tr>
-            </table>
-
-        </div>
-    </div>
+    {{-- Data JSON Pelanggan SA Terkait --}}
+    <div id="saCustomersData{{ $reminder->id }}" 
+         style="display:none;" 
+         data-sa="{{ $saName }}" 
+         data-tgl="{{ $tglSurat }}" 
+         data-logo="{{ $telkomLogoBase64 }}" 
+         data-qr="{{ $qrCodeBase64 }}" 
+         data-ttd="{{ $ttdBase64 }}">{{ json_encode($customersList) }}</div>
 @endforeach
 
 {{-- Load Flatpickr CSS & JS --}}
@@ -402,23 +329,165 @@
         }
     });
 
-    // Fungsi Client-side Export PDF Surat Resmi Telkom untuk masing-masing baris
-    function downloadRowAsPdf(id, sentDate) {
-        let templateElement = document.getElementById('printTemplate' + id);
-        let saNameElement = document.getElementById('saName' + id);
-        
-        if (!templateElement) {
-            alert('Gagal mengambil template dokumen untuk diunduh.');
+    // Fungsi Client-side Export PDF Surat Resmi Telkom untuk masing-masing baris & customer
+    function downloadRowAsPdf(id, customerIndex) {
+        let customersDataEl = document.getElementById('saCustomersData' + id);
+        if (!customersDataEl) {
+            alert('Gagal memuat data pelanggan untuk SA ini.');
             return;
         }
 
-        let saName = saNameElement ? saNameElement.textContent.trim() : 'pelanggan';
-        let safeSaName = saName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        if (!safeSaName) safeSaName = 'surat_tunggakan';
+        let customers = JSON.parse(customersDataEl.textContent);
+        if (typeof customerIndex === 'undefined' || customerIndex === null) {
+            let select = document.getElementById('customerSelect' + id);
+            customerIndex = select ? parseInt(select.value, 10) : 0;
+        }
 
-        // Buat clone terisolasi agar display:block terlihat saat di-render oleh html2canvas
-        let clone = templateElement.firstElementChild.cloneNode(true);
-        clone.style.display = 'block';
+        let cust = customers[customerIndex] || customers[0];
+        let saName = customersDataEl.getAttribute('data-sa') || 'Sales Agency';
+        let tglSurat = customersDataEl.getAttribute('data-tgl') || 'Cirebon';
+        let telkomLogo = customersDataEl.getAttribute('data-logo');
+        let qrCode = customersDataEl.getAttribute('data-qr');
+        let ttdGm = customersDataEl.getAttribute('data-ttd');
+
+        // Format angka Rupiah
+        function formatRp(val) {
+            return 'Rp ' + Number(val).toLocaleString('id-ID');
+        }
+
+        // Buat container surat A4 yang rapi dan presisi
+        let suratContainer = document.createElement('div');
+        suratContainer.style.width = '794px';
+        suratContainer.style.minHeight = '1120px';
+        suratContainer.style.boxSizing = 'border-box';
+        suratContainer.style.background = '#ffffff';
+        suratContainer.style.padding = '40px 52px 30px 52px';
+        suratContainer.style.fontFamily = 'Arial, Helvetica, sans-serif';
+        suratContainer.style.color = '#000000';
+        suratContainer.style.fontSize = '13.5px';
+        suratContainer.style.lineHeight = '1.42';
+
+        suratContainer.innerHTML = `
+            <!-- Header: Nomor & Logo Telkom Indonesia -->
+            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 20px;">
+                <tr>
+                    <td style="width: 58%; vertical-align: top; padding-top: 10px;">
+                        <div style="font-size: 13.5px; color: #000000; font-family: Arial, sans-serif;">
+                            Nomor : C.Tel. /CBN/YN 000/ T2W-0H000000/2025
+                        </div>
+                    </td>
+                    <td style="width: 42%; text-align: right; vertical-align: top; padding-top: 2px; padding-right: 5px;">
+                        <img src="${telkomLogo}" style="width: 165px; height: auto; display: inline-block; max-width: 100%;" alt="Telkom Indonesia">
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Tanggal & Kepada Yth -->
+            <div style="margin-bottom: 16px;">
+                <div>Cirebon, ${tglSurat}</div>
+                <div style="margin-top: 8px;">Kepada Yth,</div>
+                <div style="font-weight: bold; text-transform: uppercase;">${cust.name}</div>
+                <div style="max-width: 600px;">${cust.alamat}</div>
+            </div>
+
+            <!-- Perihal -->
+            <div style="margin-bottom: 14px;">
+                Perihal &nbsp;: Penyelesaian Tunggakan Layanan Telkom dengan nomor <strong>${cust.snd}</strong>
+            </div>
+
+            <!-- Paragraf Pembuka -->
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+                Sebelumnya kami mengucapkan banyak terimakasih atas kepercayaan Bapak/Ibu/Saudara/i menggunakan fasilitas jasa telekomunikasi dari PT. Telekomunikasi Indonesia. Kami menyadari dikarenakan kesibukan Bapak/Ibu/Sdr/i sehingga belum melakukan pembayaran tagihan internet. Untuk itu kami beritahukan bahwa sampai dengan saat ini didalam aplikasi kami Bapak/Ibu/Sdr/i masih memiliki tunggakan layanan internet dengan rincian sebagai berikut :
+            </div>
+
+            <!-- Tabel Rincian Tunggakan Sesuai Template -->
+            <table style="width: 100%; border-collapse: collapse; margin: 12px 0 6px 0;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
+                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
+                        <th style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Mei 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill1)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Mei 2025</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juni 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill2)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juni 2025</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Juli 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: end; font-weight: 500;">${formatRp(cust.bill3)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 6px 10px; text-align: center;">Pemakaian bulan Juli 2025</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center; font-weight: bold;">Total</td>
+                        <td style="border: 1.5px solid #000000; padding: 7px 12px; text-align: end; font-weight: bold;">${formatRp(cust.tagTotal)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 7px 10px; text-align: center;"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="font-size: 12.5px; font-weight: bold; margin-bottom: 14px;">
+                *Tagihan sudah termasuk Denda, Materai.
+            </div>
+
+            <!-- Paragraf Metode Pembayaran -->
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+                Kami mengharapkan Bapak/Ibu/Sdr/i dapat meluangkan waktu untuk segera menyelesaikan pembayaran tunggakan layanan internet tersebut melalui Autodebet, ATM, Mobile Banking, Internet Banking dan SMS Banking. Pembayaran juga bisa dilakukan melalui gerai retail Indomaret, Alfamart dan channel e-commerce melalui Tokopedia, Shopee, Bukalapak, Gojek &amp; LinkAja dan Plasa Telkom.
+            </div>
+
+            <!-- Paragraf Konsekuensi -->
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+                Perlu kami sampaikan juga bahwa konsekuensi bagi pelanggan internet Telkom yang mempunyai tunggakan tagihan,<br>
+                diantaranya :
+                <div style="margin-top: 4px; padding-left: 2px;">
+                    <div>1. Adanya mekanisme blacklist (daftar hitam) pelanggan, sehingga permintaan pasang baru ulang tidak bisa dilayani.</div>
+                    <div>2. Adanya biaya pendaftaran pasang baru Internet Telkom, untuk permintaan pasang baru kembali.</div>
+                    <div>3. Adanya denda penalti Rp 1.000.000,- bagi pelanggan yang berhenti berlangganan sebelum satu tahun.</div>
+                </div>
+            </div>
+
+            <!-- Peringatan Kuasa Hukum -->
+            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.45;">
+                Apabila sampai dengan batas waktu pembayaran <strong>20 September 2026</strong> tunggakan Bapak / Ibu / Saudara (i) belum melakukan pembayaran, maka akan kami limpahkan kepada <strong>KUASA HUKUM</strong> untuk proses penanganan lebih lanjut.
+            </div>
+
+            <!-- Bagian Kontak PIC, QR Code, dan Tanda Tangan Resmi -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
+                <tr>
+                    <td style="width: 76%; vertical-align: top; padding-right: 15px;">
+                        <div style="margin-bottom: 10px; line-height: 1.45;">
+                            Untuk informasi lebih lanjut dapat menghubungi pic : <strong>${saName}</strong> (085137634949),<br>
+                            Serta pembayaran lebih mudah dengan melakukan scan QR-Code disamping
+                        </div>
+                        <div style="margin-bottom: 10px; line-height: 1.45;">
+                            Mohon diabaikan pemberitahuan ini, apabila Bapak/Ibu/Sdr/i telah menyelesaikan pembayaran tagihan sebelum surat ini diterima.
+                        </div>
+                        <div style="margin-bottom: 14px; line-height: 1.45;">
+                            Demikian disampaikan, atas perhatian dan pengertiannya kami ucapkan terimaksih.
+                        </div>
+                        <div style="font-weight: bold; margin-bottom: 4px;">
+                            Hormat Kami,
+                        </div>
+                        <div>
+                            <img src="${ttdGm}" style="width: 130px; height: auto; display: block; margin: 4px 0;" alt="Tanda Tangan GM Witel">
+                        </div>
+                        <div style="font-weight: bold; margin-top: 2px;">
+                            Nugroho Setio Budi<br>
+                            GM Witel Priangan Timur
+                        </div>
+                    </td>
+                    <td style="width: 24%; text-align: center; vertical-align: top; padding-top: 5px;">
+                        <img src="${qrCode}" style="width: 95px; height: 95px; display: block; margin: 0 auto; border: 1px solid #ddd; padding: 2px;" alt="QR Code Telkom">
+                    </td>
+                </tr>
+            </table>
+        `;
 
         // Temporary wrapper di luar viewport untuk proses render
         let wrapper = document.createElement('div');
@@ -426,13 +495,17 @@
         wrapper.style.left = '-9999px';
         wrapper.style.top = '0';
         wrapper.style.zIndex = '-9999';
-        wrapper.appendChild(clone);
+        wrapper.appendChild(suratContainer);
         document.body.appendChild(wrapper);
+
+        let safeCustName = cust.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        let safeSnd = cust.snd.replace(/[^a-z0-9]/gi, '');
+        let safeSaName = saName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         // Konfigurasi html2pdf
         let opt = {
             margin:       [8, 8, 8, 8], // 8mm margin
-            filename:     'Surat_Penyelesaian_Tunggakan_Telkom_' + safeSaName + '_' + new Date().toISOString().slice(0,10) + '.pdf',
+            filename:     'Surat_Penyelesaian_Tunggakan_' + safeSaName + '_' + safeSnd + '.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
                 scale: 2, 
@@ -445,7 +518,7 @@
         };
 
         // Jalankan generator PDF
-        html2pdf().from(clone).set(opt).save().then(() => {
+        html2pdf().from(suratContainer).set(opt).save().then(() => {
             if (document.body.contains(wrapper)) {
                 document.body.removeChild(wrapper);
             }
