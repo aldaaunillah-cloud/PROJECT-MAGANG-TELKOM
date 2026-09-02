@@ -191,11 +191,11 @@
             <tr>
                 <th style="width: 5%; text-align: center;">NO</th>
                 <th style="width: 15%;">SND</th>
-                <th style="width: 35%;">NAMA CUSTOMER</th>
+                <th style="width: 30%;">NAMA CUSTOMER</th>
                 <th style="width: 15%;">DATEL</th>
                 <th style="width: 15%;">AGENCY PSB</th>
                 <th style="width: 10%; text-align: center;">STATUS</th>
-                <th style="width: 10%; text-align: right;">TAGIHAN</th>
+                <th style="width: 10%;">TAGIHAN</th>
             </tr>
         </thead>
         <tbody>
@@ -211,7 +211,12 @@
                             {{ $customer->status_bayar == 'Sdh Bayar' ? 'Sudah Bayar' : 'Belum Bayar' }}
                         </span>
                     </td>
-                    <td class="text-end" style="font-weight: 700; color: #000361;">Rp {{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</td>
+                    <td style="font-weight: 700; color: #000361;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Rp</span>
+                            <span>{{ number_format($customer->tag_total ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                    </td>
                 </tr>
             @empty
                 <tr>
