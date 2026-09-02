@@ -21,9 +21,11 @@ class CustomerController extends Controller
         $agency = $request->input('agency');
         $sales = $request->input('sales');
 
+        $search = $request->input('search');
+
         $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
 
-        $applyFilters = function ($query) use ($datel, $agency, $sales, $invalidPlaceholders) {
+        $applyFilters = function ($query) use ($datel, $agency, $sales, $search, $invalidPlaceholders) {
             if ($datel) {
                 $query->where('datel', $datel);
             }
@@ -32,6 +34,16 @@ class CustomerController extends Controller
             }
             if ($sales) {
                 $query->where('sales_agency', $sales);
+            }
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                      ->orWhere('snd', 'like', "%{$search}%")
+                      ->orWhere('ncli', 'like', "%{$search}%")
+                      ->orWhere('agency_psb', 'like', "%{$search}%")
+                      ->orWhere('sales_agency', 'like', "%{$search}%")
+                      ->orWhere('datel', 'like', "%{$search}%");
+                });
             }
 
             // Filter invalid placeholders agar tidak dihitung dalam rekap
@@ -63,6 +75,16 @@ class CustomerController extends Controller
         if ($sales) {
             $baseQuery->where('sales_agency', $sales);
         }
+        if ($search) {
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('snd', 'like', "%{$search}%")
+                  ->orWhere('ncli', 'like', "%{$search}%")
+                  ->orWhere('agency_psb', 'like', "%{$search}%")
+                  ->orWhere('sales_agency', 'like', "%{$search}%")
+                  ->orWhere('datel', 'like', "%{$search}%");
+            });
+        }
 
         // 2. Compute statistics for Default/Datel/Agency views
         $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
@@ -88,6 +110,24 @@ class CustomerController extends Controller
             $salesCountQuery->where('agency_psb', $agency);
             $agencyCountQuery->where('agency_psb', $agency);
         }
+        if ($search) {
+            $salesCountQuery->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('snd', 'like', "%{$search}%")
+                  ->orWhere('ncli', 'like', "%{$search}%")
+                  ->orWhere('agency_psb', 'like', "%{$search}%")
+                  ->orWhere('sales_agency', 'like', "%{$search}%")
+                  ->orWhere('datel', 'like', "%{$search}%");
+            });
+            $agencyCountQuery->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('snd', 'like', "%{$search}%")
+                  ->orWhere('ncli', 'like', "%{$search}%")
+                  ->orWhere('agency_psb', 'like', "%{$search}%")
+                  ->orWhere('sales_agency', 'like', "%{$search}%")
+                  ->orWhere('datel', 'like', "%{$search}%");
+            });
+        }
 
         $totalSales = $salesCountQuery->distinct()->pluck('sales_agency')->filter()->count();
         $totalAgency = $agencyCountQuery->distinct()->pluck('agency_psb')->filter()->count();
@@ -102,6 +142,7 @@ class CustomerController extends Controller
         $rekapBilling = null;
         $agencyCustomers = null;
         $salesCustomers = null;
+        $searchCustomers = null;
 
         // 4. Load case-specific data
         if ($sales) {
@@ -114,6 +155,13 @@ class CustomerController extends Controller
         } elseif ($agency) {
             // Case 2: Agency Terpilih (Hanya menampilkan yang belum bayar)
             $agencyCustomers = (clone $unpaidQuery)
+                ->orderBy('tag_total', 'desc')
+                ->paginate(30)
+                ->withQueryString();
+        } elseif ($search) {
+            // Case 4: Hanya Search (dan Datel jika ada). Tampilkan list semua customer yang match
+            $searchCustomers = (clone $baseQuery)
+                ->orderBy('status_bayar', 'desc')
                 ->orderBy('tag_total', 'desc')
                 ->paginate(30)
                 ->withQueryString();
@@ -321,6 +369,7 @@ class CustomerController extends Controller
             'rekapBilling',
             'agencyCustomers',
             'salesCustomers',
+            'searchCustomers',
             'dashboardGrid'
         ));
     }
