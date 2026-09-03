@@ -4,38 +4,39 @@
 
 @section('content')
 <div class="container-fluid px-0">
-    <p class="text-primary mb-4" style="margin-top: -15px; font-size: 0.95rem;">
+    <p class="text-primary mb-3" style="margin-top: -15px; font-size: 0.85rem;">
         Daftar pengiriman reminder chatbot ke Sales Agency
     </p>
 
     {{-- ============================================ --}}
     {{-- FILTER BOX (TANGGAL & PENCARIAN) --}}
     {{-- ============================================ --}}
-    <div class="card border border-2 rounded-4 mb-4 no-hover" style="border-color: #dbe0eb !important; box-shadow: none;">
-        <div class="card-body p-4">
-            <form method="GET" id="filterForm" class="row align-items-end g-3">
+    <div class="card border rounded-3 mb-3 no-hover" style="border-color: #e2e8f0 !important; box-shadow: none;">
+        <div class="card-body p-2.5 px-3">
+            <form method="GET" id="filterForm" class="row align-items-end g-2">
                 {{-- Tanggal Mulai --}}
                 <div class="col-md-3">
-                    <label class="form-label text-secondary fw-semibold mb-2" style="font-size: 0.85rem;">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control rounded-3 py-2" 
-                           value="{{ request('start_date') }}" style="border-color: #ced4da !important;">
+                    <label class="form-label text-secondary fw-semibold mb-1" style="font-size: 0.75rem;">Tanggal Mulai</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm rounded-2" 
+                           value="{{ request('start_date') }}" style="border-color: #cbd5e1 !important; font-size: 0.8rem;">
                 </div>
 
                 {{-- Tanggal Akhir --}}
                 <div class="col-md-3">
-                    <label class="form-label text-secondary fw-semibold mb-2" style="font-size: 0.85rem;">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control rounded-3 py-2" 
-                           value="{{ request('end_date') }}" style="border-color: #ced4da !important;">
+                    <label class="form-label text-secondary fw-semibold mb-1" style="font-size: 0.75rem;">Tanggal Akhir</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm rounded-2" 
+                           value="{{ request('end_date') }}" style="border-color: #cbd5e1 !important; font-size: 0.8rem;">
                 </div>
 
                 {{-- Search Bar --}}
                 <div class="col-md-4 ms-auto">
+                    <label class="form-label text-secondary fw-semibold mb-1" style="font-size: 0.75rem;">Pencarian</label>
                     <div class="position-relative">
-                        <input type="text" name="search" class="form-control rounded-3 py-2 pe-5" 
-                               placeholder="Cari Customer / pesan...." value="{{ request('search') }}"
-                               style="border-color: #ced4da !important;">
-                        <span class="position-absolute end-0 top-50 translate-middle-y me-3">
-                            <i class="bi bi-search text-secondary fs-5"></i>
+                        <input type="text" name="search" class="form-control form-control-sm rounded-2 pe-4" 
+                               placeholder="Cari Customer / Sales Agency...." value="{{ request('search') }}"
+                               style="border-color: #cbd5e1 !important; font-size: 0.8rem;">
+                        <span class="position-absolute end-0 top-50 translate-middle-y me-2.5">
+                            <i class="bi bi-search text-secondary" style="font-size: 0.85rem;"></i>
                         </span>
                     </div>
                 </div>
@@ -46,65 +47,59 @@
     {{-- ============================================ --}}
     {{-- TABLE DATA --}}
     {{-- ============================================ --}}
-    <div class="card border-0 rounded-4 overflow-hidden mb-3 no-hover" style="box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+    <div class="card border rounded-3 overflow-hidden mb-3 no-hover" style="border-color: #e2e8f0 !important; box-shadow: none;">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="reminderTable">
                     <thead>
-                        <tr class="text-secondary" style="background-color: #f3f6f9; border-bottom: 2px solid #ebedf3;">
-                            <th class="py-3 px-4 text-center fw-bold" style="width: 60px; font-size: 0.85rem;">No</th>
-                            <th class="py-3 px-3 fw-bold" style="width: 180px; font-size: 0.85rem;">Tanggal</th>
-                            <th class="py-3 px-3 fw-bold" style="width: 220px; font-size: 0.85rem;">Sales Agency</th>
-                            <th class="py-3 px-3 fw-bold text-center" style="width: 150px; font-size: 0.85rem;">Total SSL</th>
-                            <th class="py-3 px-4 fw-bold text-center" style="width: 180px; font-size: 0.85rem;">Status</th>
-                            <th class="py-3 px-3 fw-bold text-center" style="width: 150px; font-size: 0.85rem;">Aksi</th>
+                        <tr class="text-secondary" style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                            <th class="py-2.5 px-3 text-center fw-bold" style="width: 50px; font-size: 0.72rem; letter-spacing: 0.4px;">NO</th>
+                            <th class="py-2.5 px-3 fw-bold" style="width: 170px; font-size: 0.72rem; letter-spacing: 0.4px;">TANGGAL</th>
+                            <th class="py-2.5 px-3 fw-bold" style="font-size: 0.72rem; letter-spacing: 0.4px;">SALES AGENCY</th>
+                            <th class="py-2.5 px-3 fw-bold text-center" style="width: 130px; font-size: 0.72rem; letter-spacing: 0.4px;">TOTAL SSL</th>
+                            <th class="py-2.5 px-3 fw-bold text-center" style="width: 140px; font-size: 0.72rem; letter-spacing: 0.4px;">STATUS</th>
+                            <th class="py-2.5 px-3 fw-bold text-center" style="width: 90px; font-size: 0.72rem; letter-spacing: 0.4px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($reminders as $index => $reminder)
-                            <tr style="border-bottom: 1px solid #ebedf3;">
-                                <td class="py-3 px-4 text-center text-secondary fw-semibold">{{ $reminders->firstItem() + $index }}</td>
-                                <td class="py-3 px-3 text-secondary" style="font-size: 0.9rem;">
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td class="py-2 px-3 text-center text-secondary fw-semibold" style="font-size: 0.8rem;">{{ $reminders->firstItem() + $index }}</td>
+                                <td class="py-2 px-3 text-secondary" style="font-size: 0.8rem;">
                                     {{ $reminder->created_at ? $reminder->created_at->format('d M Y H:i:s') : '-' }}
                                 </td>
-                                <td class="py-3 px-3 text-dark fw-bold text-uppercase" style="font-size: 0.9rem; letter-spacing: 0.2px;">
+                                <td class="py-2 px-3 text-dark fw-bold text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.2px;">
                                     {{ $reminder->sales_agency ?? '-' }}
                                 </td>
-                                <td class="py-3 px-3 text-center fw-semibold text-secondary" style="font-size: 0.9rem;">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5" style="border-radius: 6px; font-size: 0.85rem;">
+                                <td class="py-2 px-3 text-center">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-2.5 py-1" style="border-radius: 5px; font-size: 0.75rem;">
                                         {{ $reminder->total_ssl ?? 0 }} SSL
                                     </span>
                                 </td>
-                                <td class="py-3 px-4 text-center">
+                                <td class="py-2 px-3 text-center">
                                     @if(in_array(strtolower($reminder->status), ['selesai', 'terkirim', 'lunas']))
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-3 py-2 fw-bold" style="font-size: 0.75rem; border-radius: 6px;">
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2.5 py-1 fw-bold" style="font-size: 0.72rem; border-radius: 5px;">
                                             Terkirim
                                         </span>
                                     @else
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-3 py-2 fw-bold" style="font-size: 0.75rem; border-radius: 6px;">
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2.5 py-1 fw-bold" style="font-size: 0.72rem; border-radius: 5px;">
                                             Belum Terkirim
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-3 text-center">
+                                <td class="py-2 px-3 text-center">
                                     {{-- Eye Icon (Detail) --}}
-                                    <button type="button" class="btn btn-sm btn-light text-primary border-0 rounded-3 shadow-sm px-3 py-2" 
+                                    <button type="button" class="btn btn-sm btn-light text-primary border-0 rounded-2 shadow-sm px-2.5 py-1" 
                                             data-bs-toggle="modal" data-bs-target="#messageModal{{ $reminder->id }}" 
                                             title="Lihat Detail Pesan">
-                                        <i class="bi bi-eye-fill fs-5"></i>
-                                    </button>
-                                    {{-- Download Icon (PDF) --}}
-                                    <button type="button" onclick="downloadRowAsPdf('{{ $reminder->id }}', 0)" 
-                                            class="btn btn-sm btn-light text-danger border-0 rounded-3 shadow-sm px-3 py-2 ms-1" 
-                                            title="Unduh Surat Tunggakan (.pdf)">
-                                        <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
+                                        <i class="bi bi-eye-fill fs-6"></i>
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-chat-left-text fs-1 d-block text-secondary mb-3"></i>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="bi bi-chat-left-text fs-2 d-block text-secondary mb-2"></i>
                                     Tidak ada data riwayat reminder ditemukan.
                                 </td>
                             </tr>
@@ -113,13 +108,17 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    {{-- Pagination --}}
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <div>
-            {{ $reminders->appends(request()->query())->links('pagination::bootstrap-5') }}
-        </div>
+        @if($reminders->hasPages())
+            <div class="card-footer bg-white border-top border-light p-3 d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Menampilkan {{ $reminders->firstItem() }} s/d {{ $reminders->lastItem() }} dari total {{ $reminders->total() }} riwayat reminder
+                </small>
+                <div>
+                    {{ $reminders->appends(request()->query())->links('vendor.pagination.bootstrap-5') }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 
@@ -329,7 +328,7 @@
         }
     });
 
-    // Fungsi Client-side Export PDF Surat Resmi Telkom untuk masing-masing baris & customer
+    // Fungsi Client-side Export PDF Surat Resmi Telkom (Cara A: Native Vector Print / PDF)
     function downloadRowAsPdf(id, customerIndex) {
         let customersDataEl = document.getElementById('saCustomersData' + id);
         if (!customersDataEl) {
@@ -350,7 +349,6 @@
         let qrCode = customersDataEl.getAttribute('data-qr');
         let ttdGm = customersDataEl.getAttribute('data-ttd');
 
-        // Format angka Rupiah
         function formatRp(val) {
             return 'Rp ' + Number(val).toLocaleString('id-ID');
         }
@@ -360,29 +358,29 @@
         suratContainer.style.width = '794px';
         suratContainer.style.boxSizing = 'border-box';
         suratContainer.style.background = '#ffffff';
-        suratContainer.style.padding = '42px 52px 36px 52px';
+        suratContainer.style.padding = '40px 50px 32px 50px';
         suratContainer.style.fontFamily = 'Arial, Helvetica, sans-serif';
         suratContainer.style.color = '#000000';
-        suratContainer.style.fontSize = '12.5px';
-        suratContainer.style.lineHeight = '1.48';
+        suratContainer.style.fontSize = '12px';
+        suratContainer.style.lineHeight = '1.45';
 
         suratContainer.innerHTML = `
             <!-- Header: Nomor & Logo Telkom Indonesia -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 22px;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 0; margin-bottom: 20px;">
                 <tr>
-                    <td style="width: 60%; vertical-align: top; padding-top: 8px;">
-                        <div style="font-size: 12.5px; color: #000000; font-family: Arial, sans-serif;">
+                    <td style="width: 60%; vertical-align: top; padding-top: 6px;">
+                        <div style="font-size: 12px; color: #000000; font-family: Arial, sans-serif;">
                             Nomor : C.Tel. /CBN/YN 000/ T2W-0H000000/2025
                         </div>
                     </td>
-                    <td style="width: 40%; text-align: right; vertical-align: top; padding-top: 0; padding-right: 2px;">
-                        <img src="${telkomLogo}" style="width: 155px; height: auto; display: inline-block; max-width: 100%;" alt="Telkom Indonesia">
+                    <td style="width: 40%; text-align: right; vertical-align: top; padding-top: 0;">
+                        <img src="${telkomLogo}" style="width: 150px; height: auto; display: inline-block;" alt="Telkom Indonesia">
                     </td>
                 </tr>
             </table>
 
             <!-- Tanggal & Kepada Yth -->
-            <div style="margin-bottom: 18px;">
+            <div style="margin-bottom: 16px;">
                 <div>Cirebon, ${tglSurat}</div>
                 <div style="margin-top: 8px;">Kepada Yth,</div>
                 <div style="font-weight: bold; text-transform: uppercase; margin-top: 2px;">${cust.name}</div>
@@ -390,61 +388,61 @@
             </div>
 
             <!-- Perihal -->
-            <div style="margin-bottom: 16px;">
+            <div style="margin-bottom: 14px;">
                 Perihal &nbsp;: Penyelesaian Tunggakan Layanan Telkom dengan nomor <strong>${cust.snd}</strong>
             </div>
 
             <!-- Paragraf Pembuka -->
-            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.48;">
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
                 Sebelumnya kami mengucapkan banyak terimakasih atas kepercayaan Bapak/Ibu/Saudara/i menggunakan fasilitas jasa telekomunikasi dari PT. Telekomunikasi Indonesia. Kami menyadari dikarenakan kesibukan Bapak/Ibu/Sdr/i sehingga belum melakukan pembayaran tagihan internet. Untuk itu kami beritahukan bahwa sampai dengan saat ini didalam aplikasi kami Bapak/Ibu/Sdr/i masih memiliki tunggakan layanan internet dengan rincian sebagai berikut :
             </div>
 
             <!-- Tabel Rincian Tunggakan Sesuai Template -->
-            <table style="width: 100%; border-collapse: collapse; margin: 10px 0 6px 0; font-size: 12px;">
+            <table style="width: 100%; border-collapse: collapse; margin: 8px 0 6px 0; font-size: 11.5px;">
                 <thead>
                     <tr style="background-color: #f8f9fa;">
-                        <th style="border: 1.5px solid #000000; padding: 6px 12px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
-                        <th style="border: 1.5px solid #000000; padding: 6px 12px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
-                        <th style="border: 1.5px solid #000000; padding: 6px 12px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center; width: 25%; font-weight: bold;">Bulan Tagihan</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center; width: 25%; font-weight: bold;">Jumlah</th>
+                        <th style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center; width: 50%; font-weight: bold;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Mei 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 14px; text-align: end; font-weight: 500;">${formatRp(cust.bill1)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Pemakaian bulan Mei 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Mei 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 14px; text-align: right; font-weight: 500;">${formatRp(cust.bill1)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Pemakaian bulan Mei 2025</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Juni 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 14px; text-align: end; font-weight: 500;">${formatRp(cust.bill2)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Pemakaian bulan Juni 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Juni 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 14px; text-align: right; font-weight: 500;">${formatRp(cust.bill2)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Pemakaian bulan Juni 2025</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Juli 2025</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 14px; text-align: end; font-weight: 500;">${formatRp(cust.bill3)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;">Pemakaian bulan Juli 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Juli 2025</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 14px; text-align: right; font-weight: 500;">${formatRp(cust.bill3)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 4px 12px; text-align: center;">Pemakaian bulan Juli 2025</td>
                     </tr>
                     <tr style="background-color: #f8f9fa;">
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: center; font-weight: bold;">Total</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 14px; text-align: end; font-weight: bold;">${formatRp(cust.tagTotal)}</td>
-                        <td style="border: 1.5px solid #000000; padding: 6px 12px; text-align: center;"></td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center; font-weight: bold;">Total</td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 14px; text-align: right; font-weight: bold;">${formatRp(cust.tagTotal)}</td>
+                        <td style="border: 1.5px solid #000000; padding: 5px 12px; text-align: center;"></td>
                     </tr>
                 </tbody>
             </table>
-            <div style="font-size: 11px; font-weight: bold; margin-bottom: 14px;">
+            <div style="font-size: 10.5px; font-weight: bold; margin-bottom: 12px;">
                 *Tagihan sudah termasuk Denda, Materai.
             </div>
 
             <!-- Paragraf Metode Pembayaran -->
-            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.48;">
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
                 Kami mengharapkan Bapak/Ibu/Sdr/i dapat meluangkan waktu untuk segera menyelesaikan pembayaran tunggakan layanan internet tersebut melalui Autodebet, ATM, Mobile Banking, Internet Banking dan SMS Banking. Pembayaran juga bisa dilakukan melalui gerai retail Indomaret, Alfamart dan channel e-commerce melalui Tokopedia, Shopee, Bukalapak, Gojek &amp; LinkAja dan Plasa Telkom.
             </div>
 
             <!-- Paragraf Konsekuensi -->
-            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.48;">
+            <div style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
                 Perlu kami sampaikan juga bahwa konsekuensi bagi pelanggan internet Telkom yang mempunyai tunggakan tagihan,<br>
                 diantaranya :
-                <div style="margin-top: 4px; padding-left: 4px;">
+                <div style="margin-top: 3px; padding-left: 4px;">
                     <div>1. Adanya mekanisme blacklist (daftar hitam) pelanggan, sehingga permintaan pasang baru ulang tidak bisa dilayani.</div>
                     <div>2. Adanya biaya pendaftaran pasang baru Internet Telkom, untuk permintaan pasang baru kembali.</div>
                     <div>3. Adanya denda penalti Rp 1.000.000,- bagi pelanggan yang berhenti berlangganan sebelum satu tahun.</div>
@@ -452,7 +450,7 @@
             </div>
 
             <!-- Peringatan Kuasa Hukum -->
-            <div style="text-align: justify; margin-bottom: 18px; line-height: 1.48;">
+            <div style="text-align: justify; margin-bottom: 14px; line-height: 1.45;">
                 Apabila sampai dengan batas waktu pembayaran <strong>20 September 2026</strong> tunggakan Bapak / Ibu / Saudara (i) belum melakukan pembayaran, maka akan kami limpahkan kepada <strong>KUASA HUKUM</strong> untuk proses penanganan lebih lanjut.
             </div>
 
@@ -460,29 +458,29 @@
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
                 <tr>
                     <td style="width: 76%; vertical-align: top; padding-right: 15px;">
-                        <div style="margin-bottom: 8px; line-height: 1.42;">
+                        <div style="margin-bottom: 6px; line-height: 1.4;">
                             Untuk informasi lebih lanjut dapat menghubungi pic : <strong>${saName}</strong> (085137634949),<br>
                             Serta pembayaran lebih mudah dengan melakukan scan QR-Code disamping
                         </div>
-                        <div style="margin-bottom: 8px; line-height: 1.42;">
+                        <div style="margin-bottom: 6px; line-height: 1.4;">
                             Mohon diabaikan pemberitahuan ini, apabila Bapak/Ibu/Sdr/i telah menyelesaikan pembayaran tagihan sebelum surat ini diterima.
                         </div>
-                        <div style="margin-bottom: 14px; line-height: 1.42;">
+                        <div style="margin-bottom: 12px; line-height: 1.4;">
                             Demikian disampaikan, atas perhatian dan pengertiannya kami ucapkan terimaksih.
                         </div>
                         <div style="font-weight: bold; margin-bottom: 4px;">
                             Hormat Kami,
                         </div>
                         <div>
-                            <img src="${ttdGm}" style="width: 125px; height: auto; display: block; margin: 4px 0;" alt="Tanda Tangan GM Witel">
+                            <img src="${ttdGm}" style="width: 120px; height: auto; display: block; margin: 3px 0;" alt="Tanda Tangan GM Witel">
                         </div>
-                        <div style="font-weight: bold; line-height: 1.3; margin-top: 4px;">
+                        <div style="font-weight: bold; line-height: 1.25; margin-top: 3px;">
                             Nugroho Setio Budi<br>
                             GM Witel Priangan Timur
                         </div>
                     </td>
-                    <td style="width: 24%; text-align: center; vertical-align: top; padding-top: 6px;">
-                        <img src="${qrCode}" style="width: 92px; height: 92px; display: block; margin: 0 auto; border: 1px solid #ddd; padding: 2px;" alt="QR Code Telkom">
+                    <td style="width: 24%; text-align: center; vertical-align: top; padding-top: 4px;">
+                        <img src="${qrCode}" style="width: 95px; height: 95px; display: block; margin: 0 auto; border: 1px solid #ddd; padding: 2px;" alt="QR Code Finpay Indibiz">
                     </td>
                 </tr>
             </table>
@@ -501,9 +499,9 @@
         let safeSnd = cust.snd.replace(/[^a-z0-9]/gi, '');
         let safeSaName = saName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
-        // Konfigurasi html2pdf: Pas 1 halaman utuh A4 tanpa page-break
+        // Konfigurasi html2pdf: Pas 1 halaman utuh A4 tanpa page-break & langsung auto download
         let opt = {
-            margin:       0, // 0 margin agar container 794px pas mengisi seluruh bidang A4
+            margin:       0,
             filename:     'Surat_Penyelesaian_Tunggakan_' + safeSaName + '_' + safeSnd + '.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
@@ -516,7 +514,7 @@
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Jalankan generator PDF & pastikan hanya 1 halaman yang disimpan
+        // Jalankan generator PDF & langsung simpan (auto download)
         html2pdf().from(suratContainer).set(opt).toPdf().get('pdf').then(function(pdf) {
             let totalPages = pdf.internal.getNumberOfPages();
             if (totalPages > 1) {
@@ -533,7 +531,7 @@
             if (document.body.contains(wrapper)) {
                 document.body.removeChild(wrapper);
             }
-            alert('Gagal menghasilkan file PDF.');
+            alert('Gagal mengunduh file PDF.');
         });
     }
 </script>

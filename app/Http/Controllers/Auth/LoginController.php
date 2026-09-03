@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -20,36 +23,61 @@ class LoginController extends Controller
             return redirect()->route('dashboard');
         }
         
-        return view('auth.login');
+        return view('Auth.login');
     }
 
     /**
-     * Handle login request.
+     * Handle login request (HANYA MENGGUNAKAN USERNAME ATAU EMAIL RESMI YANG TERDAFTAR).
      */
     public function login(Request $request)
     {
         // Validasi input
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
+            'login' => 'required|string',
+            'password' => 'required|string',
+        ], [
+            'login.required' => 'Username atau Email wajib diisi.',
+            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
-        // Kunci throttle unik berdasarkan email dan IP address
-        $throttleKey = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+        $loginInput = trim($request->input('login'));
 
-        // Cek jika percobaan melebihi 5 kali
+        // Kunci throttle unik berdasarkan input login dan IP address
+        $throttleKey = Str::transliterate(Str::lower($loginInput).'|'.$request->ip());
+
+        // Cek jika percobaan login gagal melebihi 5 kali
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             return back()->withErrors([
-                'email' => "Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik.",
-            ])->onlyInput('email');
+                'login' => "Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik.",
+            ])->onlyInput('login');
         }
 
-        // Attempt login
-        $credentials = $request->only('email', 'password');
-        
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            // Hapus hitungan gagal setelah berhasil login
+        // Cari HANYA berdasarkan kolom email ATAU kolom username yang terdaftar secara persis
+        $user = User::where(function ($query) use ($loginInput) {
+            $query->where('email', $loginInput)
+                  ->orWhere('email', strtolower($loginInput));
+
+            if (Schema::hasColumn('users', 'username')) {
+                $query->orWhere('username', $loginInput)
+                      ->orWhere('username', strtolower($loginInput));
+            }
+        })->first();
+
+        // Verifikasi kata sandi jika akun ditemukan
+        if ($user && Hash::check($request->password, $user->password)) {
+            
+            // Cek apakah akun berstatus aktif
+            if (!$user->isActive()) {
+                return back()->withErrors([
+                    'login' => 'Akun Anda berstatus Tidak Aktif. Silakan hubungi Admin PIKOL untuk mengaktifkan akun.',
+                ])->onlyInput('login');
+            }
+
+            // Login akun
+            Auth::login($user, $request->filled('remember'));
+
+            // Hapus hitungan rate limiter setelah berhasil login
             RateLimiter::clear($throttleKey);
 
             // Regenerate session untuk keamanan
@@ -64,8 +92,8 @@ class LoginController extends Controller
 
         // Jika login gagal
         return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->onlyInput('email');
+            'login' => 'Username/Email atau kata sandi yang Anda masukkan salah.',
+        ])->onlyInput('login');
     }
 
     /**

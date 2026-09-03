@@ -35,75 +35,75 @@
             box-sizing: border-box;
         }
 
+        html {
+            font-size: 14px; /* Base 14px: memberikan tampilan compact enterprise yang pas di zoom 100% */
+        }
+
         body {
             background-color: var(--bg-color);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #1e293b;
+            font-size: 0.875rem;
+            line-height: 1.45;
         }
 
         /* ============================================
            MAIN CONTENT
            ============================================ */
         .main-content {
-            padding: 30px;
+            padding: 20px 24px;
             min-height: 100vh;
-            margin-left: 260px;
-            width: calc(100% - 260px);
+            margin-left: 240px;
+            width: calc(100% - 240px);
             flex: none;
             background-color: var(--bg-color);
         }
 
         /* ============================================
-           CARDS - Premium & Modern
+           CARDS - Compact, Modern & Statis
            ============================================ */
         .card {
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
             border: 1px solid #e2e8f0;
             background: #ffffff;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.01);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
         }
 
         .card-header {
             background: #fff;
             border-bottom: 1px solid #e2e8f0;
-            padding: 16px 20px;
+            padding: 12px 16px;
         }
 
         .card-body {
-            padding: 20px;
+            padding: 16px;
         }
 
         /* ============================================
-           TABLES
+           TABLES - Compact & Clean
            ============================================ */
         .table thead th {
             border-bottom: 2px solid #e2e8f0;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.72rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             color: #475569;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background-color: #f8fafc;
         }
 
         .table tbody td {
-            padding: 10px 12px;
+            padding: 8px 10px;
             vertical-align: middle;
             color: #334155;
             border-color: #f1f5f9;
+            font-size: 0.8125rem;
         }
 
         .table-hover tbody tr:hover {
-            background-color: rgba(226, 0, 26, 0.03);
-            transition: background-color 0.2s ease;
+            background-color: rgba(0, 3, 97, 0.02);
         }
 
         .table-striped tbody tr:nth-of-type(odd) {
@@ -152,14 +152,13 @@
         }
 
         /* ============================================
-           BUTTONS
+           BUTTONS - Compact & Clean
            ============================================ */
         .btn {
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 500;
-            padding: 8px 18px;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
+            padding: 6px 14px;
+            font-size: 0.8125rem;
         }
 
         .btn-primary {
@@ -171,27 +170,21 @@
         .btn-primary:hover {
             background-color: #00024a;
             border-color: #00024a;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 3, 97, 0.2);
+            box-shadow: 0 3px 8px rgba(0, 3, 97, 0.15);
         }
 
         .btn-sm {
-            border-radius: 6px;
-            padding: 5px 12px;
-            font-size: 0.78rem;
+            border-radius: 5px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
         }
 
         /* ============================================
-           SIDEBAR LINKS & HOVER
+           SIDEBAR LINKS & HOVER (Statis / Tidak Bergeser)
            ============================================ */
-        .hover-bg-light {
-            transition: all 0.2s ease;
-        }
-        
         .hover-bg-light:hover {
             background-color: rgba(255, 255, 255, 0.08) !important;
             color: #fff !important;
-            transform: translateX(3px);
         }
 
         /* ============================================
@@ -213,27 +206,27 @@
         }
 
         /* ============================================
-           FORM
+           FORM - Compact & Clean
            ============================================ */
         .form-control, .form-select {
-            border-radius: 10px;
-            border: 1px solid #e8e8e8;
-            padding: 8px 16px;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            transition: all 0.2s ease;
+            font-size: 0.825rem;
         }
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(226, 0, 26, 0.15);
+            box-shadow: 0 0 0 0.18rem rgba(0, 3, 97, 0.12);
         }
 
         .form-label {
             font-weight: 600;
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 4px;
-            letter-spacing: 0.3px;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 3px;
+            letter-spacing: 0.2px;
         }
 
         /* ============================================
@@ -322,10 +315,10 @@
         }
 
         /* ============================================
-        SIDEBAR FIXED
+        SIDEBAR FIXED - Compact 240px
         ============================================ */
         .sidebar {
-            width: 260px;
+            width: 240px;
             height: 100vh;
             max-height: 100vh;
             position: fixed;
@@ -367,10 +360,19 @@
             color: #ffffff !important;
         }
         .hover-logout {
-            transition: color 0.2s ease !important;
+            transition: all 0.2s ease-in-out !important;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            width: 100%;
         }
         .hover-logout:hover {
-            color: #ff4d5e !important; /* Warna merah terang agar kontras di latar biru gelap */
+            color: #ff2d42 !important; /* Warna merah menyala tegas & jelas */
+            background-color: rgba(255, 45, 66, 0.15) !important; /* Highlight background merah lembut */
+            font-weight: 600 !important;
+        }
+        .hover-logout:hover i {
+            color: #ff2d42 !important;
         }
 
         /* ============================================
@@ -558,30 +560,47 @@
                         Riwayat Reminder
                     </a>
 
-                    <hr class="border-light border-opacity-25 my-3 mx-2">
+                    {{-- MENU KHUSUS PIKOL (ADMIN) --}}
+                    @if(Auth::user() && Auth::user()->isPikol())
+                        <hr class="border-light border-opacity-25 my-3 mx-2">
+                        
+                        <div class="px-3 text-white-50 small fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.8px;">
+                            Administrator (PIKOL)
+                        </div>
 
-                    {{-- SINKRONISASI --}}
-                    <a href="{{ route('sync.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('sync.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
-                        <i class="bi bi-arrow-repeat me-2 fs-5"></i>
-                        Sinkronisasi
-                    </a>
+                        {{-- SINKRONISASI --}}
+                        <a href="{{ route('sync.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('sync.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                            <i class="bi bi-arrow-repeat me-2 fs-5"></i>
+                            Sinkronisasi
+                        </a>
+
+                        {{-- MANAJEMEN ANGGOTA --}}
+                        <a href="{{ route('users.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('users.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                            <i class="bi bi-people-fill me-2 fs-5"></i>
+                            Manajemen Anggota
+                        </a>
+                    @endif
                 </nav>
 
                 {{-- FOOTER SIDEBAR --}}
                 <div class="p-3 border-top border-light border-opacity-25 mt-auto">
                     <a href="{{ route('profile') }}" class="d-flex align-items-center gap-2 mb-2 text-decoration-none text-white hover-bg-light p-1.5 rounded" style="transition: all 0.2s;">
-                        <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center overflow-hidden" style="width: 35px; height: 35px; font-size: 1.2rem;">
+                        <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0" style="width: 35px; height: 35px; font-size: 1.2rem;">
                             @if(Auth::user() && Auth::user()->profile_photo_path && file_exists(public_path(Auth::user()->profile_photo_path)))
                                 <img src="{{ asset(Auth::user()->profile_photo_path) }}?v={{ time() }}" class="w-100 h-100" style="object-fit: cover;">
                             @else
                                 <i class="bi bi-person-circle"></i>
                             @endif
                         </div>
-                        <div>
-                            <div class="fw-bold text-white" style="font-size: 0.85rem;">{{ Auth::user()->name ?? 'Admin' }}</div>
-                            <small class="text-white-50" style="font-size: 0.7rem;">
-                                <i class="bi bi-briefcase me-1"></i>
-                                {{ Auth::user()->divisi ?? Auth::user()->role ?? 'Supervisor' }}
+                        <div class="overflow-hidden">
+                            <div class="fw-bold text-white text-truncate" style="font-size: 0.85rem;">{{ Auth::user()->name ?? 'Admin' }}</div>
+                            <small class="text-white-50 d-flex align-items-center gap-1" style="font-size: 0.7rem;">
+                                @if(Auth::user() && Auth::user()->isPikol())
+                                    <span class="badge bg-danger text-white py-0.5 px-1.5" style="font-size: 0.6rem;">PIKOL</span>
+                                @else
+                                    <span class="badge bg-info text-dark py-0.5 px-1.5" style="font-size: 0.6rem;">HOTD</span>
+                                @endif
+                                <span class="text-truncate">{{ Auth::user()->divisi ?? 'Telkom' }}</span>
                             </small>
                         </div>
                     </a>
@@ -619,16 +638,19 @@
                         </h1>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="{{ route('profile') }}" class="text-decoration-none hover-bg-light">
-                            <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
-                                @if(Auth::user() && Auth::user()->profile_photo_path && file_exists(public_path(Auth::user()->profile_photo_path)))
-                                    <img src="{{ asset(Auth::user()->profile_photo_path) }}?v={{ time() }}" class="rounded-circle" style="width: 18px; height: 18px; object-fit: cover;">
-                                @else
-                                    <i class="bi bi-person-circle"></i>
-                                @endif
-                                {{ Auth::user()->name ?? 'Admin' }}
-                            </span>
-                        </a>
+                        <div class="badge bg-white text-dark border d-flex align-items-center gap-1.5 py-1.5 px-3 shadow-sm rounded-pill" style="cursor: default; user-select: none;">
+                            @if(Auth::user() && Auth::user()->profile_photo_path && file_exists(public_path(Auth::user()->profile_photo_path)))
+                                <img src="{{ asset(Auth::user()->profile_photo_path) }}?v={{ time() }}" class="rounded-circle" style="width: 20px; height: 20px; object-fit: cover;">
+                            @else
+                                <i class="bi bi-person-circle fs-6 text-muted"></i>
+                            @endif
+                            <span class="fw-bold ms-1" style="font-size: 0.82rem;">{{ Auth::user()->name ?? 'Admin' }}</span>
+                            @if(Auth::user() && Auth::user()->isPikol())
+                                <span class="badge bg-danger text-white ms-1" style="font-size: 0.62rem;">PIKOL</span>
+                            @else
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1" style="font-size: 0.62rem;">HOTD</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
 

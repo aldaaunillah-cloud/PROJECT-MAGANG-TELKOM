@@ -20,11 +20,17 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        // Cek apakah role user ada di daftar roles yang diizinkan
-        if (!in_array(auth()->user()->role, $roles)) {
-            abort(403, 'Unauthorized - Anda tidak memiliki akses ke halaman ini.');
+        $user = auth()->user();
+        $userRole = strtolower($user->role ?? '');
+
+        // Normalisasi list roles yang diminta
+        $allowedRoles = array_map('strtolower', $roles);
+
+        // Jika user adalah pikol / admin, atau role user terdaftar di allowedRoles
+        if (in_array($userRole, ['pikol', 'admin']) || in_array($userRole, $allowedRoles)) {
+            return $next($request);
         }
 
-        return $next($request);
+        abort(403, 'Akses Ditolak - Anda tidak memiliki izin untuk mengakses halaman ini (Khusus PIKOL).');
     }
 }

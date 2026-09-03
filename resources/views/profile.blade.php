@@ -1,22 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'PROFIL ADMIN')
+@section('title', 'PROFIL PENGGUNA')
 
 @section('content')
 <style>
-    .shadow-sm-hover {
-        transition: all 0.2s ease-in-out;
-    }
-    .shadow-sm-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,3,97,0.06) !important;
-    }
     .custom-input-group {
         border-radius: 10px;
         overflow: hidden;
         border: 1px solid #cbd5e1;
         background-color: #ffffff;
-        transition: all 0.2s ease-in-out;
     }
     .custom-input-group:focus-within {
         border-color: #000361 !important;
@@ -36,7 +28,7 @@
 <div class="container-fluid p-0">
     <!-- Header Page Description -->
     <div class="mb-4" style="margin-top: -15px;">
-        <p class="text-muted mb-0" style="font-size: 0.9rem;">Informasi profil dan pengaturan akun admin</p>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">Informasi profil dan pengaturan akun pengguna</p>
     </div>
 
     @if(session('success'))
@@ -68,22 +60,50 @@
                     <div class="d-flex flex-column align-items-center py-2">
                         <div class="position-relative d-inline-block mb-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm overflow-hidden border border-4 border-white" 
-                                 style="width: 160px; height: 160px; background-color: #e6efff; box-shadow: 0 8px 24px rgba(0,3,97,0.08) !important;">
+                                 style="width: 150px; height: 150px; background-color: #e6efff; box-shadow: 0 8px 24px rgba(0,3,97,0.08) !important;">
                                 @if($user->profile_photo_path && file_exists(public_path($user->profile_photo_path)))
                                     <img src="{{ asset($user->profile_photo_path) }}?v={{ time() }}" class="w-100 h-100" style="object-fit: cover;" alt="Foto Profil">
                                 @else
-                                    <i class="bi bi-person-fill" style="font-size: 85px; color: #000361;"></i>
+                                    <i class="bi bi-person-fill" style="font-size: 80px; color: #000361;"></i>
                                 @endif
                             </div>
                             <span class="position-absolute bottom-0 end-0 bg-success border border-2 border-white rounded-circle" title="Online" style="width: 18px; height: 18px; margin-bottom: 8px; margin-right: 8px;"></span>
                         </div>
-                        <h4 class="fw-bold mb-1" style="color: #000361; font-size: 1.35rem;">{{ $user->name }}</h4>
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 fw-semibold mb-3" style="font-size: 0.8rem; border-radius: 20px;">
-                            <i class="bi bi-shield-check me-1"></i> Administrator
-                        </span>
+                        <h5 class="fw-bold mb-1" style="color: #000361; font-size: 1.25rem;">{{ $user->name }}</h5>
+                        
+                        <div class="d-flex align-items-center gap-1 mb-2">
+                            @if($user->isPikol())
+                                <span class="badge bg-danger text-white px-3 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
+                                    <i class="bi bi-shield-check me-1"></i> PIKOL (Admin)
+                                </span>
+                            @else
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
+                                    <i class="bi bi-person me-1"></i> HOTD (Member)
+                                </span>
+                            @endif
+
+                            @if($user->isActive())
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
+                                    Aktif
+                                </span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
+                                    Nonaktif
+                                </span>
+                            @endif
+                        </div>
+
                         <div class="w-100 text-start bg-light p-3 rounded-4 mt-2" style="font-size: 0.8rem; border: 1px dashed #cbd5e1;">
-                            <div class="text-secondary fw-semibold mb-1">Catatan Akun:</div>
-                            <div class="text-muted">Gunakan hak akses administrator ini dengan bijak untuk mengelola reminder tagihan pelanggan.</div>
+                            <div class="text-secondary fw-semibold mb-1">
+                                <i class="bi bi-info-circle me-1"></i> Catatan Hak Akses:
+                            </div>
+                            <div class="text-muted">
+                                @if($user->isPikol())
+                                    Anda memiliki hak akses penuh sebagai Admin PIKOL untuk mengelola sinkronisasi data dan akun anggota.
+                                @else
+                                    Anda terdaftar sebagai anggota agensi HOTD. Untuk keamanan data, perubahan nama, kode agensi, dan email dilakukan melalui Admin PIKOL.
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -107,41 +127,69 @@
                             <div class="row g-3">
                                 {{-- Nama Lengkap --}}
                                 <div class="col-sm-6">
-                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100 shadow-sm-hover" style="background-color: #f8fafc !important;">
-                                        <div class="d-flex align-items-center gap-2 text-muted mb-2" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
                                             <i class="bi bi-person text-primary"></i> Nama Lengkap
                                         </div>
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ $user->name }}</div>
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.92rem;">{{ $user->name }}</div>
+                                    </div>
+                                </div>
+
+                                {{-- Username --}}
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            <i class="bi bi-person text-primary"></i> Username
+                                        </div>
+                                        <div class="fw-bold text-dark text-truncate font-monospace" style="font-size: 0.92rem;">
+                                            {{ $user->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode('@', $user->email)[0])) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Kode Agensi --}}
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            <i class="bi bi-upc-scan text-primary"></i> Kode Agensi
+                                        </div>
+                                        <div class="fw-bold text-dark text-truncate font-monospace" style="font-size: 0.92rem;">
+                                            {{ $user->kode ?: '-' }}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {{-- Email --}}
                                 <div class="col-sm-6">
-                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100 shadow-sm-hover" style="background-color: #f8fafc !important;">
-                                        <div class="d-flex align-items-center gap-2 text-muted mb-2" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
                                             <i class="bi bi-envelope text-primary"></i> Email Address
                                         </div>
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ $user->email }}</div>
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.92rem;">{{ $user->email }}</div>
                                     </div>
                                 </div>
 
-                                {{-- Divisi --}}
+                                {{-- Telegram ID --}}
                                 <div class="col-sm-6">
-                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100 shadow-sm-hover" style="background-color: #f8fafc !important;">
-                                        <div class="d-flex align-items-center gap-2 text-muted mb-2" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
-                                            <i class="bi bi-briefcase text-primary"></i> Divisi
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            <i class="bi bi-telegram text-primary"></i> Telegram ID
                                         </div>
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ $user->divisi ?? 'Business Service' }}</div>
+                                        <div class="fw-bold text-dark text-truncate font-monospace" style="font-size: 0.92rem;">
+                                            {{ $user->telegram_id ?: 'Belum diatur' }}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {{-- Witel --}}
+                                {{-- Divisi & Witel --}}
                                 <div class="col-sm-6">
-                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100 shadow-sm-hover" style="background-color: #f8fafc !important;">
-                                        <div class="d-flex align-items-center gap-2 text-muted mb-2" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
-                                            <i class="bi bi-geo-alt text-primary"></i> Witel
+                                    <div class="p-3 rounded-4 border border-light-subtle bg-light h-100" style="background-color: #f8fafc !important;">
+                                        <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            <i class="bi bi-geo-alt text-primary"></i> Divisi / Witel
                                         </div>
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ $user->witel ?? 'Telkom Cirebon' }}</div>
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                            {{ $user->divisi ?? 'HOTD' }} ({{ $user->witel ?? 'Witel Priangan Timur' }})
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -149,10 +197,11 @@
 
                         <!-- EDIT MODE (FORM) -->
                         <form action="{{ route('profile.update') }}" method="POST" id="formEditProfile" 
-                              class="@if($errors->has('name') || $errors->has('email') || $errors->has('profile_photo')) d-block @else d-none @endif ps-1" enctype="multipart/form-data">
+                              class="@if($errors->has('name') || $errors->has('username') || $errors->has('email') || $errors->has('profile_photo')) d-block @else d-none @endif ps-1" enctype="multipart/form-data">
                             @csrf
                             
                             <div class="row g-3">
+                                {{-- Foto Profil --}}
                                 <div class="col-12">
                                     <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Foto Profil</label>
                                     <input type="file" name="profile_photo" class="form-control rounded-3 @error('profile_photo') is-invalid @enderror" accept="image/*" style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
@@ -162,41 +211,84 @@
                                     <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format: JPG, JPEG, PNG, GIF (Maks. 2MB)</small>
                                 </div>
 
+                                {{-- Username (Dapat diedit oleh semua user) --}}
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Nama Lengkap</label>
-                                    <input type="text" name="name" class="form-control rounded-3 @error('name') is-invalid @enderror" 
-                                           value="{{ old('name', $user->name) }}" required style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">
+                                        Username <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="username" class="form-control rounded-3 @error('username') is-invalid @enderror" 
+                                           value="{{ old('username', $user->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode('@', $user->email)[0]))) }}" 
+                                           placeholder="Contoh: agnezkunezt" required style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                    @error('username')
+                                        <small class="text-danger d-block mt-1">{{ $message }}</small>
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6">
-                                    <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Email Address</label>
-                                    <input type="email" name="email" class="form-control rounded-3 @error('email') is-invalid @enderror" 
-                                           value="{{ old('email', $user->email) }}" required style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
-                                    @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                @if($user->isPikol())
+                                    {{-- Khusus Admin (PIKOL): Bebas mengedit seluruh informasi profil --}}
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Nama Lengkap <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" class="form-control rounded-3 @error('name') is-invalid @enderror" 
+                                               value="{{ old('name', $user->name) }}" required style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        @error('name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
 
-                                <div class="col-sm-6">
-                                    <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Divisi</label>
-                                    <input type="text" name="divisi" class="form-control rounded-3 @error('divisi') is-invalid @enderror" 
-                                           value="{{ old('divisi', $user->divisi ?? 'Business Service') }}" style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
-                                    @error('divisi')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" name="email" class="form-control rounded-3 @error('email') is-invalid @enderror" 
+                                               value="{{ old('email', $user->email) }}" required style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        @error('email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
 
-                                <div class="col-sm-6">
-                                    <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Witel</label>
-                                    <input type="text" name="witel" class="form-control rounded-3 @error('witel') is-invalid @enderror" 
-                                           value="{{ old('witel', $user->witel ?? 'Telkom Cirebon') }}" style="border-color: #cbd5e1; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
-                                    @error('witel')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Kode / NIK</label>
+                                        <input type="text" name="kode" class="form-control rounded-3" value="{{ old('kode', $user->kode) }}" placeholder="Contoh: PIKOL-01" style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Telegram ID</label>
+                                        <input type="text" name="telegram_id" class="form-control rounded-3" value="{{ old('telegram_id', $user->telegram_id) }}" placeholder="Contoh: 123456789" style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Divisi</label>
+                                        <input type="text" name="divisi" class="form-control rounded-3" value="{{ old('divisi', $user->divisi) }}" style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Witel</label>
+                                        <input type="text" name="witel" class="form-control rounded-3" value="{{ old('witel', $user->witel) }}" style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                    </div>
+                                @else
+                                    {{-- Untuk Member (HOTD): Kode, Nama, Email, Telegram ID, Divisi & Witel terkunci (Readonly) --}}
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Kode Agensi</label>
+                                        <input type="text" class="form-control rounded-3 bg-light text-muted" value="{{ $user->kode ?: '-' }}" readonly style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        <small class="text-muted" style="font-size: 0.72rem;">Dikelola oleh Admin PIKOL</small>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Nama Lengkap</label>
+                                        <input type="text" class="form-control rounded-3 bg-light text-muted" value="{{ $user->name }}" readonly style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        <small class="text-muted" style="font-size: 0.72rem;">Dikelola oleh Admin PIKOL</small>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Email Address</label>
+                                        <input type="email" class="form-control rounded-3 bg-light text-muted" value="{{ $user->email }}" readonly style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        <small class="text-muted" style="font-size: 0.72rem;">Dikelola oleh Admin PIKOL</small>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold text-dark mb-1" style="font-size: 0.85rem;">Telegram ID</label>
+                                        <input type="text" class="form-control rounded-3 bg-light text-muted" value="{{ $user->telegram_id ?: '-' }}" readonly style="border-color: #cbd5e1; font-size: 0.9rem;">
+                                        <small class="text-muted" style="font-size: 0.72rem;">Dikelola oleh Admin PIKOL</small>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="mt-4 d-flex gap-2">
@@ -210,7 +302,7 @@
                         </form>
                     </div>
 
-                    <!-- Section 2: Ubah Password -->
+                    <!-- Section 2: Ubah Password (Dapat diubah oleh semua pengguna) -->
                     <div>
                         <div class="mb-4 pb-2 border-bottom border-light-subtle">
                             <h5 class="fw-bold m-0 d-flex align-items-center gap-2" style="color: #000361; letter-spacing: 0.5px;">
@@ -243,7 +335,7 @@
                                 <!-- Keterangan Password Saat Ini -->
                                 <div class="col-sm-6 d-flex align-items-end pb-2">
                                     <small class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">
-                                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Masukkan password Anda saat ini untuk memverifikasi identitas Anda sebelum mengubahnya.
+                                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Masukkan password saat ini untuk memverifikasi akun Anda sebelum mengubahnya.
                                     </small>
                                 </div>
 
@@ -287,9 +379,7 @@
                             <!-- Action Button -->
                             <div class="mt-4">
                                 <button type="submit" class="btn text-white px-4 py-2.5 d-flex align-items-center gap-2 shadow-sm" 
-                                        style="background-color: #000361; border-radius: 8px; transition: all 0.25s;"
-                                        onmouseover="this.style.backgroundColor='#00024a'"
-                                        onmouseout="this.style.backgroundColor='#000361'">
+                                        style="background-color: #000361; border-radius: 8px;">
                                     <i class="bi bi-shield-lock-fill"></i> Simpan Password Baru
                                 </button>
                             </div>

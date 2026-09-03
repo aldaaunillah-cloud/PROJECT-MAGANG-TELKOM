@@ -37,7 +37,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.25);
             z-index: 1;
         }
 
@@ -45,52 +45,52 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 440px;
+            max-width: 375px;
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.15); /* Transparan putih */
+            background: rgba(255, 255, 255, 0.16); /* Transparan putih */
             backdrop-filter: blur(15px); /* Efek blur kaca */
             -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
+            border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            padding: 50px 40px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+            padding: 45px 32px; /* Panjang vertikal proporsional */
             color: white;
-            animation: fadeIn 0.8s ease-in-out;
+            animation: fadeIn 0.6s ease-in-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
         .login-logo {
-            max-height: 65px;
+            max-height: 50px;
             width: auto;
             object-fit: contain;
             display: inline-block;
         }
 
         .login-header p.sub-title {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
             color: rgba(255, 255, 255, 0.9);
         }
 
         .login-header h2 {
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             margin: 0;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -99,26 +99,26 @@
         /* Styling Input Wrapper & Icons */
         .input-group-custom {
             position: relative;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
         .input-group-custom i.input-icon {
             position: absolute;
-            left: 16px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: rgba(255, 255, 255, 0.8);
-            font-size: 16px;
+            font-size: 14px;
             z-index: 5;
         }
 
         .input-group-custom i.toggle-password {
             position: absolute;
-            right: 16px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: rgba(255, 255, 255, 0.8);
-            font-size: 16px;
+            font-size: 14px;
             z-index: 5;
             cursor: pointer;
             transition: color 0.2s;
@@ -131,12 +131,22 @@
         .input-group-custom .form-control {
             background: rgba(255, 255, 255, 0.18);
             border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
-            padding: 13px 40px 13px 48px; /* Padding kiri untuk ikon, kanan untuk mata */
-            font-size: 15px;
-            transition: all 0.3s;
+            padding: 11px 40px 11px 42px;
+            font-size: 13.5px;
+            transition: all 0.25s;
             width: 100%;
+        }
+
+        /* Hapus icon mata bawaan browser Edge / Chrome / Windows */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear,
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         .input-group-custom .form-control::placeholder {
@@ -151,44 +161,27 @@
             color: white;
         }
 
-        /* Lupa Kata Sandi */
-        .forgot-password {
-            text-align: right;
-            margin-top: -12px;
-            margin-bottom: 25px;
-        }
-
-        .forgot-password a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: underline;
-            font-size: 13px;
-            transition: color 0.2s;
-        }
-
-        .forgot-password a:hover {
-            color: white;
-        }
-
         /* Tombol Masuk Merah Bulat */
         .btn-login {
             background: #a61c30; /* Warna merah gelap Telkom */
             color: white;
             border: none;
-            padding: 13px;
-            border-radius: 25px;
+            padding: 11px;
+            border-radius: 22px;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             width: 100%;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(166, 28, 48, 0.3);
+            transition: all 0.25s;
+            box-shadow: 0 4px 12px rgba(166, 28, 48, 0.3);
+            margin-top: 10px;
         }
 
         .btn-login:hover {
             background: #be2037;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(166, 28, 48, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(166, 28, 48, 0.45);
             color: white;
         }
 
@@ -196,49 +189,14 @@
             transform: translateY(0);
         }
 
-        /* Media Sosial Login */
-        .social-login {
-            text-align: center;
-            margin-top: 35px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .social-icons a {
-            color: white;
-            background: rgba(255, 255, 255, 0.2);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .social-icons a:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.1);
-        }
-
         .alert-custom {
             background: rgba(220, 53, 69, 0.3);
             border: 1px solid rgba(220, 53, 69, 0.4);
             color: #ffb3b8;
-            border-radius: 12px;
-            font-size: 14px;
-            padding: 10px 15px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            padding: 8px 12px;
+            margin-bottom: 18px;
         }
 
         /* Responsif untuk HP */
@@ -247,11 +205,27 @@
                 justify-content: center;
                 padding-left: 15px;
                 padding-right: 15px;
-                background-position: 30% center; /* Geser background sedikit ke kanan di layar kecil */
+                background-position: 30% center;
             }
             .login-container {
                 max-width: 100%;
             }
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, 0.72);
+            text-decoration: none;
+            transition: color 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .forgot-link:hover {
+            color: white;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -265,9 +239,16 @@
                 <h2>Billing Telkom Cirebon</h2>
             </div>
 
+            @if (session('success_reset'))
+                <div class="alert" style="background: rgba(25, 135, 84, 0.35); border: 1px solid rgba(25, 135, 84, 0.5); color: #c0f3c4; border-radius: 10px; font-size: 12.5px; padding: 10px 12px; margin-bottom: 18px;">
+                    <i class="fas fa-check-circle me-1.5"></i> 
+                    {{ session('success_reset') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="alert alert-custom">
-                    <i class="fas fa-exclamation-circle me-2"></i> 
+                    <i class="fas fa-exclamation-circle me-1.5"></i> 
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -278,16 +259,16 @@
                 <!-- Input Username / Email -->
                 <div class="input-group-custom">
                     <i class="far fa-user input-icon"></i>
-                    <input type="email" 
-                           name="email" 
+                    <input type="text" 
+                           name="login" 
                            class="form-control" 
-                           placeholder="Username" 
-                           value="{{ old('email') }}" 
+                           placeholder="Username atau Email" 
+                           value="{{ old('login') }}" 
                            required 
                            autofocus>
                 </div>
 
-                <!-- Input Password -->
+                <!-- Input Password dengan Custom Toggle Eye -->
                 <div class="input-group-custom">
                     <i class="fas fa-lock input-icon"></i>
                     <input type="password" 
@@ -296,12 +277,7 @@
                            class="form-control" 
                            placeholder="Kata Sandi" 
                            required>
-                    <i class="far fa-eye-slash toggle-password" onclick="togglePasswordVisibility()"></i>
-                </div>
-
-                <!-- Lupa Sandi -->
-                <div class="forgot-password">
-                    <a href="#">Lupa Kata Sandi?</a>
+                    <i class="far fa-eye-slash toggle-password" onclick="togglePasswordVisibility()" title="Tampilkan/Sembunyikan Kata Sandi"></i>
                 </div>
 
                 <!-- Tombol Submit -->
@@ -309,16 +285,16 @@
                     Masuk
                 </button>
 
-                <!-- Default Credentials Hint -->
-                <div class="text-center mt-4" style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">
-                    <small>Default: admin@telkom.com / password</small>
-                </div>
+                <!-- Link Lupa Password -->
+                <a href="{{ route('password.request') }}" class="forgot-link">
+                    <i class="fas fa-key me-1"></i> Lupa Password?
+                </a>
             </form>
         </div>
     </div>
 
     <script>
-        // Fungsi show/hide password
+        // Fungsi show/hide password interaktif
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password-input');
             const toggleIcon = document.querySelector('.toggle-password');

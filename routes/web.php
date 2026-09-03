@@ -9,9 +9,21 @@ use Illuminate\Support\Facades\Auth;
 Route::middleware(['web'])->group(function () {
     Auth::routes([
         'register' => false,
-        'reset' => false,
-        'verify' => false,
+        'reset'    => false, // Gunakan custom OTP Telegram di bawah
+        'verify'   => false,
     ]);
+
+    // ============================================
+    // RESET PASSWORD VIA BOT TELEGRAM (OTP)
+    // ============================================
+    Route::get('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetOtp'])
+        ->name('password.email');
+    Route::get('/reset-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'reset'])
+        ->name('password.update');
 
     Route::middleware(['auth'])->group(function () {
 
@@ -77,23 +89,35 @@ Route::middleware(['web'])->group(function () {
             ->name('hotd.export');
 
         // ============================================
-        // SYNC
+        // KHUSUS PIKOL (ADMIN / SINKRONISASI)
         // ============================================
-        Route::prefix('sync')->group(function () {
-            Route::get('/', [SyncController::class, 'index'])
-                ->name('sync.index');
+        Route::middleware(['role:pikol'])->group(function () {
+            // SINKRONISASI
+            Route::prefix('sync')->group(function () {
+                Route::get('/', [SyncController::class, 'index'])
+                    ->name('sync.index');
 
-            Route::get('/google-sheets', [SyncController::class, 'sync'])
-                ->name('sync.google-sheets');
+                Route::get('/google-sheets', [SyncController::class, 'sync'])
+                    ->name('sync.google-sheets');
 
-            Route::get('/init', [SyncController::class, 'init'])
-                ->name('sync.init');
+                Route::get('/init', [SyncController::class, 'init'])
+                    ->name('sync.init');
 
-            Route::post('/batch', [SyncController::class, 'syncBatch'])
-                ->name('sync.batch');
+                Route::post('/batch', [SyncController::class, 'syncBatch'])
+                    ->name('sync.batch');
 
-            Route::get('/status', [SyncController::class, 'status'])
-                ->name('sync.status');
+                Route::get('/status', [SyncController::class, 'status'])
+                    ->name('sync.status');
+            });
+
+            // MANAJEMEN ANGGOTA & AGENSI
+            Route::prefix('users')->name('users.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\UserController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\UserController::class, 'store'])->name('store');
+                Route::put('/{user}', [\App\Http\Controllers\UserController::class, 'update'])->name('update');
+                Route::patch('/{user}/toggle-status', [\App\Http\Controllers\UserController::class, 'toggleStatus'])->name('toggle-status');
+                Route::delete('/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('destroy');
+            });
         });
 
         // ============================================

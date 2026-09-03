@@ -13,8 +13,13 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
+        'kode',
         'email',
+        'telegram_id',
         'password',
+        'role',
+        'status',
         'divisi',
         'witel',
         'profile_photo_path',
@@ -31,5 +36,44 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Accessor untuk memastikan admin@telkom.com selalu ber-role pikol
+     */
+    public function getRoleAttribute($value)
+    {
+        if (in_array(strtolower($this->email ?? ''), ['admin@telkom.com', 'admin@telkom.co.id'])) {
+            return 'pikol';
+        }
+        return $value ?: 'hotd';
+    }
+
+    /**
+     * Cek apakah pengguna memiliki hak akses PIKOL (Admin / Sinkronisasi)
+     */
+    public function isPikol(): bool
+    {
+        if (in_array(strtolower($this->email ?? ''), ['admin@telkom.com', 'admin@telkom.co.id'])) {
+            return true;
+        }
+
+        return in_array(strtolower($this->role ?? ''), ['pikol', 'admin', 'supervisor']);
+    }
+
+    /**
+     * Cek apakah pengguna adalah HOTD (Member)
+     */
+    public function isHotd(): bool
+    {
+        return !$this->isPikol();
+    }
+
+    /**
+     * Cek apakah status pengguna aktif
+     */
+    public function isActive(): bool
+    {
+        return strtolower($this->status ?? 'aktif') === 'aktif';
     }
 }

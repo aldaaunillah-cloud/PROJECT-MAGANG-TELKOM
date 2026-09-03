@@ -38,6 +38,10 @@
                 </small>
             </div>
             <div class="d-flex align-items-center gap-2">
+                {{-- Tombol Kembali --}}
+                <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('dashboard') }}" class="btn btn-sm btn-outline-secondary px-3" style="border-radius: 8px;">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
                 <a href="{{ route('billing.detail.export-excel', array_merge(['billing_ke' => $billing_ke], request()->query())) }}" class="btn btn-sm btn-success text-white px-3" style="border-radius: 8px;">
                     <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Unduh Excel
                 </a>
@@ -161,12 +165,12 @@
             <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
                 <div>
                     <small class="text-muted" style="font-size: 0.8rem;">
-                        Menampilkan {{ $customers->firstItem() ?? 0 }} - {{ $customers->lastItem() ?? 0 }} 
-                        dari {{ number_format($customers->total()) }} data
+                        Menampilkan {{ $customers->firstItem() ?? 0 }} s/d {{ $customers->lastItem() ?? 0 }} 
+                        dari total {{ number_format($customers->total()) }} customer
                     </small>
                 </div>
                 <div>
-                    {{ $customers->appends(request()->query())->links() }}
+                    {{ $customers->appends(request()->query())->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div>

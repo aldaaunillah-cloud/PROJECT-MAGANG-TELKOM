@@ -13,7 +13,7 @@ class ReminderApiController extends Controller
     public function store(Request $request)
     {
         // 1. Validasi Token Keamanan
-        $token = env('API_REMINDER_TOKEN');
+        $token = config('api.reminder_token');
         $bearerToken = $request->bearerToken();
 
         if (empty($token) || $bearerToken !== $token) {
@@ -68,4 +68,77 @@ class ReminderApiController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Mengambil daftar status anggota (Aktif / Tidak Aktif) untuk Bot Telegram
+     */
+    public function getMembersStatus(Request $request)
+    {
+        // 1. Validasi Token Keamanan
+        $token = config('api.reminder_token');
+        $bearerToken = $request->bearerToken();
+
+        if (empty($token) || $bearerToken !== $token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Invalid API Token.'
+            ], 401);
+        }
+
+        try {
+            $users = \App\Models\User::select('id', 'name', 'username', 'kode', 'telegram_id', 'role', 'status', 'email')->get();
+
+            $activeTelegramIds = [];
+            $inactiveTelegramIds = [];
+            $inactiveNames = [];
+            $members = [];
+
+            foreach ($users as $user) {
+                $status = strtolower($user->status ?? 'aktif');
+                $isAktif = ($status === 'aktif');
+                $tid = trim((string) $user->telegram_id);
+
+                if (!empty($tid) && $tid !== '-') {
+                    if ($isAktif) {
+                        $activeTelegramIds[] = $tid;
+                    } else {
+                        $inactiveTelegramIds[] = $tid;
+                    }
+                }
+
+                if (!$isAktif) {
+                    $inactiveNames[] = strtolower(trim($user->name));
+                    if (!empty($user->kode)) {
+                        $inactiveNames[] = strtolower(trim($user->kode));
+                    }
+                }
+
+                $members[] = [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'kode' => $user->kode,
+                    'telegram_id' => $user->telegram_id,
+                    'status' => $user->status ?? 'aktif',
+                    'is_active' => $isAktif,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'total_members' => count($members),
+                'active_telegram_ids' => array_values(array_unique($activeTelegramIds)),
+                'inactive_telegram_ids' => array_values(array_unique($inactiveTelegramIds)),
+                'inactive_names' => array_values(array_unique($inactiveNames)),
+                'members' => $members,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil status anggota: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+
