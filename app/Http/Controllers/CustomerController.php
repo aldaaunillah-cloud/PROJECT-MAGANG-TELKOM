@@ -105,6 +105,7 @@ class CustomerController extends Controller
             });
         }
 
+<<<<<<< HEAD
         // ============================================================
         // STATISTIK
         // ============================================================
@@ -114,6 +115,25 @@ class CustomerController extends Controller
 
         $totalBelumLunas = (clone $unpaidQuery)->count();
 
+=======
+        // 2. Compute statistics for Default/Datel/Agency views
+        // 2. Compute statistics for Default/Datel/Agency/Sales views (HANYA DATA BLM BAYAR)
+        $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
+
+        // 1 NCLI = 1 customer. Jika NCLI kosong, fallback ke SND agar
+        // customer tanpa NCLI tidak ikut tergabung menjadi satu.
+        $customerGroupSql = "CASE
+            WHEN ncli IS NOT NULL AND TRIM(ncli) != ''
+                THEN CONCAT('NCLI_', TRIM(ncli))
+            ELSE CONCAT('SND_', snd)
+        END";
+
+        $totalBelumLunas = (clone $unpaidQuery)
+            ->selectRaw("COUNT(DISTINCT {$customerGroupSql}) as total")
+            ->value('total') ?? 0;
+
+        // Tagihan tetap dijumlahkan per layanan/SND.
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         $totalTagihan = (clone $unpaidQuery)->sum('tag_total');
 
         // Total Sales Agency
@@ -190,8 +210,11 @@ class CustomerController extends Controller
             $rekapBilling = $rekapQuery
                 ->select(
                     'billing_ke',
-                    DB::raw('COUNT(*) as total_cust'),
-                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as unpaid_cust'),
+                    DB::raw("COUNT(DISTINCT {$customerGroupSql}) as total_cust"),
+                    DB::raw("COUNT(DISTINCT CASE
+                        WHEN status_bayar != 'Sdh Bayar' THEN {$customerGroupSql}
+                        ELSE NULL
+                    END) as unpaid_cust"),
                     DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
                 )
                 ->groupBy('billing_ke')
@@ -211,8 +234,11 @@ class CustomerController extends Controller
                 ->select(
                     'datel',
                     'billing_ke',
-                    DB::raw('COUNT(*) as total_cust'),
-                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN 1 ELSE 0 END) as unpaid_cust'),
+                    DB::raw("COUNT(DISTINCT {$customerGroupSql}) as total_cust"),
+                    DB::raw("COUNT(DISTINCT CASE
+                        WHEN status_bayar != 'Sdh Bayar' THEN {$customerGroupSql}
+                        ELSE NULL
+                    END) as unpaid_cust"),
                     DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
                 )
                 ->whereBetween('billing_ke', [1, 6])
@@ -333,7 +359,7 @@ class CustomerController extends Controller
                 ->select(
                     'datel',
                     'billing_ke',
-                    DB::raw('COUNT(snd) as blm_bayar'),
+                    DB::raw("COUNT(DISTINCT {$customerGroupSql}) as blm_bayar"),
                     DB::raw('SUM(tag_total) as blm_bayar_rp')
                 )
                 ->groupBy('datel', 'billing_ke')
@@ -347,7 +373,7 @@ class CustomerController extends Controller
                 ->whereNotIn('sales_agency', $invalidPlaceholders)
                 ->select(
                     'billing_ke',
-                    DB::raw('COUNT(*) as belum_lunas'),
+                    DB::raw("COUNT(DISTINCT {$customerGroupSql}) as belum_lunas"),
                     DB::raw('SUM(tag_total) as total_tagihan')
                 )
                 ->groupBy('billing_ke')
@@ -531,6 +557,7 @@ class CustomerController extends Controller
     ) {
         $request = $request ?? request();
 
+<<<<<<< HEAD
         $invalidPlaceholders = [
             '#N/A ()',
             '#N/A',
@@ -540,6 +567,13 @@ class CustomerController extends Controller
             'NULL'
         ];
 
+=======
+        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
+
+        // =========================================================
+        // 1. Ambil seluruh layanan/SND sesuai filter
+        // =========================================================
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         $query = Customer::query()
             ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereBetween('billing_ke', [1, 6])
@@ -547,7 +581,10 @@ class CustomerController extends Controller
             ->whereNotIn('agency_psb', $invalidPlaceholders)
             ->whereNotIn('sales_agency', $invalidPlaceholders);
 
+<<<<<<< HEAD
         // FILTER BILLING
+=======
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if (
             $billingKe &&
             $billingKe !== 'All' &&
@@ -559,7 +596,10 @@ class CustomerController extends Controller
             $query->where('billing_ke', $billingKe);
         }
 
+<<<<<<< HEAD
         // FILTER DATEL
+=======
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if (
             $datel &&
             $datel !== 'Nasional' &&
@@ -570,7 +610,10 @@ class CustomerController extends Controller
             $query->where('datel', $datel);
         }
 
+<<<<<<< HEAD
         // FILTER AGENCY
+=======
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if ($request->filled('agency')) {
             $query->where(
                 'agency_psb',
@@ -578,7 +621,10 @@ class CustomerController extends Controller
             );
         }
 
+<<<<<<< HEAD
         // FILTER SALES
+=======
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if ($request->filled('sales')) {
             $query->where(
                 'sales_agency',
@@ -586,6 +632,7 @@ class CustomerController extends Controller
             );
         }
 
+<<<<<<< HEAD
         $customers = $query
             ->select(
                 'status_bayar',
@@ -619,19 +666,137 @@ class CustomerController extends Controller
                 'ppp',
                 'caring_mybrains'
             )
+=======
+        $rawCustomers = $query->select(
+            'status_bayar',
+            'tag_total',
+            'tag_inet',
+            'tag_tlp',
+            'snd',
+            'snd_group',
+            'ncli',
+            'nama',
+            'alamat',
+            'sto',
+            'datel',
+            'produk',
+            'eksepsi_desc',
+            'desc_newbill',
+            'usage_desc',
+            'saldo',
+            'umur_customer',
+            'billing_ke',
+            'paid_l11',
+            'tgl_paid',
+            'paid_rp',
+            'coll_agent',
+            'tgl_klaim',
+            'amount_klaim',
+            'user_klaim',
+            'tgl_paid_n1',
+            'agency_psb',
+            'sales_agency',
+            'ppp',
+            'caring_mybrains'
+        )
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
             ->orderBy('tag_total', 'DESC')
             ->get();
+
+        // =========================================================
+        // 2. Grouping tampilan:
+        //    - NCLI sama = 1 customer
+        //    - NCLI kosong = fallback per SND
+        //    - SND yang sama di dalam grup hanya dihitung sekali
+        // =========================================================
+        $customers = $rawCustomers
+            ->groupBy(function ($customer) {
+                $ncli = trim((string) ($customer->ncli ?? ''));
+
+                return $ncli !== ''
+                    ? 'NCLI_' . $ncli
+                    : 'SND_' . trim((string) ($customer->snd ?? ''));
+            })
+            ->map(function ($group) {
+                // Proteksi jika sumber mengandung row SND yang sama berulang.
+                $uniqueServices = $group
+                    ->unique(function ($item) {
+                        $snd = trim((string) ($item->snd ?? ''));
+
+                        // Bila SND kosong, jangan gabungkan semua row kosong.
+                        return $snd !== ''
+                            ? 'SND_' . $snd
+                            : 'ROW_' . spl_object_id($item);
+                    })
+                    ->values();
+
+                // Untuk baris utama, prioritaskan produk Internet.
+                $representative = $uniqueServices->first(function ($item) {
+                    return str_contains(
+                        strtolower((string) ($item->produk ?? '')),
+                        'internet'
+                    );
+                }) ?? $uniqueServices->first();
+
+                $customer = clone $representative;
+
+                // SND Group pada baris utama mengikuti row representative asli.
+                // Jadi jika representative adalah layanan Internet dan snd_group-nya kosong,
+                // tetap tampil "-" di tabel utama. Nilai snd_group milik layanan tambahan
+                // tetap tersedia di detail_snd.
+                $customer->snd_group = trim((string) ($representative->snd_group ?? '')) !== ''
+                    ? (string) $representative->snd_group
+                    : null;
+
+                // Nilai finansial digabung dari seluruh SND unik dalam NCLI.
+                $customer->tag_total = (float) $uniqueServices->sum('tag_total');
+                $customer->tag_inet = (float) $uniqueServices->sum('tag_inet');
+                $customer->tag_tlp = (float) $uniqueServices->sum('tag_tlp');
+                $customer->saldo = (float) $uniqueServices->sum('saldo');
+
+                // Data tambahan untuk badge/detail di dashboard.
+                $customer->jumlah_snd = $uniqueServices->count();
+                $customer->daftar_snd = $uniqueServices
+                    ->pluck('snd')
+                    ->filter(fn ($snd) => trim((string) $snd) !== '')
+                    ->map(fn ($snd) => (string) $snd)
+                    ->values()
+                    ->all();
+
+                $customer->detail_snd = $uniqueServices
+                    ->map(function ($item) {
+                        return [
+                            'snd' => (string) ($item->snd ?? ''),
+                            'snd_group' => (string) ($item->snd_group ?? ''),
+                            'produk' => (string) ($item->produk ?? ''),
+                            'tag_total' => (float) ($item->tag_total ?? 0),
+                        ];
+                    })
+                    ->values()
+                    ->all();
+
+                return $customer;
+            })
+            ->sortByDesc('tag_total')
+            ->values();
 
         $totalCustomer = $customers->count();
 
         $totalTagihan = (float) $customers->sum('tag_total');
+        $totalSaldo = (float) $customers->sum('saldo');
 
+<<<<<<< HEAD
+=======
+        // =========================================================
+        // 3. Response popup HOTD
+        // =========================================================
+>>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         return response()->json([
             'billing_ke' => $billingKe,
             'datel' => $datel,
             'total_customer' => $totalCustomer,
             'total_tagihan' => $totalTagihan,
-            'total_saldo' => $totalTagihan,
+            'total_saldo' => $totalSaldo,
             'total_blm_bayar' => $totalCustomer,
             'total_sdh_bayar' => 0,
             'customers' => $customers,
