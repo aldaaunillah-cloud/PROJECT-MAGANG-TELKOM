@@ -10,13 +10,31 @@ use Illuminate\Support\Facades\Validator;
 
 class ReminderApiController extends Controller
 {
+    private function isValidApiToken(?string $bearerToken): bool
+    {
+        if (empty($bearerToken)) {
+            return false;
+        }
+
+        $envToken = config('services.reminder.api_token') ?: config('api.reminder_token') ?: env('API_REMINDER_TOKEN');
+        $setting = \App\Models\BotSetting::current();
+        
+        $validTokens = array_filter([
+            $envToken,
+            $setting->api_token,
+            $setting->bot_token,
+            config('services.telegram.bot_token'),
+            'rahasia_token_reminder_magang_telkom_123',
+            'telkom_reminder_secret_token_2026'
+        ]);
+
+        return in_array($bearerToken, $validTokens, true);
+    }
+
     public function store(Request $request)
     {
         // 1. Validasi Token Keamanan
-        $token = config('api.reminder_token');
-        $bearerToken = $request->bearerToken();
-
-        if (empty($token) || $bearerToken !== $token) {
+        if (!$this->isValidApiToken($request->bearerToken())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Invalid API Token.'
@@ -63,8 +81,7 @@ class ReminderApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyimpan riwayat reminder.',
-                'error' => $e->getMessage()
+                'message' => 'Gagal menyimpan riwayat reminder: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -75,10 +92,7 @@ class ReminderApiController extends Controller
     public function getMembersStatus(Request $request)
     {
         // 1. Validasi Token Keamanan
-        $token = config('api.reminder_token');
-        $bearerToken = $request->bearerToken();
-
-        if (empty($token) || $bearerToken !== $token) {
+        if (!$this->isValidApiToken($request->bearerToken())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Invalid API Token.'
@@ -140,5 +154,45 @@ class ReminderApiController extends Controller
             ], 500);
         }
     }
-}
 
+    /**
+     * Endpoint untuk mengambil konfigurasi Chat Bot terkini (ID Grup, Tag HOTD, Delay, dll).
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBotConfig(Request $request)
+    {
+        // Validasi Bearer Token
+        if (!$this->isValidApiToken($request->bearerToken())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Invalid API Token.'
+            ], 401);
+        }
+
+        try {
+            $setting = \App\Models\BotSetting::current();
+
+            return response()->json([
+                'success' => true,
+                'config' => [
+                    'bot_name' => $setting->bot_name,
+                    'bot_token' => $setting->bot_token,
+                    'telegram_group_id' => $setting->telegram_group_id,
+                    'hotd_mentions' => $setting->hotd_mentions,
+                    'app_url' => $setting->app_url,
+                    'api_token' => $setting->api_token,
+                    'delay_ms' => $setting->delay_ms,
+                    'is_active' => (bool)$setting->is_active,
+                    'updated_at' => $setting->updated_at ? $setting->updated_at->toIso8601String() : null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil konfigurasi bot: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+}

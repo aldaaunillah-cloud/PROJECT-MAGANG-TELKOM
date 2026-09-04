@@ -52,13 +52,13 @@
             </div>
         </div>
 
-        {{-- Total HOTD (Member) --}}
+        {{-- Total SA (Sales Agency) --}}
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 rounded-4 shadow-sm h-100 p-3 bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Role HOTD (Member)</div>
-                        <h3 class="fw-bold text-info mb-0 mt-1">{{ number_format($totalHotd) }}</h3>
+                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Role SA (Sales Agency)</div>
+                        <h3 class="fw-bold text-info mb-0 mt-1">{{ number_format($totalSa ?? $totalHotd) }}</h3>
                     </div>
                     <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="bi bi-person-badge-fill text-info fs-4"></i>
@@ -121,7 +121,7 @@
                         <select name="role" class="form-select bg-light border-0" onchange="this.form.submit()">
                             <option value="all">Semua Role</option>
                             <option value="pikol" {{ request('role') == 'pikol' ? 'selected' : '' }}>PIKOL (Admin)</option>
-                            <option value="hotd" {{ request('role') == 'hotd' ? 'selected' : '' }}>HOTD (Member)</option>
+                            <option value="sa" {{ in_array(request('role'), ['sa', 'hotd']) ? 'selected' : '' }}>SA (Sales Agency)</option>
                         </select>
                     </div>
                     <div class="col-6 col-md-3">
@@ -195,8 +195,8 @@
                                             <i class="bi bi-shield-check me-1"></i> PIKOL
                                         </span>
                                     @else
-                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                                            <i class="bi bi-person me-1"></i> HOTD
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                                            <i class="bi bi-person me-1"></i> SA
                                         </span>
                                     @endif
                                 </td>
@@ -322,7 +322,7 @@
                         <div class="col-6">
                             <label class="form-label fw-bold small text-muted">Role Pengguna <span class="text-danger">*</span></label>
                             <select name="role" class="form-select rounded-3" required>
-                                <option value="hotd" {{ old('role') == 'hotd' ? 'selected' : '' }}>HOTD (Member)</option>
+                                <option value="sa" {{ in_array(old('role'), ['sa', 'hotd']) || !old('role') ? 'selected' : '' }}>SA (Sales Agency)</option>
                                 <option value="pikol" {{ old('role') == 'pikol' ? 'selected' : '' }}>PIKOL (Admin / Sinkronisasi)</option>
                             </select>
                         </div>
@@ -338,7 +338,7 @@
                     <div class="row g-2">
                         <div class="col-6">
                             <label class="form-label fw-bold small text-muted">Divisi (Opsional)</label>
-                            <input type="text" name="divisi" class="form-control rounded-3" placeholder="Misal: HOTD / Collection" value="{{ old('divisi') }}">
+                            <input type="text" name="divisi" class="form-control rounded-3" placeholder="Misal: Sales Agency / Collection" value="{{ old('divisi') }}">
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small text-muted">Witel (Opsional)</label>
@@ -402,8 +402,8 @@
                             <div class="col-6">
                                 <label class="form-label fw-bold small text-muted">Role Pengguna <span class="text-danger">*</span></label>
                                 <select name="role" class="form-select rounded-3" required>
+                                    <option value="sa" {{ in_array(old('role', $user->role), ['sa', 'hotd']) && !$user->isPikol() ? 'selected' : '' }}>SA (Sales Agency)</option>
                                     <option value="pikol" {{ old('role', $user->role) == 'pikol' || $user->isPikol() ? 'selected' : '' }}>PIKOL (Admin)</option>
-                                    <option value="hotd" {{ old('role', $user->role) == 'hotd' && !$user->isPikol() ? 'selected' : '' }}>HOTD (Member)</option>
                                 </select>
                             </div>
                             <div class="col-6">

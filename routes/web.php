@@ -118,6 +118,13 @@ Route::middleware(['web'])->group(function () {
                 Route::patch('/{user}/toggle-status', [\App\Http\Controllers\UserController::class, 'toggleStatus'])->name('toggle-status');
                 Route::delete('/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('destroy');
             });
+
+            // PENGATURAN CHAT BOT
+            Route::prefix('bot-settings')->name('bot-settings.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\BotSettingController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\BotSettingController::class, 'update'])->name('update');
+                Route::post('/test-telegram', [\App\Http\Controllers\BotSettingController::class, 'testTelegram'])->name('test-telegram');
+            });
         });
 
         // ============================================

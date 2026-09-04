@@ -579,6 +579,12 @@
                             <i class="bi bi-people-fill me-2 fs-5"></i>
                             Manajemen Anggota
                         </a>
+
+                        {{-- PENGATURAN CHAT BOT --}}
+                        <a href="{{ route('bot-settings.index') }}" class="nav-link text-white rounded mb-1 px-3 py-2 d-flex align-items-center {{ request()->routeIs('bot-settings.*') ? 'bg-white bg-opacity-25 fw-bold shadow-sm' : '' }} hover-bg-light">
+                            <i class="bi bi-robot me-2 fs-5"></i>
+                            Pengaturan Chat Bot
+                        </a>
                     @endif
                 </nav>
 
@@ -598,7 +604,7 @@
                                 @if(Auth::user() && Auth::user()->isPikol())
                                     <span class="badge bg-danger text-white py-0.5 px-1.5" style="font-size: 0.6rem;">PIKOL</span>
                                 @else
-                                    <span class="badge bg-info text-dark py-0.5 px-1.5" style="font-size: 0.6rem;">HOTD</span>
+                                    <span class="badge bg-primary text-white py-0.5 px-1.5" style="font-size: 0.6rem;">SA</span>
                                 @endif
                                 <span class="text-truncate">{{ Auth::user()->divisi ?? 'Telkom' }}</span>
                             </small>
@@ -614,14 +620,14 @@
                             <span id="live-clock-val">{{ now()->format('d/m H:i') }}</span>
                         </small>
                     </div>
-                    <hr class="border-light border-opacity-25 my-2">
-                    <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center hover-logout" style="font-size: 0.8rem;" 
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        Logout
-                    </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+
+                    {{-- TOMBOL LOGOUT --}}
+                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
                         @csrf
+                        <button type="submit" class="btn btn-outline-light btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-1.5 border-opacity-50 hover-bg-danger">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -630,8 +636,8 @@
             {{-- MAIN CONTENT --}}
             {{-- ============================================ --}}
             <div class="main-content">
-                {{-- Top Bar --}}
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h1 class="mb-0 fw-bold text-primary-custom">
                             @yield('title', 'Dashboard')
@@ -648,7 +654,7 @@
                             @if(Auth::user() && Auth::user()->isPikol())
                                 <span class="badge bg-danger text-white ms-1" style="font-size: 0.62rem;">PIKOL</span>
                             @else
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1" style="font-size: 0.62rem;">HOTD</span>
+                                <span class="badge bg-primary text-white ms-1" style="font-size: 0.62rem;">SA</span>
                             @endif
                         </div>
                     </div>

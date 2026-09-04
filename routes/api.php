@@ -23,3 +23,8 @@ Route::post('/reminders', [ReminderApiController::class, 'store'])->middleware('
 // Dilindungi Bearer Token custom
 Route::get('/members-status', [ReminderApiController::class, 'getMembersStatus'])->middleware('throttle:60,1');
 
+// Endpoint untuk mengambil konfigurasi bot (ID Grup, Tag HOTD, Delay, dll)
+// Dilindungi Bearer Token custom
+Route::get('/bot-config', [ReminderApiController::class, 'getBotConfig'])->middleware('throttle:60,1');
+
+

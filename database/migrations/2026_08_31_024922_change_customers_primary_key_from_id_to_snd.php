@@ -10,9 +10,24 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Cek apakah PRIMARY KEY sudah pada kolom snd
+        $primaryKey = DB::select("SHOW KEYS FROM customers WHERE Key_name = 'PRIMARY'");
+        if (!empty($primaryKey) && isset($primaryKey[0]->Column_name) && strtolower($primaryKey[0]->Column_name) === 'snd') {
+            return; // Sudah menjadi primary key
+        }
+
+        // Bersihkan baris yang snd bernilai NULL atau kosong
+        DB::statement("DELETE FROM customers WHERE snd IS NULL OR TRIM(snd) = ''");
+
+        // Hapus duplikat snd lama jika ada (mempertahankan baris pertama)
+        DB::statement("
+            DELETE c1 FROM customers c1
+            INNER JOIN customers c2 
+            WHERE c1.id > c2.id AND c1.snd = c2.snd
+        ");
+
         /*
          * SAFETY CHECK
-         * Migration dibatalkan jika SND belum aman menjadi primary key.
          */
         $stats = DB::table('customers')
             ->selectRaw("
@@ -38,17 +53,16 @@ return new class extends Migration
          *
          * Karena id menggunakan AUTO_INCREMENT, id harus tetap memiliki
          * index setelah PRIMARY KEY dipindahkan ke snd.
-         *
-         * Maka:
-         * - id       => UNIQUE + AUTO_INCREMENT
-         * - snd      => PRIMARY KEY
-         * - NCLI dan seluruh kolom lain tidak disentuh.
          */
+        // Cek apakah index customers_id_unique sudah ada
+        $indexes = DB::select("SHOW INDEXES FROM customers WHERE Key_name = 'customers_id_unique'");
+        $addUniqueSql = empty($indexes) ? "ADD UNIQUE INDEX customers_id_unique (id)," : "";
+
         DB::statement(
-            'ALTER TABLE customers
-             ADD UNIQUE INDEX customers_id_unique (id),
+            "ALTER TABLE customers
+             {$addUniqueSql}
              DROP PRIMARY KEY,
-             ADD PRIMARY KEY (snd)'
+             ADD PRIMARY KEY (snd)"
         );
     }
 

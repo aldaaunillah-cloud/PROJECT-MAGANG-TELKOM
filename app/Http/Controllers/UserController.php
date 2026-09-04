@@ -40,10 +40,9 @@ class UserController extends Controller
                     $q->whereIn('role', ['pikol', 'admin', 'supervisor'])
                       ->orWhereIn('email', ['admin@telkom.com', 'admin@telkom.co.id']);
                 });
-            } elseif ($roleFilter === 'hotd') {
+            } elseif ($roleFilter === 'sa' || $roleFilter === 'hotd') {
                 $query->where(function ($q) {
-                    $q->where('role', 'hotd')
-                      ->orWhere('role', 'sales')
+                    $q->whereIn('role', ['sa', 'hotd', 'sales'])
                       ->orWhereNull('role');
                 })->whereNotIn('email', ['admin@telkom.com', 'admin@telkom.co.id']);
             }
@@ -66,9 +65,10 @@ class UserController extends Controller
         // Statistik Ringkas
         $totalUsers = User::count();
         $totalPikol = User::whereIn('role', ['pikol', 'admin', 'supervisor'])->orWhereIn('email', ['admin@telkom.com', 'admin@telkom.co.id'])->count();
-        $totalHotd = User::whereNotIn('email', ['admin@telkom.com', 'admin@telkom.co.id'])->where(function ($q) {
-            $q->where('role', 'hotd')->orWhere('role', 'sales')->orWhereNull('role');
+        $totalSa = User::whereNotIn('email', ['admin@telkom.com', 'admin@telkom.co.id'])->where(function ($q) {
+            $q->whereIn('role', ['sa', 'hotd', 'sales'])->orWhereNull('role');
         })->count();
+        $totalHotd = $totalSa; // Backwards compatibility
         $totalAktif = User::where('status', 'aktif')->orWhereNull('status')->count();
         $totalNonaktif = User::where('status', 'tidak_aktif')->count();
 
@@ -76,6 +76,7 @@ class UserController extends Controller
             'users',
             'totalUsers',
             'totalPikol',
+            'totalSa',
             'totalHotd',
             'totalAktif',
             'totalNonaktif'
@@ -94,7 +95,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'telegram_id' => 'nullable|string|max:50',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:pikol,hotd',
+            'role' => 'required|in:pikol,sa,hotd',
             'status' => 'required|in:aktif,tidak_aktif',
             'divisi' => 'nullable|string|max:100',
             'witel' => 'nullable|string|max:100',
@@ -109,6 +110,9 @@ class UserController extends Controller
             'status.required' => 'Status akun wajib dipilih.',
         ]);
 
+        // Standardize role to 'sa' if 'hotd' is passed
+        $role = ($request->role === 'hotd') ? 'sa' : $request->role;
+
         // Generate username otomatis jika tidak diisi
         $username = $request->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode('@', $request->email)[0]));
 
@@ -119,9 +123,9 @@ class UserController extends Controller
             'email' => $request->email,
             'telegram_id' => $request->telegram_id,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $role,
             'status' => $request->status,
-            'divisi' => $request->divisi ?? ($request->role === 'pikol' ? 'PIKOL Collection' : 'HOTD Agency'),
+            'divisi' => $request->divisi ?? ($role === 'pikol' ? 'PIKOL Collection' : 'Sales Agency'),
             'witel' => $request->witel ?? 'Witel Priangan Timur',
         ]);
 
@@ -139,7 +143,7 @@ class UserController extends Controller
             'kode' => 'nullable|string|max:50',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'telegram_id' => 'nullable|string|max:50',
-            'role' => 'required|in:pikol,hotd',
+            'role' => 'required|in:pikol,sa,hotd',
             'status' => 'required|in:aktif,tidak_aktif',
             'divisi' => 'nullable|string|max:100',
             'witel' => 'nullable|string|max:100',
@@ -148,13 +152,15 @@ class UserController extends Controller
             'email.required' => 'Alamat email wajib diisi.',
         ]);
 
+        $role = ($request->role === 'hotd') ? 'sa' : $request->role;
+
         $data = [
             'name' => $request->name,
             'username' => $request->username ?: $user->username,
             'kode' => $request->kode,
             'email' => $request->email,
             'telegram_id' => $request->telegram_id,
-            'role' => $request->role,
+            'role' => $role,
             'status' => $request->status,
             'divisi' => $request->divisi,
             'witel' => $request->witel,

@@ -32,9 +32,9 @@ class SalesAgencyUserSeeder extends Seeder
             });
         }
 
-        // Pastikan kolom role diubah dari ENUM ke VARCHAR agar menerima 'hotd' dan 'pikol'
+        // Pastikan kolom role diubah dari ENUM ke VARCHAR agar menerima 'sa' dan 'pikol'
         try {
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(30) DEFAULT 'hotd'");
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(30) DEFAULT 'sa'");
         } catch (\Exception $e) {}
 
         if (!\Illuminate\Support\Facades\Schema::hasColumn('users', 'status')) {
@@ -58,13 +58,6 @@ class SalesAgencyUserSeeder extends Seeder
             ['name' => 'Mohamad allan sadat', 'kode' => 'MN01085', 'email' => 'allansadat@gmail.com', 'telegram_id' => '80669463'],
             ['name' => 'MUHAMMAD SALMAN AL FARIS', 'kode' => 'MN02791', 'email' => 'anaheryani53@gmail.com', 'telegram_id' => '1446666817'],
             ['name' => 'Nina rosana', 'kode' => 'MN02489', 'email' => 'rosanarosan267@gmail.com', 'telegram_id' => '8418180266'],
-            ['name' => 'Nurhayati', 'kode' => 'MN02451', 'email' => 'nurhayatibatusumur@gmail.com', 'telegram_id' => '7409937312'],
-            ['name' => 'Pipit Fitriani', 'kode' => 'MN02140', 'email' => 'rivanoa3@gmail.com', 'telegram_id' => '5404141789'],
-            ['name' => 'Raden Ahmad Basuki', 'kode' => 'MN02650', 'email' => 'gms468477@gmail.com', 'telegram_id' => '8578893355'],
-            ['name' => 'Sendi Syarif Hidayatuloh', 'kode' => 'MN02539', 'email' => 'abilstore740@gmail.com', 'telegram_id' => '7845174829'],
-            ['name' => 'Shokikah', 'kode' => 'MN02312', 'email' => 'ikhashokhikhaikha@gmail.com', 'telegram_id' => '1824667590'],
-            ['name' => 'Soni Yuniar', 'kode' => 'MN02291', 'email' => 'soni.yuniar05@gmail.com', 'telegram_id' => '370903602'],
-            ['name' => 'Wahyu Mulyadi', 'kode' => 'MN02041', 'email' => 'wahyu.artsm2@gmail.com', 'telegram_id' => '97466977'],
             ['name' => 'Yessa Lorenza', 'kode' => 'MN02551', 'email' => 'yessalorenza@gmail.com', 'telegram_id' => '5651813279'],
             ['name' => 'ADE NENI MULYANI', 'kode' => 'MB00454', 'email' => 'ade.87neni@gmail.com', 'telegram_id' => '6361404016'],
             ['name' => 'ANGGI SITI LOGAYAH', 'kode' => 'MB00457', 'email' => 'anggisl.indibiz@gmail.com', 'telegram_id' => '6018747843'],
@@ -120,9 +113,9 @@ class SalesAgencyUserSeeder extends Seeder
                     'kode' => trim($m['kode']),
                     'telegram_id' => $m['telegram_id'] ? trim($m['telegram_id']) : null,
                     'password' => $defaultPassword,
-                    'role' => 'hotd',
+                    'role' => 'sa',
                     'status' => 'aktif',
-                    'divisi' => 'HOTD Agency',
+                    'divisi' => 'Sales Agency',
                     'witel' => 'Witel Priangan Timur',
                 ]
             );

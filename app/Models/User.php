@@ -46,7 +46,7 @@ class User extends Authenticatable
         if (in_array(strtolower($this->email ?? ''), ['admin@telkom.com', 'admin@telkom.co.id'])) {
             return 'pikol';
         }
-        return $value ?: 'hotd';
+        return $value ?: 'sa';
     }
 
     /**
@@ -62,11 +62,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah pengguna adalah HOTD (Member)
+     * Cek apakah pengguna adalah Sales Agency (SA)
+     */
+    public function isSa(): bool
+    {
+        return !$this->isPikol();
+    }
+
+    /**
+     * Backward compatibility alias untuk isSa
      */
     public function isHotd(): bool
     {
-        return !$this->isPikol();
+        return $this->isSa();
     }
 
     /**

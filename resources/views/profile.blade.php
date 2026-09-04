@@ -77,8 +77,8 @@
                                     <i class="bi bi-shield-check me-1"></i> PIKOL (Admin)
                                 </span>
                             @else
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
-                                    <i class="bi bi-person me-1"></i> HOTD (Member)
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-semibold" style="font-size: 0.75rem; border-radius: 20px;">
+                                    <i class="bi bi-person me-1"></i> SA (Sales Agency)
                                 </span>
                             @endif
 
@@ -101,7 +101,7 @@
                                 @if($user->isPikol())
                                     Anda memiliki hak akses penuh sebagai Admin PIKOL untuk mengelola sinkronisasi data dan akun anggota.
                                 @else
-                                    Anda terdaftar sebagai anggota agensi HOTD. Untuk keamanan data, perubahan nama, kode agensi, dan email dilakukan melalui Admin PIKOL.
+                                    Anda terdaftar sebagai Sales Agency (SA). Untuk keamanan data, perubahan nama, kode agensi, dan email dilakukan melalui Admin PIKOL.
                                 @endif
                             </div>
                         </div>

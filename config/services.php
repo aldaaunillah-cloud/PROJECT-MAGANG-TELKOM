@@ -39,4 +39,8 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 
+    'reminder' => [
+        'api_token' => env('API_REMINDER_TOKEN', 'rahasia_token_reminder_magang_telkom_123'),
+    ],
+
 ];
