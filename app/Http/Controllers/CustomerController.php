@@ -1619,19 +1619,20 @@ class CustomerController extends Controller
         );
     }
 
+/**
+ * ============================================
+ * REKAP AGENCY BILLING 3-6 HOTD
+ * ============================================
+ */
+public function rekapAgencyBilling36(
+    Request $request
+) {
+    $billing = $request->input(
+        'billing',
+        'all'
+    );
 
-    /**
-     * ============================================
-     * REKAP AGENCY BILLING 3-6 HOTD
-     * ============================================
-     */
-    public function rekapAgencyBilling36(
-        Request $request
-    ) {
-        $billing = $request->input(
-            'billing',
-            'all'
-        );
+    $search = trim($request->input('search', ''));
 
         // ============================================================
         // TABEL UTAMA BILLING 3-6
@@ -1777,22 +1778,88 @@ class CustomerController extends Controller
                 }
             )
 
+            
+
             ->groupBy(
                 'agency_psb',
                 'sales_agency'
             )
 
-            ->orderBy(
-                'agency_psb',
-                'ASC'
-            )
+->orderBy(
+    'agency_psb',
+    'ASC'
+)
 
-            ->orderBy(
-                'sales_agency',
-                'ASC'
-            )
+->orderBy(
+    'sales_agency',
+    'ASC'
+)
 
-            ->paginate(25);
+->paginate(25)
+->withQueryString();
+
+        
+        // ============================================================
+        // SEARCH DETAIL CUSTOMER
+        // ============================================================
+
+        $searchCustomers = collect();
+
+        if ($search !== '') {
+
+            $searchCustomers = Customer::where('status_bayar', 'Blm Bayar')
+                ->whereBetween('billing_ke', [3, 6])
+
+                // FILTER AGENCY
+                ->when($request->filled('agency_psb'), function ($q) use ($request) {
+                    $q->where('agency_psb', $request->agency_psb);
+                })
+
+                // FILTER SALES
+                ->when($request->filled('sales_agency'), function ($q) use ($request) {
+                    $q->where('sales_agency', $request->sales_agency);
+                })
+
+                // SEARCH SEMUA KOLOM DETAIL
+                ->where(function ($query) use ($search) {
+
+                    $query->where('status_bayar', 'like', "%{$search}%")
+                        ->orWhere('tag_inet', 'like', "%{$search}%")
+                        ->orWhere('tag_tlp', 'like', "%{$search}%")
+                        ->orWhere('tag_total', 'like', "%{$search}%")
+                        ->orWhere('snd', 'like', "%{$search}%")
+                        ->orWhere('snd_group', 'like', "%{$search}%")
+                        ->orWhere('ncli', 'like', "%{$search}%")
+                        ->orWhere('nama', 'like', "%{$search}%")
+                        ->orWhere('alamat', 'like', "%{$search}%")
+                        ->orWhere('sto', 'like', "%{$search}%")
+                        ->orWhere('datel', 'like', "%{$search}%")
+                        ->orWhere('produk', 'like', "%{$search}%")
+                        ->orWhere('eksepsi_desc', 'like', "%{$search}%")
+                        ->orWhere('desc_newbill', 'like', "%{$search}%")
+                        ->orWhere('usage_desc', 'like', "%{$search}%")
+                        ->orWhere('saldo', 'like', "%{$search}%")
+                        ->orWhere('umur_customer', 'like', "%{$search}%")
+                        ->orWhere('billing_ke', 'like', "%{$search}%")
+                        ->orWhere('paid_l11', 'like', "%{$search}%")
+                        ->orWhere('tgl_paid', 'like', "%{$search}%")
+                        ->orWhere('paid_rp', 'like', "%{$search}%")
+                        ->orWhere('coll_agent', 'like', "%{$search}%")
+                        ->orWhere('tgl_klaim', 'like', "%{$search}%")
+                        ->orWhere('amount_klaim', 'like', "%{$search}%")
+                        ->orWhere('user_klaim', 'like', "%{$search}%")
+                        ->orWhere('agency_psb', 'like', "%{$search}%")
+                        ->orWhere('sales_agency', 'like', "%{$search}%")
+                        ->orWhere('ppp', 'like', "%{$search}%")
+                        ->orWhere('caring_mybrains', 'like', "%{$search}%");
+
+                })
+
+                ->orderBy('billing_ke')
+                ->orderBy('agency_psb')
+                ->orderBy('nama')
+                ->get();
+        }
 
         // ============================================================
         // FILTER AGENCY & SALES
@@ -2023,6 +2090,8 @@ class CustomerController extends Controller
                 'rekap',
                 'filters',
                 'billing',
+'search',
+'searchCustomers',
 
                 'witelAgencies3',
                 'witelDatels3',

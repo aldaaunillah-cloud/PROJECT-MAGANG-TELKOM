@@ -474,92 +474,262 @@
 
             <div class="card-body">
 
-                {{-- FILTER --}}
-
+                {{-- ====================================================
+                    FILTER BILLING 3 - 6
+                ===================================================== --}}
                 <form method="GET"
-                      action="{{ route('rekap.agency.billing36') }}"
-                      class="billing-form row g-2 mb-3">
+                    action="{{ route('rekap.agency.billing36') }}"
+                    class="billing-form row g-2 mb-3">
 
                     {{-- AGENCY --}}
-
-                    <div class="col-md-5 col-sm-6">
-
-                        <label class="form-label fw-bold text-secondary">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">
                             Agency
                         </label>
 
                         <select name="agency_psb"
-                                class="form-select form-select-sm"
-                                onchange="this.form.submit()">
+                                class="form-select form-select-sm">
 
                             <option value="">
                                 Semua Agency
                             </option>
 
                             @foreach($filters['agency_psb'] as $agency)
-
                                 <option value="{{ $agency }}"
                                     {{ request('agency_psb') == $agency ? 'selected' : '' }}>
-
                                     {{ $agency }}
-
                                 </option>
-
                             @endforeach
 
                         </select>
-
                     </div>
 
 
                     {{-- SALES AGENCY --}}
-
-                    <div class="col-md-5 col-sm-6">
-
-                        <label class="form-label fw-bold text-secondary">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">
                             Sales Agency
                         </label>
 
                         <select name="sales_agency"
-                                class="form-select form-select-sm"
-                                onchange="this.form.submit()">
+                                class="form-select form-select-sm">
 
                             <option value="">
                                 Semua Sales
                             </option>
 
                             @foreach($filters['sales_agency'] as $sales)
-
                                 <option value="{{ $sales }}"
                                     {{ request('sales_agency') == $sales ? 'selected' : '' }}>
-
                                     {{ $sales }}
-
                                 </option>
-
                             @endforeach
 
                         </select>
-
                     </div>
 
 
-                    {{-- RESET --}}
+                    {{-- SEARCH --}}
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">
+                            Search
+                        </label>
 
-                    <div class="col-md-2 col-sm-12 d-flex align-items-end">
+                        <div class="position-relative">
+
+                            <input type="text"
+                                name="search"
+                                value="{{ request('search') }}"
+                                class="form-control form-control-sm pe-5"
+                                placeholder="Cari Agency, Sales, Nama, SSL, NCLI...">
+
+                            <button type="submit"
+                                class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-0 border-0 bg-transparent"
+                                title="Search">
+                                <i class="bi bi-search text-muted"></i>
+                            </button>
+
+                        </div>
+                    </div>
+
+
+                    {{-- BUTTON FILTER + RESET --}}
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary btn-sm flex-fill"
+                                style="height: 31px;">
+                            <i class="bi bi-funnel me-1"></i>
+                            Filter
+                        </button>
 
                         <a href="{{ route('rekap.agency.billing36') }}"
-                           class="btn btn-secondary btn-sm w-100"
-                           style="border-radius: 8px;">
-
+                        class="btn btn-secondary btn-sm flex-fill"
+                        style="height: 31px;">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>
                             Reset
-
                         </a>
 
                     </div>
 
                 </form>
+
+                {{-- ============================================================
+                    HASIL SEARCH CUSTOMER
+                ============================================================ --}}
+
+                @if($search !== '')
+
+                    <div class="card border-0 shadow-sm mb-3">
+
+                        <div class="card-header bg-white border-0">
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <h6 class="mb-1 fw-bold text-primary-custom">
+                                        HASIL PENCARIAN CUSTOMER
+                                    </h6>
+
+                                    <small class="text-muted">
+                                        Hasil pencarian:
+                                        <strong>{{ $search }}</strong>
+                                    </small>
+                                </div>
+
+                                <span class="badge bg-primary">
+                                    {{ $searchCustomers->count() }} Customer
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="card-body">
+
+                            @if($searchCustomers->count() > 0)
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-bordered table-hover table-striped mb-0">
+
+                                        <thead>
+
+                                            <tr>
+
+                                                <th class="text-center">
+                                                    NO
+                                                </th>
+
+                                                <th>
+                                                    BILLING KE-
+                                                </th>
+
+                                                <th>
+                                                    AGENCY
+                                                </th>
+
+                                                <th>
+                                                    SALES AGENCY
+                                                </th>
+
+                                                <th>
+                                                    NAMA
+                                                </th>
+
+                                                <th>
+                                                    SSL / SND
+                                                </th>
+
+                                                <th>
+                                                    NCLI
+                                                </th>
+
+                                                <th>
+                                                    DATEL
+                                                </th>
+
+                                                <th>
+                                                    ALAMAT
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+
+                                        <tbody>
+
+                                            @foreach($searchCustomers as $index => $customer)
+
+                                                <tr>
+
+                                                    <td class="text-center">
+                                                        {{ $index + 1 }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        {{ $customer->billing_ke }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->agency_psb }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->sales_agency }}
+                                                    </td>
+
+                                                    <td class="fw-semibold">
+                                                        {{ $customer->nama }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->snd }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->ncli }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->datel }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $customer->alamat }}
+                                                    </td>
+
+                                                </tr>
+
+                                            @endforeach
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            @else
+
+                                <div class="text-center py-4">
+
+                                    <i class="bi bi-search fs-2 text-muted"></i>
+
+                                    <p class="text-muted mb-0 mt-2">
+                                        Customer tidak ditemukan.
+                                    </p>
+
+                                </div>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                @endif
 
 
 
@@ -799,9 +969,19 @@
                                     ===================================================== --}}
 
                                     <td class="text-center fw-bold">
-
-                                        {{ number_format($row->billing_3_ssl ?? 0) }}
-
+                                        @if(($row->billing_3_ssl ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 3,
+                                                'agency' => $row->agency_psb,
+                                                'sales' => $row->sales_agency,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="ssl-link">
+                                                {{ number_format($row->billing_3_ssl) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
                                     </td>
 
 
@@ -823,9 +1003,19 @@
                                     ===================================================== --}}
 
                                     <td class="text-center fw-bold">
-
-                                        {{ number_format($row->billing_4_ssl ?? 0) }}
-
+                                        @if(($row->billing_4_ssl ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 4,
+                                                'agency' => $row->agency_psb,
+                                                'sales' => $row->sales_agency,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="ssl-link">
+                                                {{ number_format($row->billing_4_ssl) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
                                     </td>
 
 
@@ -847,9 +1037,19 @@
                                     ===================================================== --}}
 
                                     <td class="text-center fw-bold">
-
-                                        {{ number_format($row->billing_5_ssl ?? 0) }}
-
+                                        @if(($row->billing_5_ssl ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 5,
+                                                'agency' => $row->agency_psb,
+                                                'sales' => $row->sales_agency,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="ssl-link">
+                                                {{ number_format($row->billing_5_ssl) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
                                     </td>
 
 
@@ -871,9 +1071,19 @@
                                     ===================================================== --}}
 
                                     <td class="text-center fw-bold">
-
-                                        {{ number_format($row->billing_6_ssl ?? 0) }}
-
+                                        @if(($row->billing_6_ssl ?? 0) > 0)
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 6,
+                                                'agency' => $row->agency_psb,
+                                                'sales' => $row->sales_agency,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="ssl-link">
+                                                {{ number_format($row->billing_6_ssl) }}
+                                            </a>
+                                        @else
+                                            0
+                                        @endif
                                     </td>
 
 
@@ -1313,9 +1523,15 @@
                                         @endphp
 
                                         <td class="text-center">
-
-                                            {{ number_format($jumlah) }}
-
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 3,
+                                                'agency' => $agency,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-primary fw-bold text-decoration-none">
+                                                {{ number_format($jumlah) }}
+                                            </a>
                                         </td>
 
                                     @endforeach
@@ -1540,9 +1756,15 @@
                                         @endphp
 
                                         <td class="text-center">
-
-                                            {{ number_format($jumlah) }}
-
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 4,
+                                                'agency' => $agency,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-primary fw-bold text-decoration-none">
+                                                {{ number_format($jumlah) }}
+                                            </a>
                                         </td>
 
                                     @endforeach
@@ -1767,9 +1989,15 @@
                                         @endphp
 
                                         <td class="text-center">
-
-                                            {{ number_format($jumlah) }}
-
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 5,
+                                                'agency' => $agency,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-primary fw-bold text-decoration-none">
+                                                {{ number_format($jumlah) }}
+                                            </a>
                                         </td>
 
                                     @endforeach
@@ -1994,9 +2222,15 @@
                                         @endphp
 
                                         <td class="text-center">
-
-                                            {{ number_format($jumlah) }}
-
+                                            <a href="{{ route('billing.detail', [
+                                                'billing_ke' => 6,
+                                                'agency' => $agency,
+                                                'datel' => $datel,
+                                                'status' => 'Blm Bayar'
+                                            ]) }}"
+                                            class="text-primary fw-bold text-decoration-none">
+                                                {{ number_format($jumlah) }}
+                                            </a>
                                         </td>
 
                                     @endforeach
