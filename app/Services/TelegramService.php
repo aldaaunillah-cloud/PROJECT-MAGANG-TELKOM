@@ -15,12 +15,36 @@ class TelegramService
     }
 
     /**
+     * Dapatkan Bot Token aktif (dari DB BotSetting atau config .env)
+     */
+    protected function getActiveBotToken(): ?string
+    {
+        if (!empty($this->botToken)) {
+            return $this->botToken;
+        }
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('bot_settings')) {
+                $setting = \App\Models\BotSetting::getSettings();
+                if ($setting && !empty($setting->bot_token)) {
+                    return $setting->bot_token;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore if DB not ready
+        }
+
+        return null;
+    }
+
+    /**
      * Kirim pesan Telegram ke Chat ID tertentu (HTML mode)
      */
     public function sendMessage(string|int $chatId, string $message): array
     {
-        if (empty($this->botToken)) {
-            Log::error('TelegramService: TELEGRAM_BOT_TOKEN belum dikonfigurasi di .env / services.php');
+        $token = $this->getActiveBotToken();
+        if (empty($token)) {
+            Log::error('TelegramService: TELEGRAM_BOT_TOKEN belum dikonfigurasi di Pengaturan Bot / .env');
             return [
                 'success' => false,
                 'message' => 'Token Bot Telegram belum dikonfigurasi di server.'
@@ -28,7 +52,7 @@ class TelegramService
         }
 
         try {
-            $url = "https://api.telegram.org/bot{$this->botToken}/sendMessage";
+            $url = "https://api.telegram.org/bot{$token}/sendMessage";
             
             $response = Http::timeout(10)->post($url, [
                 'chat_id' => $chatId,

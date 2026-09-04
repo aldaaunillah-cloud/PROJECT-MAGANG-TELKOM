@@ -25,7 +25,7 @@ class ForgotPasswordController extends Controller
      */
     public function showLinkRequestForm()
     {
-        return view('auth.passwords.email');
+        return view('Auth.passwords.email');
     }
 
     /**
@@ -131,7 +131,7 @@ class ForgotPasswordController extends Controller
             }
         }
 
-        return view('auth.passwords.reset', compact('loginInput', 'maskedTelegram'));
+        return view('Auth.passwords.reset', compact('loginInput', 'maskedTelegram'));
     }
 
     /**
