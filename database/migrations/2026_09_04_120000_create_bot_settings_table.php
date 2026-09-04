@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('bot_settings', function (Blueprint $table) {
             $table->id();
             $table->string('bot_name', 100)->default('Telkom Reminder Bot');
-            $table->string('bot_token')->nullable()->default('8887064573:AAH1ah0uPr0DzfRRACTJYthrtjIHsAch9kk');
+            $table->string('bot_token')->nullable();
             $table->string('telegram_group_id', 50)->nullable()->default('-5430258004');
             $table->string('hotd_mentions')->nullable()->default('@hotdAinun @hotdDhea');
             $table->string('app_url')->nullable()->default('https://reminder.crafts.web.id');
@@ -28,7 +28,7 @@ return new class extends Migration
         // Insert initial default configuration row
         DB::table('bot_settings')->insert([
             'bot_name' => 'Telkom Reminder Bot',
-            'bot_token' => '8887064573:AAH1ah0uPr0DzfRRACTJYthrtjIHsAch9kk',
+            'bot_token' => env('TELEGRAM_BOT_TOKEN', null),
             'telegram_group_id' => '-5430258004',
             'hotd_mentions' => '@hotdAinun @hotdDhea',
             'app_url' => 'https://reminder.crafts.web.id',
