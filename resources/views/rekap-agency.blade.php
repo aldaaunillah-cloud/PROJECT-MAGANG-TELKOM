@@ -482,10 +482,8 @@
             class="billing-filter-item
                 {{ request('view', 'rekap') == 'rekap' ? 'active' : '' }}"
         >
-
             <span class="billing-radio"></span>
             <span>Billing 1 & 2</span>
-
         </a>
 
 
@@ -497,10 +495,8 @@
             class="billing-filter-item billing-1
                 {{ request('view') == 'billing1' ? 'active' : '' }}"
         >
-
             <span class="billing-radio"></span>
             <span>Billing Ke-1</span>
-
         </a>
 
 
@@ -512,10 +508,8 @@
             class="billing-filter-item billing-2
                 {{ request('view') == 'billing2' ? 'active' : '' }}"
         >
-
             <span class="billing-radio"></span>
             <span>Billing Ke-2</span>
-
         </a>
 
     </div>
@@ -639,7 +633,7 @@
                         FILTER AGENCY
                     ===================================================== --}}
 
-                    <div class="col-md-5 col-sm-6">
+                    <div class="col-md-4 col-sm-6">
 
                         <label class="form-label fw-bold text-secondary">
                             Agency
@@ -648,7 +642,6 @@
                         <select
                             name="agency_psb"
                             class="form-select form-select-sm"
-                            onchange="this.form.submit()"
                         >
 
                             <option value="">
@@ -675,7 +668,7 @@
                         FILTER SALES AGENCY
                     ===================================================== --}}
 
-                    <div class="col-md-5 col-sm-6">
+                    <div class="col-md-4 col-sm-6">
 
                         <label class="form-label fw-bold text-secondary">
                             Sales Agency
@@ -684,7 +677,6 @@
                         <select
                             name="sales_agency"
                             class="form-select form-select-sm"
-                            onchange="this.form.submit()"
                         >
 
                             <option value="">
@@ -708,10 +700,30 @@
 
 
                     {{-- ====================================================
+                        BUTTON FILTER
+                    ===================================================== --}}
+
+                    <div class="col-md-2 col-sm-6 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-sm w-100"
+                            style="border-radius: 8px;"
+                        >
+
+                            <i class="bi bi-funnel me-1"></i>
+                            Filter
+
+                        </button>
+
+                    </div>
+
+
+                    {{-- ====================================================
                         RESET
                     ===================================================== --}}
 
-                    <div class="col-md-2 col-sm-12 d-flex align-items-end">
+                    <div class="col-md-2 col-sm-6 d-flex align-items-end">
 
                         <a
                             href="{{ route('rekap.agency', [
