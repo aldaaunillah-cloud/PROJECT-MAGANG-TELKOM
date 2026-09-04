@@ -36,12 +36,12 @@
                     </div>
 
                     {{-- Info --}}
-                    <div class="alert alert-info">
+                    <div class="alert alert-info alert-permanent">
                         <i class="bi bi-info-circle me-2"></i>
                         <strong>Informasi:</strong>
                         <ul class="mb-0 mt-2">
                             <li>Sinkronisasi akan mengambil data dari Google Sheets</li>
-                            <li>Proses menggunakan <strong>chunk 1000</strong> data untuk performa</li>
+                            <li>Proses menggunakan <strong>chunk 2000</strong> data untuk performa</li>
                             <li>Data akan di-<strong>upsert</strong> (update jika sudah ada, insert jika baru)</li>
                             <li>Total data sekitar <strong>26.000+</strong> customer</li>
                             <li>Proses hanya mengupdate data yang <strong>berubah</strong> (lebih cepat!)</li>
@@ -77,9 +77,8 @@
                 <div class="progress mb-3" style="height: 20px; border-radius: 10px;">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="syncProgressBar">0%</div>
                 </div>
-                
-                <div class="text-muted small fw-bold" id="syncDetails">
-                    Baris diproses: <span id="processedRows">0</span> / <span id="totalRows">0</span>
+                <div class="text-muted small fw-bold mb-0" id="syncDetails">
+                    Baris diproses: <span id="processedRows" class="text-primary fw-bold">0</span> / <span id="totalRows">0</span>
                 </div>
             </div>
         </div>
@@ -122,7 +121,6 @@ async function startSyncProcess() {
             progressStatus.innerText = "Tidak ada data untuk disinkronkan.";
             progressBar.style.width = "100%";
             progressBar.innerText = "100%";
-            setTimeout(() => window.location.reload(), 1500);
             return;
         }
         
@@ -164,16 +162,26 @@ async function startSyncProcess() {
             progressBar.setAttribute('aria-valuenow', percent);
         }
         
-        // Sukses
+        // Sukses Selesai - Tampilkan tombol Tutup Halaman & Refresh ke Dashboard
         spinner.style.display = "none";
         iconContainer.innerHTML = '<i class="bi bi-check-circle-fill text-success mb-3 d-block" style="font-size: 3.5rem;"></i>';
-        progressTitle.innerText = "Sinkronisasi Selesai!";
-        progressStatus.className = "text-success fw-bold mb-4";
-        progressStatus.innerText = "Seluruh data berhasil disimpan ke database!";
+        progressTitle.innerText = "Sinkronisasi Berhasil Selesai!";
+        progressStatus.className = "text-success fw-bold mb-3";
+        progressStatus.innerText = "Seluruh data dari Google Sheets berhasil disinkronkan ke database.";
         
-        setTimeout(() => {
-            window.location.href = "{{ route('dashboard') }}?sync=success";
-        }, 1500);
+        // Membuka akses tutup modal manual
+        const modalElement = document.getElementById('syncProgressModal');
+        modalElement.setAttribute('data-bs-backdrop', 'true');
+        modalElement.setAttribute('data-bs-keyboard', 'true');
+        
+        // Tombol Tutup Halaman & Refresh (langsung ke Dashboard)
+        const closeBtn = document.createElement('a');
+        closeBtn.href = "{{ route('dashboard') }}?sync=success";
+        closeBtn.className = "btn btn-primary mt-3 px-4 py-2 fw-semibold shadow-sm";
+        closeBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> Tutup Halaman & Refresh';
+        
+        const modalBody = document.querySelector('#syncProgressModal .modal-body');
+        modalBody.appendChild(closeBtn);
         
     } catch (error) {
         console.error(error);

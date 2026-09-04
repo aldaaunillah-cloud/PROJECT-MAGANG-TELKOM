@@ -709,9 +709,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        // Auto hide alerts after 5 seconds
+        // Auto hide flash alerts after 5 seconds (hanya untuk alert-dismissible / flash message)
         document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            const alerts = document.querySelectorAll('.alert.alert-dismissible:not(.alert-permanent)');
             alerts.forEach(function(alert) {
                 setTimeout(function() {
                     const bsAlert = bootstrap.Alert.getInstance(alert);

@@ -55,30 +55,27 @@ class SyncService
                 Log::info('=== FIRST GOOGLE CUSTOMER ===', ['data' => $googleCustomers[0]]);
             }
 
-            // Ambil data customer yang ada untuk perbandingan (hanya kolom penting untuk menghemat memori)
-            $dbCustomers = Customer::select([
-                'snd', 'nama', 'alamat', 'datel', 'agency', 'sales',
-                'billing_ke', 'saldo', 'status_bayar', 'tag_total',
-                'tag_inet', 'tag_tlp', 'snd_group', 'ncli', 'sto',
-                'produk', 'eksepsi_desc', 'desc_newbill', 'usage_desc',
-                'umur_customer', 'paid_l11', 'tgl_paid', 'paid_rp',
-                'coll_agent', 'tgl_klaim', 'amount_klaim', 'user_klaim',
-                'tgl_paid_n1', 'agency_psb', 'sales_agency', 'ppp',
-                'caring_mybrains', 'ssl_file'
-            ])->get()->keyBy('snd');
-
             $skip = 0;
-            $insertedCount = 0;
-            $updatedCount = 0;
             $now = now();
+            $updateColumns = [
+                'snd_group', 'ncli', 'nama', 'alamat', 'sto',
+                'datel', 'agency', 'sales', 'billing_ke', 'saldo', 'status_bayar',
+                'tag_total', 'tag_inet', 'tag_tlp', 'produk', 'eksepsi_desc',
+                'desc_newbill', 'usage_desc', 'umur_customer', 'paid_l11', 'tgl_paid',
+                'paid_rp', 'coll_agent', 'tgl_klaim', 'amount_klaim', 'user_klaim',
+                'tgl_paid_n1', 'agency_psb', 'sales_agency', 'ppp', 'caring_mybrains',
+                'updated_at'
+            ];
 
-            // Bagi data Google Sheets menjadi chunk 2000 baris agar tidak memakan RAM
-            $chunks = array_chunk($googleCustomers, 2000);
-            unset($googleCustomers); // Bebaskan memori array utama yang sangat besar
+            // Bagi data Google Sheets menjadi chunk 1000 baris untuk bulk upsert ultra-cepat
+            $chunks = array_chunk($googleCustomers, 1000);
+            unset($googleCustomers); // Bebaskan memori array utama
 
-            DB::transaction(function () use ($chunks, $dbCustomers, $now, &$insertedCount, &$updatedCount, &$skip) {
+            $processedCount = 0;
+
+            DB::transaction(function () use ($chunks, $updateColumns, $now, &$processedCount, &$skip) {
                 foreach ($chunks as $chunk) {
-                    $insertData = [];
+                    $upsertRows = [];
 
                     foreach ($chunk as $customer) {
                         $snd = trim($customer['snd'] ?? '');
@@ -87,7 +84,7 @@ class SyncService
                             continue;
                         }
 
-                        $row = [
+                        $upsertRows[] = [
                             'snd' => $snd,
                             'snd_group' => trim($customer['snd_group'] ?? ''),
                             'ncli' => trim($customer['ncli'] ?? ''),
@@ -120,39 +117,17 @@ class SyncService
                             'sales_agency' => trim($customer['sales_agency'] ?? ''),
                             'ppp' => trim($customer['ppp'] ?? ''),
                             'caring_mybrains' => trim($customer['caring_mybrains'] ?? ''),
-                            'ssl_file' => trim($customer['ssl_file'] ?? ''),
+                            'created_at' => $now,
                             'updated_at' => $now,
                         ];
+                    }
 
-                        if (!isset($dbCustomers[$snd])) {
-                            $row['created_at'] = $now;
-                            $insertData[] = $row;
-                            $insertedCount++;
-                        } else {
-                            $existing = $dbCustomers[$snd];
-                            $existingHash = $this->generateHash($existing);
-                            $newHash = $this->generateHash($row);
-                            
-                            if ($existingHash !== $newHash) {
-                                // Jangan overwrite ssl_file milik customer jika di spreadsheet kosong
-                                if (empty($row['ssl_file'])) {
-                                    unset($row['ssl_file']);
-                                }
-                                Customer::where('snd', $snd)->update($row);
-                                $updatedCount++;
-                            } else {
-                                $skip++;
-                            }
+                    if (!empty($upsertRows)) {
+                        foreach (array_chunk($upsertRows, 500) as $chunkUpsert) {
+                            Customer::upsert($chunkUpsert, ['snd'], $updateColumns);
                         }
+                        $processedCount += count($upsertRows);
                     }
-
-                    // Insert data baru dalam batch chunk
-                    if (!empty($insertData)) {
-                        Customer::insert($insertData);
-                    }
-
-                    // Bersihkan memori variabel penampung chunk
-                    unset($insertData);
                 }
             });
 
@@ -162,21 +137,11 @@ class SyncService
             $totalCustomer = Customer::count();
             $tagTotalSum = Customer::sum('tag_total');
 
-            Log::info('=== AFTER SYNC ===', [
-                'total_customer' => $totalCustomer,
-                'tag_total_sum' => $tagTotalSum,
-                'insert' => count($insertData),
-                'update' => count($updateData),
-                'skip' => $skip
-            ]);
-
             return [
                 'success' => true,
                 'message' => 'Sinkronisasi berhasil!',
                 'data' => [
-                    'google_rows' => count($googleCustomers),
-                    'insert' => count($insertData),
-                    'update' => count($updateData),
+                    'processed' => $processedCount,
                     'skip' => $skip,
                     'total_customer' => $totalCustomer,
                     'tag_total_sum' => number_format($tagTotalSum, 0, ',', '.'),
@@ -232,101 +197,71 @@ class SyncService
                 ");
             }
 
-            // Ambil data customer yang ada di database untuk perbandingan (hanya untuk SND yang ada di batch saat ini)
-            $sndsInBatch = array_map(function($customer) {
-                return trim($customer['snd'] ?? '');
-            }, $googleCustomers);
-            $sndsInBatch = array_filter($sndsInBatch);
-
-            $dbCustomers = Customer::select([
-                'snd', 'nama', 'alamat', 'datel', 'agency', 'sales',
-                'billing_ke', 'saldo', 'status_bayar', 'tag_total',
-                'tag_inet', 'tag_tlp', 'snd_group', 'ncli', 'sto',
-                'produk', 'eksepsi_desc', 'desc_newbill', 'usage_desc',
-                'umur_customer', 'paid_l11', 'tgl_paid', 'paid_rp',
-                'coll_agent', 'tgl_klaim', 'amount_klaim', 'user_klaim',
-                'tgl_paid_n1', 'agency_psb', 'sales_agency', 'ppp',
-                'caring_mybrains', 'ssl_file'
-            ])->whereIn('snd', $sndsInBatch)->get()->keyBy('snd');
-
             $skip = 0;
-            $insertedCount = 0;
-            $updatedCount = 0;
             $now = now();
-            $insertData = [];
+            $upsertRows = [];
 
-            DB::transaction(function () use ($googleCustomers, $dbCustomers, $now, &$insertData, &$insertedCount, &$updatedCount, &$skip) {
-                foreach ($googleCustomers as $customer) {
-                    $snd = trim($customer['snd'] ?? '');
-                    if (empty($snd)) {
-                        $skip++;
-                        continue;
-                    }
+            $updateColumns = [
+                'snd_group', 'ncli', 'nama', 'alamat', 'sto',
+                'datel', 'agency', 'sales', 'billing_ke', 'saldo', 'status_bayar',
+                'tag_total', 'tag_inet', 'tag_tlp', 'produk', 'eksepsi_desc',
+                'desc_newbill', 'usage_desc', 'umur_customer', 'paid_l11', 'tgl_paid',
+                'paid_rp', 'coll_agent', 'tgl_klaim', 'amount_klaim', 'user_klaim',
+                'tgl_paid_n1', 'agency_psb', 'sales_agency', 'ppp', 'caring_mybrains',
+                'updated_at'
+            ];
 
-                    $row = [
-                        'snd' => $snd,
-                        'snd_group' => trim($customer['snd_group'] ?? ''),
-                        'ncli' => trim($customer['ncli'] ?? ''),
-                        'nama' => trim($customer['nama'] ?? ''),
-                        'alamat' => trim($customer['alamat'] ?? ''),
-                        'sto' => trim($customer['sto'] ?? ''),
-                        'datel' => trim($customer['datel'] ?? ''),
-                        'agency' => trim($customer['agency'] ?? ''),
-                        'sales' => trim($customer['sales'] ?? ''),
-                        'billing_ke' => $this->parseBillingKe($customer['billing_ke'] ?? null),
-                        'saldo' => $this->parseCurrency($customer['saldo'] ?? 0),
-                        'status_bayar' => trim($customer['status_bayar'] ?? ''),
-                        'tag_total' => $this->parseCurrency($customer['tag_total'] ?? 0),
-                        'tag_inet' => $this->parseCurrency($customer['tag_inet'] ?? 0),
-                        'tag_tlp' => $this->parseCurrency($customer['tag_tlp'] ?? 0),
-                        'produk' => trim($customer['produk'] ?? ''),
-                        'eksepsi_desc' => trim($customer['eksepsi_desc'] ?? ''),
-                        'desc_newbill' => trim($customer['desc_newbill'] ?? ''),
-                        'usage_desc' => trim($customer['usage_desc'] ?? ''),
-                        'umur_customer' => (int) ($customer['umur_customer'] ?? 0),
-                        'paid_l11' => trim($customer['paid_l11'] ?? ''),
-                        'tgl_paid' => $this->parseDate($customer['tgl_paid'] ?? null),
-                        'paid_rp' => $this->parseCurrency($customer['paid_rp'] ?? 0),
-                        'coll_agent' => trim($customer['coll_agent'] ?? ''),
-                        'tgl_klaim' => $this->parseDate($customer['tgl_klaim'] ?? null),
-                        'amount_klaim' => $this->parseCurrency($customer['amount_klaim'] ?? 0),
-                        'user_klaim' => trim($customer['user_klaim'] ?? ''),
-                        'tgl_paid_n1' => $this->parseDate($customer['tgl_paid_n1'] ?? null),
-                        'agency_psb' => trim($customer['agency_psb'] ?? ''),
-                        'sales_agency' => trim($customer['sales_agency'] ?? ''),
-                        'ppp' => trim($customer['ppp'] ?? ''),
-                        'caring_mybrains' => trim($customer['caring_mybrains'] ?? ''),
-                        'ssl_file' => trim($customer['ssl_file'] ?? ''),
-                        'updated_at' => $now,
-                    ];
-
-                    if (!isset($dbCustomers[$snd])) {
-                        $row['created_at'] = $now;
-                        $insertData[] = $row;
-                        $insertedCount++;
-                    } else {
-                        $existing = $dbCustomers[$snd];
-                        $existingHash = $this->generateHash($existing);
-                        $newHash = $this->generateHash($row);
-                        
-                        if ($existingHash !== $newHash) {
-                            if (empty($row['ssl_file'])) {
-                                unset($row['ssl_file']);
-                            }
-                            Customer::where('snd', $snd)->update($row);
-                            $updatedCount++;
-                        } else {
-                            $skip++;
-                        }
-                    }
+            foreach ($googleCustomers as $customer) {
+                $snd = trim($customer['snd'] ?? '');
+                if (empty($snd)) {
+                    $skip++;
+                    continue;
                 }
 
-                if (!empty($insertData)) {
-                    foreach (array_chunk($insertData, 1000) as $chunk) {
-                        Customer::insert($chunk);
-                    }
+                $upsertRows[] = [
+                    'snd' => $snd,
+                    'snd_group' => trim($customer['snd_group'] ?? ''),
+                    'ncli' => trim($customer['ncli'] ?? ''),
+                    'nama' => trim($customer['nama'] ?? ''),
+                    'alamat' => trim($customer['alamat'] ?? ''),
+                    'sto' => trim($customer['sto'] ?? ''),
+                    'datel' => trim($customer['datel'] ?? ''),
+                    'agency' => trim($customer['agency'] ?? ''),
+                    'sales' => trim($customer['sales'] ?? ''),
+                    'billing_ke' => $this->parseBillingKe($customer['billing_ke'] ?? null),
+                    'saldo' => $this->parseCurrency($customer['saldo'] ?? 0),
+                    'status_bayar' => trim($customer['status_bayar'] ?? ''),
+                    'tag_total' => $this->parseCurrency($customer['tag_total'] ?? 0),
+                    'tag_inet' => $this->parseCurrency($customer['tag_inet'] ?? 0),
+                    'tag_tlp' => $this->parseCurrency($customer['tag_tlp'] ?? 0),
+                    'produk' => trim($customer['produk'] ?? ''),
+                    'eksepsi_desc' => trim($customer['eksepsi_desc'] ?? ''),
+                    'desc_newbill' => trim($customer['desc_newbill'] ?? ''),
+                    'usage_desc' => trim($customer['usage_desc'] ?? ''),
+                    'umur_customer' => (int) ($customer['umur_customer'] ?? 0),
+                    'paid_l11' => trim($customer['paid_l11'] ?? ''),
+                    'tgl_paid' => $this->parseDate($customer['tgl_paid'] ?? null),
+                    'paid_rp' => $this->parseCurrency($customer['paid_rp'] ?? 0),
+                    'coll_agent' => trim($customer['coll_agent'] ?? ''),
+                    'tgl_klaim' => $this->parseDate($customer['tgl_klaim'] ?? null),
+                    'amount_klaim' => $this->parseCurrency($customer['amount_klaim'] ?? 0),
+                    'user_klaim' => trim($customer['user_klaim'] ?? ''),
+                    'tgl_paid_n1' => $this->parseDate($customer['tgl_paid_n1'] ?? null),
+                    'agency_psb' => trim($customer['agency_psb'] ?? ''),
+                    'sales_agency' => trim($customer['sales_agency'] ?? ''),
+                    'ppp' => trim($customer['ppp'] ?? ''),
+                    'caring_mybrains' => trim($customer['caring_mybrains'] ?? ''),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            if (!empty($upsertRows)) {
+                // Eksekusi Bulk Upsert dalam sub-chunk 500 baris agar tidak melebihi limit placeholder MySQL (65.535)
+                foreach (array_chunk($upsertRows, 500) as $chunkUpsert) {
+                    Customer::upsert($chunkUpsert, ['snd'], $updateColumns);
                 }
-            });
+            }
 
             $duration = round(microtime(true) - $startTime, 2);
 
@@ -334,8 +269,7 @@ class SyncService
                 'success' => true,
                 'message' => "Batch {$batchIndex} berhasil diproses.",
                 'data' => [
-                    'inserted' => $insertedCount,
-                    'updated' => $updatedCount,
+                    'processed' => count($upsertRows),
                     'skip' => $skip,
                     'duration' => $duration . ' detik'
                 ]

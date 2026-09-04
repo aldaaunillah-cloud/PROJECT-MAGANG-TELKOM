@@ -653,80 +653,32 @@ class CustomerController extends Controller
             ->get();
 
         // =========================================================
-        // 2. Grouping tampilan:
-        //    - NCLI sama = 1 customer
-        //    - NCLI kosong = fallback per SND
-        //    - SND yang sama di dalam grup hanya dihitung sekali
+        // 2. Format data pelanggan & hitung jumlah SND:
+        //    - 1 SND : Jika hanya memiliki SND (SND Group kosong / '-')
+        //    - 2 SND : Jika memiliki SND DAN SND Group terisi
         // =========================================================
 
         $customers = $rawCustomers
-            ->groupBy(function ($customer) {
-                $ncli = trim((string) ($customer->ncli ?? ''));
+            ->map(function ($item) {
+                $snd = trim((string) ($item->snd ?? ''));
+                $sndGroup = trim((string) ($item->snd_group ?? ''));
+                $hasGroup = ($sndGroup !== '' && $sndGroup !== '-' && $sndGroup !== '0' && strtolower($sndGroup) !== 'null');
 
-                return $ncli !== ''
-                    ? 'NCLI_' . $ncli
-                    : 'SND_' . trim((string) ($customer->snd ?? ''));
-            })
-            ->map(function ($group) {
+                $item->snd_group = $hasGroup ? $sndGroup : null;
+                $item->jumlah_snd = ($hasGroup && $snd !== '') ? 2 : 1;
 
-                // Proteksi jika sumber mengandung row SND yang sama berulang.
-                $uniqueServices = $group
-                    ->unique(function ($item) {
-                        $snd = trim((string) ($item->snd ?? ''));
+                $item->daftar_snd = array_values(array_filter([$snd, $item->snd_group]));
 
-                        // Bila SND kosong, jangan gabungkan semua row kosong.
-                        return $snd !== ''
-                            ? 'SND_' . $snd
-                            : 'ROW_' . spl_object_id($item);
-                    })
-                    ->values();
+                $item->detail_snd = [
+                    [
+                        'snd' => $snd,
+                        'snd_group' => $item->snd_group ?? '-',
+                        'produk' => (string) ($item->produk ?? ''),
+                        'tag_total' => (float) ($item->tag_total ?? 0),
+                    ]
+                ];
 
-                // Untuk baris utama, prioritaskan produk Internet.
-                $representative = $uniqueServices->first(function ($item) {
-                    return str_contains(
-                        strtolower((string) ($item->produk ?? '')),
-                        'internet'
-                    );
-                }) ?? $uniqueServices->first();
-
-                $customer = clone $representative;
-
-                // SND Group pada baris utama mengikuti row representative asli.
-                $customer->snd_group = trim(
-                    (string) ($representative->snd_group ?? '')
-                ) !== ''
-                    ? (string) $representative->snd_group
-                    : null;
-
-                // Nilai finansial digabung dari seluruh SND unik dalam NCLI.
-                $customer->tag_total = (float) $uniqueServices->sum('tag_total');
-                $customer->tag_inet = (float) $uniqueServices->sum('tag_inet');
-                $customer->tag_tlp = (float) $uniqueServices->sum('tag_tlp');
-                $customer->saldo = (float) $uniqueServices->sum('saldo');
-
-                // Data tambahan untuk badge/detail di dashboard.
-                $customer->jumlah_snd = $uniqueServices->count();
-
-                $customer->daftar_snd = $uniqueServices
-                    ->pluck('snd')
-                    ->filter(fn ($snd) => trim((string) $snd) !== '')
-                    ->map(fn ($snd) => (string) $snd)
-                    ->values()
-                    ->all();
-
-                $customer->detail_snd = $uniqueServices
-                    ->map(function ($item) {
-                        return [
-                            'snd' => (string) ($item->snd ?? ''),
-                            'snd_group' => (string) ($item->snd_group ?? ''),
-                            'produk' => (string) ($item->produk ?? ''),
-                            'tag_total' => (float) ($item->tag_total ?? 0),
-                        ];
-                    })
-                    ->values()
-                    ->all();
-
-                return $customer;
+                return $item;
             })
             ->sortByDesc('tag_total')
             ->values();
