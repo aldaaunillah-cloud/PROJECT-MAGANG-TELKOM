@@ -105,7 +105,6 @@ class CustomerController extends Controller
             });
         }
 
-<<<<<<< HEAD
         // ============================================================
         // STATISTIK
         // ============================================================
@@ -113,15 +112,8 @@ class CustomerController extends Controller
         $unpaidQuery = (clone $baseQuery)
             ->where('status_bayar', '!=', 'Sdh Bayar');
 
-        $totalBelumLunas = (clone $unpaidQuery)->count();
-
-=======
-        // 2. Compute statistics for Default/Datel/Agency views
-        // 2. Compute statistics for Default/Datel/Agency/Sales views (HANYA DATA BLM BAYAR)
-        $unpaidQuery = (clone $baseQuery)->where('status_bayar', '!=', 'Sdh Bayar');
-
-        // 1 NCLI = 1 customer. Jika NCLI kosong, fallback ke SND agar
-        // customer tanpa NCLI tidak ikut tergabung menjadi satu.
+        // 1 NCLI = 1 customer.
+        // Jika NCLI kosong, fallback ke SND.
         $customerGroupSql = "CASE
             WHEN ncli IS NOT NULL AND TRIM(ncli) != ''
                 THEN CONCAT('NCLI_', TRIM(ncli))
@@ -132,8 +124,7 @@ class CustomerController extends Controller
             ->selectRaw("COUNT(DISTINCT {$customerGroupSql}) as total")
             ->value('total') ?? 0;
 
-        // Tagihan tetap dijumlahkan per layanan/SND.
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
+        // Tagihan tetap dijumlahkan berdasarkan layanan/SND.
         $totalTagihan = (clone $unpaidQuery)->sum('tag_total');
 
         // Total Sales Agency
@@ -212,10 +203,15 @@ class CustomerController extends Controller
                     'billing_ke',
                     DB::raw("COUNT(DISTINCT {$customerGroupSql}) as total_cust"),
                     DB::raw("COUNT(DISTINCT CASE
-                        WHEN status_bayar != 'Sdh Bayar' THEN {$customerGroupSql}
+                        WHEN status_bayar != 'Sdh Bayar'
+                        THEN {$customerGroupSql}
                         ELSE NULL
                     END) as unpaid_cust"),
-                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
+                    DB::raw('SUM(CASE
+                        WHEN status_bayar != "Sdh Bayar"
+                        THEN tag_total
+                        ELSE 0
+                    END) as unpaid_rp')
                 )
                 ->groupBy('billing_ke')
                 ->orderBy('billing_ke')
@@ -236,10 +232,15 @@ class CustomerController extends Controller
                     'billing_ke',
                     DB::raw("COUNT(DISTINCT {$customerGroupSql}) as total_cust"),
                     DB::raw("COUNT(DISTINCT CASE
-                        WHEN status_bayar != 'Sdh Bayar' THEN {$customerGroupSql}
+                        WHEN status_bayar != 'Sdh Bayar'
+                        THEN {$customerGroupSql}
                         ELSE NULL
                     END) as unpaid_cust"),
-                    DB::raw('SUM(CASE WHEN status_bayar != "Sdh Bayar" THEN tag_total ELSE 0 END) as unpaid_rp')
+                    DB::raw('SUM(CASE
+                        WHEN status_bayar != "Sdh Bayar"
+                        THEN tag_total
+                        ELSE 0
+                    END) as unpaid_rp')
                 )
                 ->whereBetween('billing_ke', [1, 6])
                 ->whereNotIn('datel', $invalidPlaceholders)
@@ -557,7 +558,6 @@ class CustomerController extends Controller
     ) {
         $request = $request ?? request();
 
-<<<<<<< HEAD
         $invalidPlaceholders = [
             '#N/A ()',
             '#N/A',
@@ -567,13 +567,10 @@ class CustomerController extends Controller
             'NULL'
         ];
 
-=======
-        $invalidPlaceholders = ['#N/A ()', '#N/A', '0', 'UNKNOWN', 'null', 'NULL'];
-
         // =========================================================
         // 1. Ambil seluruh layanan/SND sesuai filter
         // =========================================================
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
+
         $query = Customer::query()
             ->where('status_bayar', '!=', 'Sdh Bayar')
             ->whereBetween('billing_ke', [1, 6])
@@ -581,10 +578,7 @@ class CustomerController extends Controller
             ->whereNotIn('agency_psb', $invalidPlaceholders)
             ->whereNotIn('sales_agency', $invalidPlaceholders);
 
-<<<<<<< HEAD
         // FILTER BILLING
-=======
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if (
             $billingKe &&
             $billingKe !== 'All' &&
@@ -596,10 +590,7 @@ class CustomerController extends Controller
             $query->where('billing_ke', $billingKe);
         }
 
-<<<<<<< HEAD
         // FILTER DATEL
-=======
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if (
             $datel &&
             $datel !== 'Nasional' &&
@@ -610,10 +601,7 @@ class CustomerController extends Controller
             $query->where('datel', $datel);
         }
 
-<<<<<<< HEAD
         // FILTER AGENCY
-=======
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if ($request->filled('agency')) {
             $query->where(
                 'agency_psb',
@@ -621,10 +609,7 @@ class CustomerController extends Controller
             );
         }
 
-<<<<<<< HEAD
         // FILTER SALES
-=======
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
         if ($request->filled('sales')) {
             $query->where(
                 'sales_agency',
@@ -632,41 +617,6 @@ class CustomerController extends Controller
             );
         }
 
-<<<<<<< HEAD
-        $customers = $query
-            ->select(
-                'status_bayar',
-                'tag_total',
-                'tag_inet',
-                'tag_tlp',
-                'snd',
-                'snd_group',
-                'ncli',
-                'nama',
-                'alamat',
-                'sto',
-                'datel',
-                'produk',
-                'eksepsi_desc',
-                'desc_newbill',
-                'usage_desc',
-                'saldo',
-                'umur_customer',
-                'billing_ke',
-                'paid_l11',
-                'tgl_paid',
-                'paid_rp',
-                'coll_agent',
-                'tgl_klaim',
-                'amount_klaim',
-                'user_klaim',
-                'tgl_paid_n1',
-                'agency_psb',
-                'sales_agency',
-                'ppp',
-                'caring_mybrains'
-            )
-=======
         $rawCustomers = $query->select(
             'status_bayar',
             'tag_total',
@@ -699,7 +649,6 @@ class CustomerController extends Controller
             'ppp',
             'caring_mybrains'
         )
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
             ->orderBy('tag_total', 'DESC')
             ->get();
 
@@ -709,6 +658,7 @@ class CustomerController extends Controller
         //    - NCLI kosong = fallback per SND
         //    - SND yang sama di dalam grup hanya dihitung sekali
         // =========================================================
+
         $customers = $rawCustomers
             ->groupBy(function ($customer) {
                 $ncli = trim((string) ($customer->ncli ?? ''));
@@ -718,6 +668,7 @@ class CustomerController extends Controller
                     : 'SND_' . trim((string) ($customer->snd ?? ''));
             })
             ->map(function ($group) {
+
                 // Proteksi jika sumber mengandung row SND yang sama berulang.
                 $uniqueServices = $group
                     ->unique(function ($item) {
@@ -741,10 +692,9 @@ class CustomerController extends Controller
                 $customer = clone $representative;
 
                 // SND Group pada baris utama mengikuti row representative asli.
-                // Jadi jika representative adalah layanan Internet dan snd_group-nya kosong,
-                // tetap tampil "-" di tabel utama. Nilai snd_group milik layanan tambahan
-                // tetap tersedia di detail_snd.
-                $customer->snd_group = trim((string) ($representative->snd_group ?? '')) !== ''
+                $customer->snd_group = trim(
+                    (string) ($representative->snd_group ?? '')
+                ) !== ''
                     ? (string) $representative->snd_group
                     : null;
 
@@ -756,6 +706,7 @@ class CustomerController extends Controller
 
                 // Data tambahan untuk badge/detail di dashboard.
                 $customer->jumlah_snd = $uniqueServices->count();
+
                 $customer->daftar_snd = $uniqueServices
                     ->pluck('snd')
                     ->filter(fn ($snd) => trim((string) $snd) !== '')
@@ -785,12 +736,10 @@ class CustomerController extends Controller
         $totalTagihan = (float) $customers->sum('tag_total');
         $totalSaldo = (float) $customers->sum('saldo');
 
-<<<<<<< HEAD
-=======
         // =========================================================
         // 3. Response popup HOTD
         // =========================================================
->>>>>>> d19f0a4e2b39f91c1b3def365dabae197b414eb9
+
         return response()->json([
             'billing_ke' => $billingKe,
             'datel' => $datel,
@@ -1028,34 +977,13 @@ class CustomerController extends Controller
      */
     public function rekapAgency(Request $request)
     {
-        /*
-         * ============================================================
-         * SEARCH
-         * ============================================================
-         */
-
         $search = trim(
             $request->input('search', '')
         );
 
-        /*
-         * ============================================================
-         * 1. SEARCH CUSTOMER DETAIL
-         * ============================================================
-         *
-         * INI BAGIAN PALING PENTING.
-         *
-         * Search tidak mengambil hasil GROUP BY Agency.
-         * Search mengambil langsung data customer dari tabel customers.
-         *
-         * Sama seperti Dashboard:
-         * - nama
-         * - snd
-         * - ncli
-         * - agency_psb
-         * - sales_agency
-         * - datel
-         */
+        // ============================================================
+        // 1. SEARCH CUSTOMER DETAIL
+        // ============================================================
 
         $searchCustomers = null;
 
@@ -1149,19 +1077,15 @@ class CustomerController extends Controller
                 ->withQueryString();
         }
 
-
-        /*
-         * ============================================================
-         * 2. REKAP AGENCY BILLING 1-2
-         * ============================================================
-         */
+        // ============================================================
+        // 2. REKAP AGENCY BILLING 1-2
+        // ============================================================
 
         $rekap = Customer::select(
 
             'agency_psb',
             'sales_agency',
 
-            // BILLING 1 SSL
             DB::raw("
                 SUM(
                     CASE
@@ -1174,7 +1098,6 @@ class CustomerController extends Controller
                 ) as billing_1_ssl
             "),
 
-            // BILLING 1 SALDO
             DB::raw("
                 SUM(
                     CASE
@@ -1185,7 +1108,6 @@ class CustomerController extends Controller
                 ) as billing_1_saldo
             "),
 
-            // BILLING 2 SSL
             DB::raw("
                 SUM(
                     CASE
@@ -1198,7 +1120,6 @@ class CustomerController extends Controller
                 ) as billing_2_ssl
             "),
 
-            // BILLING 2 SALDO
             DB::raw("
                 SUM(
                     CASE
@@ -1209,20 +1130,16 @@ class CustomerController extends Controller
                 ) as billing_2_saldo
             "),
 
-            // TOTAL SSL
             DB::raw("
                 COUNT(NULLIF(snd, '')) as total_ssl
             "),
 
-            // TOTAL SALDO
             DB::raw("
                 SUM(saldo) as total_saldo
             ")
         )
 
-            ->whereNotNull(
-                'agency_psb'
-            )
+            ->whereNotNull('agency_psb')
 
             ->where(
                 'status_bayar',
@@ -1234,7 +1151,6 @@ class CustomerController extends Controller
                 [1, 2]
             )
 
-            // SEARCH REKAP
             ->when(
                 $search !== '',
                 function ($q) use ($search) {
@@ -1277,7 +1193,6 @@ class CustomerController extends Controller
                 }
             )
 
-            // FILTER AGENCY
             ->when(
                 $request->filled('agency_psb'),
                 function ($q) use ($request) {
@@ -1289,7 +1204,6 @@ class CustomerController extends Controller
                 }
             )
 
-            // FILTER SALES
             ->when(
                 $request->filled('sales_agency'),
                 function ($q) use ($request) {
@@ -1320,12 +1234,9 @@ class CustomerController extends Controller
 
             ->withQueryString();
 
-
-        /*
-         * ============================================================
-         * 3. SUMMARY
-         * ============================================================
-         */
+        // ============================================================
+        // 3. SUMMARY
+        // ============================================================
 
         $summaryQuery = Customer::whereNotNull(
             'agency_psb'
@@ -1403,7 +1314,6 @@ class CustomerController extends Controller
                 }
             );
 
-
         $summary = [
 
             'total_customer' =>
@@ -1426,12 +1336,9 @@ class CustomerController extends Controller
                 ),
         ];
 
-
-        /*
-         * ============================================================
-         * 4. FILTER AGENCY & SALES
-         * ============================================================
-         */
+        // ============================================================
+        // 4. FILTER AGENCY & SALES
+        // ============================================================
 
         $filters = [
 
@@ -1471,7 +1378,6 @@ class CustomerController extends Controller
                     'billing_ke',
                     [1, 2]
                 )
-
                 ->when(
                     $request->filled('agency_psb'),
                     function ($q) use ($request) {
@@ -1482,18 +1388,14 @@ class CustomerController extends Controller
                         );
                     }
                 )
-
                 ->distinct()
                 ->orderBy('sales_agency')
                 ->pluck('sales_agency'),
         ];
 
-
-        /*
-         * ============================================================
-         * 5. BILLING 1 WITEL
-         * ============================================================
-         */
+        // ============================================================
+        // 5. BILLING 1 WITEL
+        // ============================================================
 
         $billing1WitelRaw = Customer::select(
 
@@ -1571,7 +1473,6 @@ class CustomerController extends Controller
 
             ->get();
 
-
         $witelAgencies = $billing1WitelRaw
             ->pluck('agency_psb')
             ->unique()
@@ -1597,12 +1498,9 @@ class CustomerController extends Controller
             ] = $item->total;
         }
 
-
-        /*
-         * ============================================================
-         * 6. BILLING 2 WITEL
-         * ============================================================
-         */
+        // ============================================================
+        // 6. BILLING 2 WITEL
+        // ============================================================
 
         $billing2WitelRaw = Customer::select(
 
@@ -1673,7 +1571,6 @@ class CustomerController extends Controller
 
             ->get();
 
-
         $witelAgencies2 = $billing2WitelRaw
             ->pluck('agency_psb')
             ->unique()
@@ -1699,12 +1596,9 @@ class CustomerController extends Controller
             ] = $item->total;
         }
 
-
-        /*
-         * ============================================================
-         * 7. KIRIM SEMUA DATA KE BLADE
-         * ============================================================
-         */
+        // ============================================================
+        // 7. KIRIM SEMUA DATA KE BLADE
+        // ============================================================
 
         return view(
             'rekap-agency',
@@ -1712,16 +1606,12 @@ class CustomerController extends Controller
                 'rekap',
                 'summary',
                 'filters',
-
-                // HASIL SEARCH CUSTOMER
                 'searchCustomers',
 
-                // BILLING 1
                 'witelAgencies',
                 'witelDatels',
                 'witelData',
 
-                // BILLING 2
                 'witelAgencies2',
                 'witelDatels2',
                 'witelData2'
@@ -1752,7 +1642,6 @@ class CustomerController extends Controller
             'agency_psb',
             'sales_agency',
 
-            // BILLING 3
             DB::raw("
                 SUM(
                     CASE
@@ -1775,7 +1664,6 @@ class CustomerController extends Controller
                 ) as billing_3_saldo
             "),
 
-            // BILLING 4
             DB::raw("
                 SUM(
                     CASE
@@ -1798,7 +1686,6 @@ class CustomerController extends Controller
                 ) as billing_4_saldo
             "),
 
-            // BILLING 5
             DB::raw("
                 SUM(
                     CASE
@@ -1821,7 +1708,6 @@ class CustomerController extends Controller
                 ) as billing_5_saldo
             "),
 
-            // BILLING 6
             DB::raw("
                 SUM(
                     CASE
@@ -1844,7 +1730,6 @@ class CustomerController extends Controller
                 ) as billing_6_saldo
             "),
 
-            // TOTAL
             DB::raw("
                 COUNT(NULLIF(snd, '')) as total_ssl
             "),
@@ -1909,14 +1794,12 @@ class CustomerController extends Controller
 
             ->paginate(25);
 
-
         // ============================================================
         // FILTER AGENCY & SALES
         // ============================================================
 
         $filters = [
 
-            // AGENCY
             'agency_psb' => Customer::whereNotNull(
                 'agency_psb'
             )
@@ -1937,7 +1820,6 @@ class CustomerController extends Controller
                 ->orderBy('agency_psb')
                 ->pluck('agency_psb'),
 
-            // SALES
             'sales_agency' => Customer::whereNotNull(
                 'sales_agency'
             )
@@ -1954,7 +1836,6 @@ class CustomerController extends Controller
                     'billing_ke',
                     [3, 6]
                 )
-
                 ->when(
                     $request->filled('agency_psb'),
                     function ($q) use ($request) {
@@ -1965,12 +1846,10 @@ class CustomerController extends Controller
                         );
                     }
                 )
-
                 ->distinct()
                 ->orderBy('sales_agency')
                 ->pluck('sales_agency'),
         ];
-
 
         // ============================================================
         // FUNCTION BILLING TABLE
@@ -2058,7 +1937,6 @@ class CustomerController extends Controller
 
                     ->get();
 
-
                 $agencies = $raw
                     ->pluck('agency_psb')
                     ->unique()
@@ -2066,14 +1944,12 @@ class CustomerController extends Controller
                     ->values()
                     ->toArray();
 
-
                 $datels = $raw
                     ->pluck('datel')
                     ->unique()
                     ->sort()
                     ->values()
                     ->toArray();
-
 
                 $data = [];
 
@@ -2086,14 +1962,12 @@ class CustomerController extends Controller
                     ] = $item->total;
                 }
 
-
                 return [
                     'agencies' => $agencies,
                     'datels' => $datels,
                     'data' => $data,
                 ];
             };
-
 
         // BILLING 3
         $billing3 = $createBillingTable(3);
@@ -2107,7 +1981,6 @@ class CustomerController extends Controller
         $witelData3 =
             $billing3['data'];
 
-
         // BILLING 4
         $billing4 = $createBillingTable(4);
 
@@ -2119,7 +1992,6 @@ class CustomerController extends Controller
 
         $witelData4 =
             $billing4['data'];
-
 
         // BILLING 5
         $billing5 = $createBillingTable(5);
@@ -2133,7 +2005,6 @@ class CustomerController extends Controller
         $witelData5 =
             $billing5['data'];
 
-
         // BILLING 6
         $billing6 = $createBillingTable(6);
 
@@ -2145,7 +2016,6 @@ class CustomerController extends Controller
 
         $witelData6 =
             $billing6['data'];
-
 
         return view(
             'rekap-billing36-hotd',
