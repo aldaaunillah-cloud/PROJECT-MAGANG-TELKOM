@@ -972,11 +972,18 @@ function showSndGroupDetail(index) {
     const overlay = document.createElement('div');
     overlay.id = 'sndGroupDetailOverlay';
     overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.zIndex = '2000';
-    overlay.style.background = 'rgba(15, 23, 42, 0.45)';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.zIndex = '3000';
+    overlay.style.background = 'rgba(15, 23, 42, 0.55)';
+    overlay.style.backdropFilter = 'blur(2px)';
     overlay.style.display = 'flex';
     overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.padding = '20px';
+    
     const detailList = (cust.detail_snd && cust.detail_snd.length > 0)
         ? cust.detail_snd
         : [
@@ -999,7 +1006,7 @@ function showSndGroupDetail(index) {
     `).join('');
 
     overlay.innerHTML = `
-        <div class="card border-0 shadow-lg" style="width:min(600px, 96vw); border-radius:16px; overflow:hidden;">
+        <div class="card border-0 shadow-lg" style="width:min(600px, 96vw); border-radius:16px; overflow:hidden; margin:auto;">
             <div class="card-header bg-white d-flex justify-content-between align-items-start py-3 px-4">
                 <div>
                     <h6 class="mb-1 fw-bold" style="color:#000361;">

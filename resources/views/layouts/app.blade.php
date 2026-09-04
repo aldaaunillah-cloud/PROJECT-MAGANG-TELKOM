@@ -7,7 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('image/icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('image/icon.png') }}?v=2">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{ asset('image/icon.png') }}?v=2">
     
     <title>@yield('title', 'Dashboard') - Telkom Customer Management</title>
 
