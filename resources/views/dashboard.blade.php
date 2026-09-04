@@ -977,8 +977,26 @@ function showSndGroupDetail(index) {
     overlay.style.background = 'rgba(15, 23, 42, 0.45)';
     overlay.style.display = 'flex';
     overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.padding = '20px';
+    const detailList = (cust.detail_snd && cust.detail_snd.length > 0)
+        ? cust.detail_snd
+        : [
+            {
+                snd: cust.snd || '-',
+                snd_group: cust.snd_group || '-',
+                produk: cust.produk || '-',
+                tag_total: cust.tag_total || 0
+            }
+        ];
+
+    const detailRows = detailList.map((item, idx) => `
+        <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td><code class="text-danger fw-semibold">${item.snd || '-'}</code></td>
+            <td><code class="text-danger fw-semibold">${item.snd_group || '-'}</code></td>
+            <td>${item.produk || '-'}</td>
+            <td class="text-end fw-semibold">Rp ${formatRupiah(item.tag_total)}</td>
+        </tr>
+    `).join('');
 
     overlay.innerHTML = `
         <div class="card border-0 shadow-lg" style="width:min(600px, 96vw); border-radius:16px; overflow:hidden;">
@@ -1000,8 +1018,8 @@ function showSndGroupDetail(index) {
             <div class="card-body p-4">
                 <div class="alert alert-light border d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <div class="small text-muted">Jumlah SND</div>
-                        <div class="fw-bold text-dark">2 SND (SND Utama & SND Group)</div>
+                        <div class="small text-muted">Jumlah Layanan / SND</div>
+                        <div class="fw-bold text-dark">${cust.jumlah_snd || detailList.length} SND (Terhubung dalam 1 Customer)</div>
                     </div>
                     <div class="text-end">
                         <div class="small text-muted">Total Tagihan</div>
@@ -1023,13 +1041,7 @@ function showSndGroupDetail(index) {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="text-center">1</td>
-                                <td><code class="text-danger fw-semibold">${cust.snd || '-'}</code></td>
-                                <td><code class="text-danger fw-semibold">${cust.snd_group || '-'}</code></td>
-                                <td>${cust.produk || '-'}</td>
-                                <td class="text-end fw-semibold">Rp ${formatRupiah(cust.tag_total)}</td>
-                            </tr>
+                            ${detailRows}
                         </tbody>
                         <tfoot class="table-light fw-bold">
                             <tr>
@@ -1043,7 +1055,7 @@ function showSndGroupDetail(index) {
                 </div>
 
                 <div class="small text-muted mt-3">
-                    Baris ini memiliki 2 nomor layanan (SND Utama dan SND Group yang saling terhubung).
+                    Baris ini memiliki ${cust.jumlah_snd || detailList.length} nomor layanan yang saling terhubung di bawah customer yang sama.
                 </div>
             </div>
 

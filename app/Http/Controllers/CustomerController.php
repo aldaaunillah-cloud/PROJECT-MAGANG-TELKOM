@@ -653,35 +653,80 @@ class CustomerController extends Controller
             ->get();
 
         // =========================================================
-        // 2. Format data pelanggan & hitung jumlah SND:
-        //    - 1 SND : Jika hanya memiliki SND (SND Group kosong / '-')
-        //    - 2 SND : Jika memiliki SND DAN SND Group terisi
+        // 2. Format data pelanggan & Grouping 1 NCLI = 1 Customer:
+        //    - Customer dengan 2 SND / multi-layanan digabung jadi 1 baris
+        //    - Tagihan Total & Saldo dijumlahkan dari seluruh layanan
+        //    - Rincian per layanan disimpan di detail_snd untuk modal popup
         // =========================================================
 
-        $customers = $rawCustomers
-            ->map(function ($item) {
-                $snd = trim((string) ($item->snd ?? ''));
-                $sndGroup = trim((string) ($item->snd_group ?? ''));
-                $hasGroup = ($sndGroup !== '' && $sndGroup !== '-' && $sndGroup !== '0' && strtolower($sndGroup) !== 'null');
+        $grouped = $rawCustomers->groupBy(function ($item) {
+            $ncli = trim((string) ($item->ncli ?? ''));
+            if ($ncli !== '' && $ncli !== '-' && $ncli !== '0' && strtolower($ncli) !== 'null') {
+                return 'NCLI_' . $ncli;
+            }
+            $sndGroup = trim((string) ($item->snd_group ?? ''));
+            if ($sndGroup !== '' && $sndGroup !== '-' && $sndGroup !== '0' && strtolower($sndGroup) !== 'null') {
+                return 'SNDGRP_' . $sndGroup;
+            }
+            return 'SND_' . trim((string) ($item->snd ?? ''));
+        });
 
-                $item->snd_group = $hasGroup ? $sndGroup : null;
-                $item->jumlah_snd = ($hasGroup && $snd !== '') ? 2 : 1;
+        $customers = $grouped->map(function ($group) {
+            $count = $group->count();
+            $tagTotal = (float) $group->sum('tag_total');
+            $saldoTotal = (float) $group->sum('saldo');
 
-                $item->daftar_snd = array_values(array_filter([$snd, $item->snd_group]));
-
-                $item->detail_snd = [
-                    [
-                        'snd' => $snd,
-                        'snd_group' => $item->snd_group ?? '-',
-                        'produk' => (string) ($item->produk ?? ''),
-                        'tag_total' => (float) ($item->tag_total ?? 0),
-                    ]
+            // Susun detail rincian seluruh SND di bawah customer ini
+            $detailSnd = $group->map(function ($g) {
+                return [
+                    'snd' => (string) ($g->snd ?? '-'),
+                    'snd_group' => (!empty($g->snd_group) && $g->snd_group !== '-' && $g->snd_group !== '0') ? (string) $g->snd_group : '-',
+                    'produk' => (string) ($g->produk ?? '-'),
+                    'tag_total' => (float) ($g->tag_total ?? 0),
+                    'saldo' => (float) ($g->saldo ?? 0),
                 ];
+            })->values()->toArray();
 
-                return $item;
-            })
-            ->sortByDesc('tag_total')
-            ->values();
+            if ($count > 1) {
+                // Pilih row yang memiliki snd_group terisi, atau row pertama
+                $mainItem = $group->first(function ($g) {
+                    $sg = trim((string) ($g->snd_group ?? ''));
+                    return $sg !== '' && $sg !== '-' && $sg !== '0';
+                }) ?? $group->first();
+
+                // Jika row utama belum memiliki snd_group, cari SND dari row pasangannya
+                if (empty($mainItem->snd_group) || $mainItem->snd_group === '-' || $mainItem->snd_group === '0') {
+                    $otherItem = $group->first(function ($g) use ($mainItem) {
+                        return $g->snd !== $mainItem->snd;
+                    });
+                    if ($otherItem) {
+                        $mainItem->snd_group = $otherItem->snd;
+                    }
+                }
+
+                $mainItem->tag_total = $tagTotal;
+                $mainItem->saldo = $saldoTotal;
+                $mainItem->jumlah_snd = $count;
+                $mainItem->detail_snd = $detailSnd;
+
+                return $mainItem;
+            }
+
+            // Jika hanya 1 layanan/SND
+            $item = $group->first();
+            $sndGroup = trim((string) ($item->snd_group ?? ''));
+            $hasGroup = ($sndGroup !== '' && $sndGroup !== '-' && $sndGroup !== '0' && strtolower($sndGroup) !== 'null');
+
+            $item->snd_group = $hasGroup ? $sndGroup : null;
+            $item->jumlah_snd = $hasGroup ? 2 : 1;
+            $item->tag_total = (float) ($item->tag_total ?? 0);
+            $item->saldo = (float) ($item->saldo ?? 0);
+            $item->detail_snd = $detailSnd;
+
+            return $item;
+        })
+        ->sortByDesc('tag_total')
+        ->values();
 
         $totalCustomer = $customers->count();
 
